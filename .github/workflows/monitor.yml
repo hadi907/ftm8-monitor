@@ -32,6 +32,8 @@ jobs:
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
           WA_PHONE:     ${{ secrets.WA_PHONE }}
           WA_APIKEY:    ${{ secrets.WA_APIKEY }}
+          ADMIN_EMAIL:  ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASS:   ${{ secrets.ADMIN_PASS }}
         run: python monitor.py
 
       - name: Save last order ID

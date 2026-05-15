@@ -1,0 +1,40 @@
+name: 🔗 مزامنة المزرعة مع ftm8
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Restore synced sales cache
+        uses: actions/cache@v3
+        with:
+          path: ftm8_synced_sales.json
+          key: ftm8-synced-${{ github.run_id }}
+          restore-keys: ftm8-synced-
+
+      - name: Run sync
+        env:
+          JSONBIN_BIN_URL: ${{ secrets.JSONBIN_BIN_URL }}
+          JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
+          FTM8_EMAIL:      ${{ secrets.FTM8_EMAIL }}
+          FTM8_PASS:       ${{ secrets.FTM8_PASS }}
+        run: python farm_ftm8_sync.py
+
+      - name: Save synced sales cache
+        uses: actions/cache@v3
+        with:
+          pa

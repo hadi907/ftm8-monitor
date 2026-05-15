@@ -32,7 +32,7 @@ jobs:
           JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
           FTM8_EMAIL: ${{ secrets.FTM8_EMAIL }}
           FTM8_PASS: ${{ secrets.FTM8_PASS }}
-        run: python farm_ftm8_sync.py
+        run: python "farm_ftm8_sync (1).py"
 
       - name: Save cache
         uses: actions/cache/save@v3

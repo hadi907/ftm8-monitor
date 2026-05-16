@@ -57,8 +57,8 @@ def create_order(sale, inv_map, token):
         items = [{'product': pid, 'quantity': sale.get('qty', 1), 'priceAtPurchase': sale.get('price', 0)}]
     pay = sale.get('payment', '')
     body = {
-        'status': 'قيد الانتظار',
-        'paymentMethod': 'نقد' if pay in ['نقد', 'كاش'] else 'دفع إلكتروني',
+        'status': 'pending',
+        'paymentMethod': 'cash' if pay in ['نقد', 'كاش'] else 'card',
         'total': sale.get('total', 0),
         'totalBeforeDiscount': sale.get('qty', 1) * sale.get('price', 0),
         'currency': 'KWD',
@@ -73,7 +73,7 @@ def create_order(sale, inv_map, token):
         if oid:
             log("created: " + str(oid))
             return oid
-        log("not created: " + str(d)[:200])
+        log("not created: " + str(d)[:300])
     except Exception as e:
         log("create error: " + str(e))
     return None
@@ -81,7 +81,7 @@ def create_order(sale, inv_map, token):
 def cancel_order(oid, token):
     try:
         requests.patch(FTM8_URL + '/api/orders/' + oid,
-            json={'status': 'ملغي'}, headers=headers(token), timeout=10)
+            json={'status': 'cancelled'}, headers=headers(token), timeout=10)
         log("cancelled: " + str(oid))
     except Exception as e:
         log("cancel error: " + str(e))

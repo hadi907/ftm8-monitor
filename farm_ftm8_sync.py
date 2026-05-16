@@ -8,7 +8,7 @@ SYNCED_FILE = 'ftm8_synced_sales.json'
 DATA_FILE   = 'farm_data.json'
 
 def log(msg):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+    print("[" + datetime.now().strftime('%H:%M:%S') + "] " + str(msg))
 
 def load_synced():
     if os.path.exists(SYNCED_FILE):
@@ -22,34 +22,11 @@ def save_synced(data):
 
 def ftm8_login():
     try:
-        r = requests.post(
-            f'{FTM8_URL}/api/users/login',
-            json={'email': FTM8_EMAIL, 'password': FTM8_PASS},
-            timeout=10)
+        r = requests.post(FTM8_URL + '/api/users/login',
+            json={'email': FTM8_EMAIL, 'password': FTM8_PASS}, timeout=10)
         d = r.json()
         if 'token' in d:
             log("ftm8 login OK")
             return d['token']
-        log(f"ftm8 login failed: {d}")
-    except Exception as e:
-        log(f"ftm8 login error: {e}")
-    return None
-
-def ftm8_headers(token):
-    return {'Content-Type': 'application/json', 'Authorization': f'JWT {token}'}
-
-def ftm8_find_product(sku, token):
-    try:
-        r = requests.get(
-            f'{FTM8_URL}/api/products',
-            params={'where[sku][equals]': sku, 'limit': 1},
-            headers=ftm8_headers(token),
-            timeout=10)
-        d = r.json()
-        if d.get('docs'):
-            return d['docs'][0]['id']
-    except Exception as e:
-        log(f"find product error: {e}")
-    return None
-
-def ftm8
+        log("ftm8 login failed: " + str(d))
+    except

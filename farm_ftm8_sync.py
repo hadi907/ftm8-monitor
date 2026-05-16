@@ -48,6 +48,15 @@ def find_product(sku, token):
         log("find_product error: " + str(e))
     return None
 
+def get_payment_options(token):
+    try:
+        r = requests.get(FTM8_URL + '/api/globals/store-settings',
+            headers=headers(token), timeout=10)
+        d = r.json()
+        log("store settings: " + str(d)[:200])
+    except Exception as e:
+        log("settings error: " + str(e))
+
 def create_order(sale, inv_map, token):
     item = inv_map.get(sale.get('invItemId', ''))
     sku = item.get('sku') if item else None
@@ -56,12 +65,14 @@ def create_order(sale, inv_map, token):
     if pid:
         items = [{'product': pid, 'quantity': sale.get('qty', 1), 'priceAtPurchase': sale.get('price', 0)}]
     pay = sale.get('payment', '')
+    pay_method = 'cash' if pay in ['نقد', 'كاش'] else 'card'
     body = {
         'status': 'pending',
-        'paymentMethod': 'cashOnDelivery' if pay in ['نقد', 'كاش'] else 'creditCard',
+        'paymentMethod': pay_method,
         'customerDetails': {
             'name': sale.get('client') or 'زبون مزرعة',
-            'email': 'farm@ftm8.com'
+            'email': 'farm@ftm8.com',
+            'phone': '00000000'
         },
         'total': sale.get('total', 0),
         'totalBeforeDiscount': sale.get('qty', 1) * sale.get('price', 0),
@@ -77,7 +88,7 @@ def create_order(sale, inv_map, token):
         if oid:
             log("created: " + str(oid))
             return oid
-        log("not created: " + str(d)[:300])
+        log("not created: " + str(d)[:400])
     except Exception as e:
         log("create error: " + str(e))
     return None
@@ -96,7 +107,6 @@ def load_data():
         return [], []
     with open(DATA_FILE) as f:
         rec = json.load(f)
-    log("Keys: " + str(list(rec.keys())))
     sales = rec.get('SALES') or rec.get('ps3_sales') or []
     inv = rec.get('INV') or rec.get('ps3_inv') or []
     if isinstance(sales, str):

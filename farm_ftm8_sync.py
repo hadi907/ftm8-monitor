@@ -48,34 +48,37 @@ def find_product(sku, token):
         log("find_product error: " + str(e))
     return None
 
-def get_payment_options(token):
+def get_order_schema(token):
     try:
-        r = requests.get(FTM8_URL + '/api/globals/store-settings',
+        r = requests.get(FTM8_URL + '/api/orders?limit=1',
             headers=headers(token), timeout=10)
         d = r.json()
-        log("store settings: " + str(d)[:200])
+        log("sample order: " + str(d)[:300])
     except Exception as e:
-        log("settings error: " + str(e))
+        log("schema error: " + str(e))
 
 def create_order(sale, inv_map, token):
     item = inv_map.get(sale.get('invItemId', ''))
     sku = item.get('sku') if item else None
     pid = find_product(sku, token) if sku else None
+    price = max(float(sale.get('price', 0) or 0), 1)
+    qty = int(sale.get('qty', 1) or 1)
     items = []
     if pid:
-        items = [{'product': pid, 'quantity': sale.get('qty', 1), 'priceAtPurchase': sale.get('price', 0)}]
-    pay = sale.get('payment', '')
-    pay_method = 'cash' if pay in ['نقد', 'كاش'] else 'card'
+        items = [{'product': pid, 'quantity': qty, 'price': price}]
+    total = float(sale.get('total', 0) or 0)
+    if total < 1:
+        total = price * qty
     body = {
         'status': 'pending',
-        'paymentMethod': pay_method,
+        'paymentMethod': 'cashOnDelivery',
         'customerDetails': {
             'name': sale.get('client') or 'زبون مزرعة',
             'email': 'farm@ftm8.com',
-            'phone': '00000000'
+            'phone': '96500000000'
         },
-        'total': sale.get('total', 0),
-        'totalBeforeDiscount': sale.get('qty', 1) * sale.get('price', 0),
+        'total': total,
+        'totalBeforeDiscount': price * qty,
         'currency': 'KWD',
         'address': sale.get('location') or 'مزرعة هادي اسحاق',
         'items': items,
@@ -132,6 +135,7 @@ def main():
     if not token:
         log("Login failed")
         return
+    get_order_schema(token)
     current = {s['id'] for s in sales}
     for sid in list(synced.keys()):
         if sid not in current:

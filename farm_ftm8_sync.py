@@ -22,15 +22,17 @@ def save_synced(data):
 
 def ftm8_login():
     try:
-        r = requests.post(f'{FTM8_URL}/api/users/login',
-            json={'email': FTM8_EMAIL, 'password': FTM8_PASS}, timeout=10)
+        r = requests.post(
+            f'{FTM8_URL}/api/users/login',
+            json={'email': FTM8_EMAIL, 'password': FTM8_PASS},
+            timeout=10)
         d = r.json()
         if 'token' in d:
-            log("✅ ftm8 login OK")
+            log("ftm8 login OK")
             return d['token']
-        log(f"❌ ftm8 login failed: {d}")
+        log(f"ftm8 login failed: {d}")
     except Exception as e:
-        log(f"❌ ftm8 login error: {e}")
+        log(f"ftm8 login error: {e}")
     return None
 
 def ftm8_headers(token):
@@ -38,4 +40,16 @@ def ftm8_headers(token):
 
 def ftm8_find_product(sku, token):
     try:
-        r = requests.get(f'{FTM8_URL}/api/products',
+        r = requests.get(
+            f'{FTM8_URL}/api/products',
+            params={'where[sku][equals]': sku, 'limit': 1},
+            headers=ftm8_headers(token),
+            timeout=10)
+        d = r.json()
+        if d.get('docs'):
+            return d['docs'][0]['id']
+    except Exception as e:
+        log(f"find product error: {e}")
+    return None
+
+def ftm8

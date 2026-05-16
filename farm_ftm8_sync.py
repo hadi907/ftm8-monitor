@@ -61,9 +61,9 @@ def create_order(sale, inv_map, token):
     if total < 1:
         total = price * qty
     pay = sale.get('payment', '')
-    pay_method = 'Pay on Delivery' if pay in ['نقد', 'كاش'] else 'Pay Online'
+    pay_method = 'cash_on_delivery' if pay in ['نقد', 'كاش'] else 'pay_online'
     body = {
-        'status': 'Pending',
+        'status': 'pending',
         'paymentMethod': pay_method,
         'customerDetails': {
             'name': sale.get('client') or 'زبون مزرعة',
@@ -92,7 +92,7 @@ def create_order(sale, inv_map, token):
 def cancel_order(oid, token):
     try:
         requests.patch(FTM8_URL + '/api/orders/' + oid,
-            json={'status': 'Failed'}, headers=headers(token), timeout=10)
+            json={'status': 'cancelled'}, headers=headers(token), timeout=10)
         log("cancelled: " + str(oid))
     except Exception as e:
         log("cancel error: " + str(e))

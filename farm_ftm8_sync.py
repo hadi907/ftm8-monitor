@@ -48,15 +48,6 @@ def find_product(sku, token):
         log("find_product error: " + str(e))
     return None
 
-def get_order_schema(token):
-    try:
-        r = requests.get(FTM8_URL + '/api/orders?limit=1',
-            headers=headers(token), timeout=10)
-        d = r.json()
-        log("sample order: " + str(d)[:300])
-    except Exception as e:
-        log("schema error: " + str(e))
-
 def create_order(sale, inv_map, token):
     item = inv_map.get(sale.get('invItemId', ''))
     sku = item.get('sku') if item else None
@@ -69,9 +60,11 @@ def create_order(sale, inv_map, token):
     total = float(sale.get('total', 0) or 0)
     if total < 1:
         total = price * qty
+    pay = sale.get('payment', '')
+    pay_method = 'Pay on Delivery' if pay in ['نقد', 'كاش'] else 'Pay Online'
     body = {
-        'status': 'pending',
-        'paymentMethod': 'cashOnDelivery',
+        'status': 'Pending',
+        'paymentMethod': pay_method,
         'customerDetails': {
             'name': sale.get('client') or 'زبون مزرعة',
             'email': 'farm@ftm8.com',
@@ -99,7 +92,7 @@ def create_order(sale, inv_map, token):
 def cancel_order(oid, token):
     try:
         requests.patch(FTM8_URL + '/api/orders/' + oid,
-            json={'status': 'cancelled'}, headers=headers(token), timeout=10)
+            json={'status': 'Failed'}, headers=headers(token), timeout=10)
         log("cancelled: " + str(oid))
     except Exception as e:
         log("cancel error: " + str(e))
@@ -135,7 +128,6 @@ def main():
     if not token:
         log("Login failed")
         return
-    get_order_schema(token)
     current = {s['id'] for s in sales}
     for sid in list(synced.keys()):
         if sid not in current:

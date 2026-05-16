@@ -58,7 +58,11 @@ def create_order(sale, inv_map, token):
     pay = sale.get('payment', '')
     body = {
         'status': 'pending',
-        'paymentMethod': 'cash' if pay in ['نقد', 'كاش'] else 'card',
+        'paymentMethod': 'cashOnDelivery' if pay in ['نقد', 'كاش'] else 'creditCard',
+        'customerDetails': {
+            'name': sale.get('client') or 'زبون مزرعة',
+            'email': 'farm@ftm8.com'
+        },
         'total': sale.get('total', 0),
         'totalBeforeDiscount': sale.get('qty', 1) * sale.get('price', 0),
         'currency': 'KWD',

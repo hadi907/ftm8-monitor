@@ -42,7 +42,7 @@ def create_ftm8_order(session, sale):
     client = sale.get("client", "نقدا") or "نقدا"
     payload = {
         "status": "pending",
-        "paymentMethod": "cashOnDelivery",
+        "paymentMethod": "cash_on_delivery",
         "total": sale.get("total", 0),
         "currency": "KWD",
         "address": sale.get("location", "مزرعة هادي اسحاق"),

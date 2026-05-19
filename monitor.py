@@ -1,19 +1,17 @@
-import requests, smtplib, os
-from email.mime.text import MIMEText
+import requests, os
 from datetime import datetime
 
-BASE_URL   = "https://ftm8.com"
-STATE_FILE = "last_order_id.txt"
+# ── إعدادات ──
+BASE_URL       = "https://ftm8.com"
+JSONBIN_URL    = os.environ["JSONBIN_BIN_URL"]
+JSONBIN_KEY    = os.environ["JSONBIN_API_KEY"]
+WA_PHONE       = os.environ["WA_PHONE"]
+WA_APIKEY      = os.environ["WA_APIKEY"]
+ADMIN_EMAIL    = os.environ["ADMIN_EMAIL"]
+ADMIN_PASS     = os.environ["ADMIN_PASS"]
+STATE_FILE     = "last_sale_id.txt"
 
-GMAIL_USER   = os.environ["GMAIL_USER"]
-GMAIL_PASS   = os.environ["GMAIL_PASS"]
-NOTIFY_EMAIL = os.environ["NOTIFY_EMAIL"]
-WA_PHONE     = os.environ["WA_PHONE"]
-WA_APIKEY    = os.environ["WA_APIKEY"]
-ADMIN_EMAIL  = os.environ["ADMIN_EMAIL"]
-ADMIN_PASS   = os.environ["ADMIN_PASS"]
-
-
+# ── تسجيل دخول ftm8 ──
 def login():
     session = requests.Session()
     r = session.post(f"{BASE_URL}/api/users/login",
@@ -26,89 +24,130 @@ def login():
         print("Login OK")
     return session
 
-
+# ── قراءة آخر sale ID محفوظ ──
 def load_last_id():
     if os.path.exists(STATE_FILE):
         return open(STATE_FILE).read().strip()
     return None
 
+# ── حفظ آخر sale ID ──
+def save_last_id(sid):
+    open(STATE_FILE, "w").write(sid)
 
-def save_last_id(oid):
-    open(STATE_FILE, "w").write(oid)
-
-
-def send_email(order):
-    cust = order.get("customerDetails", {})
-    items = "\n".join(
-        "  - " + i.get("product", {}).get("name", "item") +
-        " x" + str(i.get("quantity", 1)) +
-        " (" + str(i.get("price", 0)) + " KWD)"
-        for i in order.get("items", [])
+# ── قراءة المبيعات من JSONBin ──
+def get_sales_from_jsonbin():
+    r = requests.get(
+        JSONBIN_URL,
+        headers={"X-Master-Key": JSONBIN_KEY},
+        timeout=15
     )
-    body = (
-        "New Order - ftm8.com\n\n"
-        "Customer: " + str(cust.get("name", "-")) + "\n"
-        "Phone: " + str(cust.get("phone", "-")) + "\n"
-        "Total: " + str(round(order.get("total", 0), 3)) + " KWD\n"
-        "Payment: " + str(order.get("paymentMethod", "-")) + "\n"
-        "Status: " + str(order.get("status", "-")) + "\n\n"
-        "Items:\n" + items + "\n\n"
-        "Link: " + BASE_URL + "/admin/collections/orders/" + order.get("id", "")
+    r.raise_for_status()
+    data = r.json().get("record", {})
+    sales = data.get("ps3_sales", [])
+    return sales
+
+# ── إنشاء طلب في ftm8 ──
+def create_ftm8_order(session, sale):
+    payload = {
+        "status": "pending",
+        "paymentMethod": "cash_on_delivery" if sale.get("payment") in ["نقد", "كاش"] else "online_payment",
+        "total": sale.get("total", 0),
+        "currency": "KWD",
+        "address": sale.get("location", "مزرعة هادي اسحاق"),
+        "notes": f"مزرعة — {sale.get('invNum', '')} | {sale.get('client', 'نقدا')}"
+    }
+    r = session.post(f"{BASE_URL}/api/orders",
+                     json=payload, timeout=15)
+    if r.status_code in [200, 201]:
+        oid = (r.json().get("doc") or r.json()).get("id", "")
+        print(f"ftm8 order created: {oid[:8] if oid else 'OK'}")
+        return oid
+    else:
+        print(f"ftm8 error: {r.status_code}")
+        return None
+
+# ── إرسال واتساب ──
+def send_whatsapp(sale):
+    product  = sale.get("product", sale.get("invItemName", "—"))
+    client   = sale.get("client", "نقدا")
+    qty      = sale.get("qty", 1)
+    total    = round(sale.get("total", 0), 3)
+    inv      = sale.get("invNum", "—")
+    payment  = sale.get("payment", "—")
+    date     = sale.get("date", "")[:10]
+
+    text = (
+        f"🌿 بيعة جديدة — مزرعة هادي\n"
+        f"📋 {inv} | {date}\n"
+        f"👤 {client}\n"
+        f"🪴 {product} x{qty}\n"
+        f"💰 {total} KWD | {payment}"
     )
-    msg = MIMEText(body, "plain", "utf-8")
-    msg["Subject"] = "New Order - " + str(cust.get("name", "")) + " - " + str(round(order.get("total", 0), 3)) + " KWD"
-    msg["From"] = GMAIL_USER
-    msg["To"] = NOTIFY_EMAIL
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
-        s.login(GMAIL_USER, GMAIL_PASS)
-        s.send_message(msg)
-    print("Email sent")
-
-
-def send_whatsapp(order):
-    cust = order.get("customerDetails", {})
-    items = " | ".join(
-        i.get("product", {}).get("name", "item") + " x" + str(i.get("quantity", 1))
-        for i in order.get("items", [])
+    r = requests.get(
+        "https://api.callmebot.com/whatsapp.php",
+        params={"phone": WA_PHONE, "text": text, "apikey": WA_APIKEY},
+        timeout=15
     )
-    text = ("New Order ftm8\n"
-            "Name: " + str(cust.get("name", "-")) + " Tel: " + str(cust.get("phone", "-")) + "\n"
-            "Total: " + str(round(order.get("total", 0), 3)) + " KWD | " + str(order.get("status", "-")) + "\n"
-            "Items: " + items)
-    requests.get("https://api.callmebot.com/whatsapp.php",
-                 params={"phone": WA_PHONE, "text": text, "apikey": WA_APIKEY},
-                 timeout=15)
-    print("WA sent")
+    print(f"WA sent: {r.status_code}")
 
-
+# ── الدالة الرئيسية ──
 def main():
     print(datetime.utcnow().isoformat() + " Checking...")
-    session = login()
-    r = session.get(f"{BASE_URL}/api/orders?limit=20&sort=-createdAt&depth=1", timeout=15)
-    r.raise_for_status()
-    docs = r.json().get("docs", [])
-    if not docs:
-        print("No orders")
+
+    # قراءة المبيعات من JSONBin
+    try:
+        sales = get_sales_from_jsonbin()
+    except Exception as e:
+        print(f"JSONBin error: {e}")
         return
+
+    if not sales:
+        print("No sales in JSONBin")
+        return
+
+    # ترتيب من الأحدث للأقدم حسب التاريخ
+    sales_sorted = sorted(sales, key=lambda x: x.get("date", ""), reverse=True)
+
     last_id = load_last_id()
-    newest = docs[0]
-    if newest["id"] == last_id:
+    newest  = sales_sorted[0]
+
+    if newest.get("id") == last_id:
         print("No new orders")
         return
-    new_orders = []
-    for o in docs:
-        if o["id"] == last_id:
+
+    # جمع المبيعات الجديدة
+    new_sales = []
+    for s in sales_sorted:
+        if s.get("id") == last_id:
             break
-        new_orders.append(o)
-    print("New orders: " + str(len(new_orders)))
-    for o in reversed(new_orders):
-        try: send_email(o)
-        except Exception as e: print("Email error: " + str(e))
-        try: send_whatsapp(o)
-        except Exception as e: print("WA error: " + str(e))
+        new_sales.append(s)
+
+    print(f"New sales: {len(new_sales)}")
+
+    # تسجيل دخول ftm8
+    try:
+        session = login()
+    except Exception as e:
+        print(f"Login error: {e}")
+        session = None
+
+    # معالجة كل بيعة جديدة (من الأقدم للأحدث)
+    for sale in reversed(new_sales):
+        # إنشاء طلب في ftm8
+        if session:
+            try:
+                create_ftm8_order(session, sale)
+            except Exception as e:
+                print(f"ftm8 error: {e}")
+
+        # إرسال واتساب
+        try:
+            send_whatsapp(sale)
+        except Exception as e:
+            print(f"WA error: {e}")
+
     save_last_id(newest["id"])
     print("Done")
-
 
 if __name__ == "__main__":
     main()

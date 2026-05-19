@@ -63,7 +63,7 @@ def create_ftm8_order(session, sale):
         print(f"ftm8 order created: {oid[:8] if oid else 'OK'}")
         return oid
     else:
-        print(f"ftm8 error: {r.status_code}")
+        print(f"ftm8 error: {r.status_code} — {r.text[:300]}")
         return None
 
 # ── إرسال واتساب ──
@@ -94,7 +94,6 @@ def send_whatsapp(sale):
 def main():
     print(datetime.utcnow().isoformat() + " Checking...")
 
-    # قراءة المبيعات من JSONBin
     try:
         sales = get_sales_from_jsonbin()
     except Exception as e:
@@ -105,7 +104,6 @@ def main():
         print("No sales in JSONBin")
         return
 
-    # ترتيب من الأحدث للأقدم حسب التاريخ
     sales_sorted = sorted(sales, key=lambda x: x.get("date", ""), reverse=True)
 
     last_id = load_last_id()
@@ -115,7 +113,6 @@ def main():
         print("No new orders")
         return
 
-    # جمع المبيعات الجديدة
     new_sales = []
     for s in sales_sorted:
         if s.get("id") == last_id:
@@ -124,23 +121,19 @@ def main():
 
     print(f"New sales: {len(new_sales)}")
 
-    # تسجيل دخول ftm8
     try:
         session = login()
     except Exception as e:
         print(f"Login error: {e}")
         session = None
 
-    # معالجة كل بيعة جديدة (من الأقدم للأحدث)
     for sale in reversed(new_sales):
-        # إنشاء طلب في ftm8
         if session:
             try:
                 create_ftm8_order(session, sale)
             except Exception as e:
                 print(f"ftm8 error: {e}")
 
-        # إرسال واتساب
         try:
             send_whatsapp(sale)
         except Exception as e:

@@ -9,19 +9,16 @@ WA_APIKEY   = os.environ["WA_APIKEY"]
 ADMIN_EMAIL = os.environ["ADMIN_EMAIL"]
 ADMIN_PASS  = os.environ["ADMIN_PASS"]
 
-# ── حفظ الـ last_id في JSONBin نفسه (يبقى بين الـ runs) ──
-STATE_BIN_URL = JSONBIN_URL.replace("/b/", "/b/") + "?meta=false"
-STATE_KEY     = "__last_sale_id__"
+STATE_KEY = "__last_sale_id__"
 
-def get_last_id_from_jsonbin():
-    try:
-        r = requests.get(JSONBIN_URL,
-                         headers={"X-Master-Key": JSONBIN_KEY},
-                         timeout=15)
-        data = r.json().get("record", {})
-        return data.get(STATE_KEY, None)
-    except:
-        return None
+def get_data_from_jsonbin():
+    r = requests.get(JSONBIN_URL,
+                     headers={"X-Master-Key": JSONBIN_KEY},
+                     timeout=15)
+    r.raise_for_status()
+    record = r.json().get("record", {})
+    sales  = record.get("ps3_sales", [])
+    return sales, record
 
 def save_last_id_to_jsonbin(sid, current_record):
     try:
@@ -47,15 +44,6 @@ def login():
         print("Login OK")
     return session
 
-def get_data_from_jsonbin():
-    r = requests.get(JSONBIN_URL,
-                     headers={"X-Master-Key": JSONBIN_KEY},
-                     timeout=15)
-    r.raise_for_status()
-    record = r.json().get("record", {})
-    sales  = record.get("ps3_sales", [])
-    return sales, record
-
 def create_ftm8_order(session, sale):
     client = sale.get("client", "نقدا") or "نقدا"
     payload = {
@@ -75,30 +63,39 @@ def create_ftm8_order(session, sale):
     if r.status_code in [200, 201]:
         oid = (r.json().get("doc") or r.json()).get("id", "")
         print(f"ftm8 order created: {oid[:8] if oid else 'OK'}")
-        return oid
     else:
         print(f"ftm8 error: {r.status_code} — {r.text[:200]}")
-        return None
 
-def send_whatsapp(sale):
-    product = sale.get("product", sale.get("invItemName", "—"))
-    client  = sale.get("client", "نقدا")
-    qty     = sale.get("qty", 1)
-    total   = round(sale.get("total", 0), 3)
-    inv     = sale.get("invNum", "—")
-    payment = sale.get("payment", "—")
-    date    = sale.get("date", "")[:10]
-    text = (f"🌿 بيعة جديدة — مزرعة هادي\n"
-            f"📋 {inv} | {date}\n"
-            f"👤 {client}\n"
-            f"🪴 {product} x{qty}\n"
-            f"💰 {total} KWD | {payment}")
+def send_whatsapp_bulk(sales):
+    """رسالة واحدة مجمّعة لكل البيعات الجديدة"""
+    now   = datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+    total_kwd = round(sum(s.get("total", 0) for s in sales), 3)
+
+    lines = [f"🌿 مزرعة هادي — {len(sales)} بيعة جديدة",
+             f"🕐 {now} UTC",
+             "─────────────────"]
+
+    for sale in sales:
+        product = sale.get("product", sale.get("invItemName", "—"))
+        client  = sale.get("client", "نقدا") or "نقدا"
+        qty     = sale.get("qty", 1)
+        total   = round(sale.get("total", 0), 3)
+        inv     = sale.get("invNum", "—")
+        payment = sale.get("payment", "—")
+        lines.append(f"📋 {inv}")
+        lines.append(f"👤 {client} | 🪴 {product} x{qty}")
+        lines.append(f"💰 {total} KWD | {payment}")
+        lines.append("─────────────────")
+
+    lines.append(f"📊 الإجمالي: {total_kwd} KWD")
+
+    text = "\n".join(lines)
     r = requests.get("https://api.callmebot.com/whatsapp.php",
                      params={"phone": WA_PHONE, "text": text, "apikey": WA_APIKEY},
                      timeout=15)
-    print(f"WA sent: {r.status_code}")
-    # ✅ تأخير بين الرسائل لتجنب Rate Limit
-    time.sleep(3)
+    print(f"WA bulk sent: {r.status_code}")
+    if r.status_code != 200:
+        print(f"WA response: {r.text[:200]}")
 
 def main():
     print(datetime.utcnow().isoformat() + " Checking...")
@@ -111,7 +108,7 @@ def main():
     if not sales:
         print("No sales in JSONBin"); return
 
-    # ✅ إزالة المكررات بالـ ID
+    # إزالة المكررات
     seen_ids = set()
     unique_sales = []
     for s in sales:
@@ -124,7 +121,6 @@ def main():
                           key=lambda x: x.get("date", ""),
                           reverse=True)
 
-    # ✅ قراءة الـ last_id من JSONBin (يبقى بين الـ runs)
     last_id = full_record.get(STATE_KEY, None)
     newest  = sales_sorted[0]
 
@@ -137,13 +133,14 @@ def main():
             break
         new_sales.append(s)
 
-    # ✅ حد أقصى 5 رسائل لتجنب الـ spam
-    if len(new_sales) > 5:
-        print(f"Too many new sales ({len(new_sales)}) — sending only latest 5")
-        new_sales = new_sales[:5]
+    # حد أقصى 10 بيعات للمعالجة
+    if len(new_sales) > 10:
+        print(f"Capped at 10 (found {len(new_sales)})")
+        new_sales = new_sales[:10]
 
     print(f"New sales to process: {len(new_sales)}")
 
+    # ftm8 — طلب لكل بيعة
     try:
         session = login()
     except Exception as e:
@@ -153,10 +150,13 @@ def main():
         if session:
             try: create_ftm8_order(session, sale)
             except Exception as e: print(f"ftm8 error: {e}")
-        try: send_whatsapp(sale)
-        except Exception as e: print(f"WA error: {e}")
 
-    # ✅ حفظ الـ last_id في JSONBin
+    # واتساب — رسالة واحدة مجمّعة ✅
+    try:
+        send_whatsapp_bulk(list(reversed(new_sales)))
+    except Exception as e:
+        print(f"WA error: {e}")
+
     save_last_id_to_jsonbin(newest["id"], full_record)
     print("Done")
 

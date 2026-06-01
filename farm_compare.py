@@ -319,7 +319,7 @@ def send_email(html_body, diff_count):
 
     try:
         # Hotmail/Outlook SMTP
-        with smtplib.SMTP('smtp-mail.outlook.com', 587) as srv:
+        with smtplib.SMTP('smtp.mail.yahoo.com', 587) as srv:
             srv.ehlo()
             srv.starttls()
             srv.login(EMAIL_FROM, EMAIL_PASS)

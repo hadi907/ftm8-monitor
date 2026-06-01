@@ -1,0 +1,65 @@
+name: 🌿 مزرعة هادي — مزامنة farm_data.json
+
+on:
+  schedule:
+    # كل ساعة
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: pip install requests
+
+      - name: 🔄 Fetch full data from JSONBin and update farm_data.json
+        env:
+          JSONBIN_BIN_URL: ${{ secrets.JSONBIN_BIN_URL }}
+          JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
+        run: |
+          python3 << 'PYEOF'
+          import requests, json, os
+
+          url = os.environ.get('JSONBIN_BIN_URL', '').rstrip('/') + '/latest'
+          key = os.environ.get('JSONBIN_API_KEY', '')
+
+          print(f"🔍 قراءة البيانات من JSONBin...")
+          res = requests.get(url, headers={'X-Master-Key': key}, timeout=15)
+          print(f"Status: {res.status_code}")
+
+          if res.status_code == 200:
+              data = res.json().get('record', {})
+              sales = data.get('SALES', [])
+              print(f"✅ تم جلب {len(sales)} مبيعة")
+
+              with open('farm_data.json', 'w', encoding='utf-8') as f:
+                  json.dump(data, f, ensure_ascii=False, indent=2)
+              print("✅ تم حفظ farm_data.json")
+          else:
+              print(f"⚠️ JSONBin غير متاح: {res.text[:100]}")
+              print("سيتم الاحتفاظ بالملف القديم")
+          PYEOF
+
+      - name: 💾 Commit farm_data.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add farm_data.json
+          git diff --staged --quiet || git commit -m "تحديث farm_data.json [skip ci]"
+          git push
+        continue-on-error: true

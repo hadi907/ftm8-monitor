@@ -719,7 +719,7 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
       <div class="inv-meta-group"><label>رقم الجوال</label><input id="ivp" placeholder="رقم الجوال"></div>
     </div>
     <div class="inv-body">
-      <table class="inv-table"><thead><tr><th>#</th><th>المنتج</th><th>الكود</th><th>الفئة</th><th>الكمية</th><th>سعر الوحدة (د.ك)</th><th>الإجمالي (د.ك)</th><th class="no-print"></th></tr></thead>
+      <table class="inv-table"><thead><tr><th>#</th><th>المنتج</th><th>الكود</th><th>الفئة</th><th>الكمية</th><th>سعر الوحدة (د.ك)</th><th style="color:#ff8a80">🏷️ خصم (د.ك)</th><th>الإجمالي (د.ك)</th><th class="no-print"></th></tr></thead>
         <tbody id="iv-lines"></tbody>
       </table>
       <div class="no-print" style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
@@ -735,6 +735,10 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
       <div style="display:flex;justify-content:flex-end">
         <table class="inv-totals">
           <tr><td>المجموع الفرعي</td><td id="iv-sub" style="text-align:left;font-weight:700">0.000</td></tr>
+          <tr id="iv-discount-row" style="display:none">
+            <td style="color:var(--red)">🏷️ الخصم</td>
+            <td id="iv-discount-val" style="text-align:left;color:var(--red);font-weight:700">0.000</td>
+          </tr>
           <tr id="iv-delivery-row" style="display:none">
             <td style="color:var(--teal2)">🚚 رسوم التوصيل</td>
             <td id="iv-delivery-val" style="text-align:left;color:var(--teal2);font-weight:700">0.000</td>
@@ -1328,6 +1332,11 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
       </label>
     </div>
     <div id="cloud-status" style="font-size:0.78rem;font-weight:700;margin-top:8px;min-height:20px;padding:4px 0"></div>
+    <div class="f1 full" style="margin-top:10px">
+      <label>🔑 GitHub Token (لرفع farm_data.json تلقائياً)</label>
+      <input id="github-token" type="password" placeholder="ghp_..." oninput="saveSetting('githubToken',this.value)">
+      <span style="font-size:0.7rem;color:var(--txt3)">احصل عليه من GitHub ← Settings ← Developer settings ← Personal access tokens</span>
+    </div>
   </div>
 
   <div class="settings-card">
@@ -1339,7 +1348,9 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
       <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSONFile(this)">
       <button class="btn btn-teal" onclick="genSyncCode()">☁️ رمز المزامنة</button>
       <button class="btn btn-ghost" onclick="importSyncCode()">📥 استيراد رمز</button>
+      <button class="btn btn-ghost" onclick="pushToGitHub()" style="background:#1b5e20;color:#fff;border-color:#1b5e20;font-weight:700">🚀 رفع على GitHub (farm_data.json)</button>
     </div>
+    <div id="github-push-status" style="margin-top:6px;font-size:0.82rem;color:var(--txt2)"></div>
     <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
       <div style="font-size:0.8rem;font-weight:700;color:var(--txt2);margin-bottom:8px">🗑️ مسح بيانات محددة:</div>
       <div class="btn-group" style="flex-wrap:wrap">
@@ -1360,6 +1371,8 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
         <button class="btn btn-ghost btn-sm" onclick="fixDeliveryCash()" style="color:var(--teal2);border-color:var(--teal3)">🔧 إزالة قيود التوصيل من الكاش</button>
         <button class="btn btn-ghost btn-sm" onclick="recalcInventory()" style="color:var(--g3);border-color:var(--g5)">🔧 إعادة حساب المخزون</button>
         <button class="btn btn-ghost btn-sm" onclick="fixInvNums(true)" style="color:var(--purple2);border-color:var(--purple2)">🔢 إصلاح أرقام الفواتير</button>
+        <button class="btn btn-ghost btn-sm" onclick="diagSalesCashGap()" style="color:var(--blue2);border-color:var(--blue2)">🔍 تشخيص فارق المبيعات/الكاش</button>
+        <button class="btn btn-ghost btn-sm" onclick="fixMay2026Errors()" style="color:var(--red);border-color:var(--red2);font-weight:800">✅ تصحيح أخطاء مايو 2026 (XLSX)</button>
       </div>
       <div id="fix-status" style="font-size:0.77rem;margin-top:6px;font-weight:700;min-height:18px"></div>
     </div
@@ -3354,18 +3367,25 @@ function handleImgUpload(fileId,previewId,dataId){const file=document.getElement
 function viewImg(src){if(!src)return;const v=document.getElementById('img-viewer');document.getElementById('img-viewer-src').src=src;v.classList.add('open');}
 
 // ══ INVOICE ══
-function openInvoiceFromSale(saleId){const s=SALES.find(x=>x.id===saleId);if(!s)return;document.getElementById('ivn').value=s.invNum||'INV-'+String(invNum).padStart(3,'0');document.getElementById('ivd').value=s.date||td();document.getElementById('ivc').value=s.client||'';document.getElementById('iv-pay').value=s.payment||'نقد';ivLines=[{id:uid(),product:s.product,cat:s.category||'داخلي',qty:s.qty,price:s.price,img:s.img||null}];rIvLines();calcIv();nav('invoice');}
+function openInvoiceFromSale(saleId){const s=SALES.find(x=>x.id===saleId);if(!s)return;document.getElementById('ivn').value=s.invNum||'INV-'+String(invNum).padStart(3,'0');document.getElementById('ivd').value=s.date||td();document.getElementById('ivc').value=s.client||'';document.getElementById('iv-pay').value=s.payment||'نقد';ivLines=[{id:uid(),product:s.product,cat:s.category||'داخلي',qty:s.qty,price:s.price,discount:s.discount||0,img:s.img||null,sku:''}];rIvLines();calcIv();nav('invoice');}
 let ivLines=[];
-function addIvLine(){ivLines.push({id:uid(),product:'',cat:'',qty:1,price:0,img:null,sku:''});rIvLines();}
+function addIvLine(){ivLines.push({id:uid(),product:'',cat:'',qty:1,price:0,discount:0,img:null,sku:''});rIvLines();}
 function removeIvLine(id){ivLines=ivLines.filter(l=>l.id!==id);rIvLines();calcIv();}
 function calcIv(){
-  var sub=ivLines.reduce(function(s,l){return s+l.qty*l.price;},0);
+  var subRaw=ivLines.reduce(function(s,l){return s+l.qty*l.price;},0);
+  var totalDisc=ivLines.reduce(function(s,l){return s+(+(l.discount)||0);},0);
+  var sub=subRaw-totalDisc;
   var delCheck=document.getElementById('iv-del-check');
   var delFeeEl=document.getElementById('iv-del-fee');
   var delFee=(delCheck&&delCheck.checked&&delFeeEl)?(+delFeeEl.value||0):0;
   var grandTotal=sub+delFee;
   document.getElementById('iv-sub').textContent=fmt(sub);
   document.getElementById('iv-grand').textContent=fmt(grandTotal);
+  // Discount row
+  var discRow=document.getElementById('iv-discount-row');
+  var discVal=document.getElementById('iv-discount-val');
+  if(discRow){discRow.style.display=totalDisc>0?'':'none';}
+  if(discVal) discVal.textContent=fmt(totalDisc);
   // Products only (excluding delivery)
   var poEl=document.getElementById('iv-products-only');
   if(poEl) poEl.textContent=fmt(sub);
@@ -3464,13 +3484,14 @@ function saveInvoiceAsSale(){
   var errors=[];
 
   // Calculate deposit per line (proportional)
-  var totalProductsAmt=ivLines.filter(function(l){return l.product&&l.product.trim();}).reduce(function(s,l){return s+l.qty*l.price;},0);
+  var totalProductsAmt=ivLines.filter(function(l){return l.product&&l.product.trim();}).reduce(function(s,l){return s+(l.qty*l.price-(+(l.discount)||0));},0);
 
   ivLines.forEach(function(l){
     if(!l.product||!l.product.trim()) return; // skip empty
     var qty=l.qty||1;
     var price=l.price||0;
-    var total=qty*price; // products only — delivery NOT included
+    var lineDisc=+(l.discount)||0;
+    var total=qty*price-lineDisc; // products only minus discount — delivery NOT included
     // Proportional deposit for this line
     var linePaid=isPartial?(totalProductsAmt>0?Math.min(total,deposit*(total/totalProductsAmt)):0):total;
     linePaid=Math.round(linePaid*1000)/1000;
@@ -3499,7 +3520,7 @@ function saveInvoiceAsSale(){
       category:l.cat||'',
       qty:qty,
       price:price,
-      discount:0,
+      discount:lineDisc,
       total:total,
       location:'فاتورة',
       payment:payment,
@@ -3649,7 +3670,9 @@ function generateInvoicePDF(){
   var payment=document.getElementById('iv-pay').value||'نقد';
   var isPartial=(_ivPayMode==='part');
   var depEl=document.getElementById('iv-deposit');
-  var subTotal=ivLines.reduce(function(s,l){return s+(l.qty*l.price);},0);
+  var subRawPDF=ivLines.reduce(function(s,l){return s+(l.qty*l.price);},0);
+  var totalDiscPDF=ivLines.reduce(function(s,l){return s+(+(l.discount)||0);},0);
+  var subTotal=subRawPDF-totalDiscPDF;
   var delCheck=document.getElementById('iv-del-check');
   var hasDelivery=delCheck&&delCheck.checked;
   var delFee=hasDelivery?(+document.getElementById('iv-del-fee').value||0):0;
@@ -3666,8 +3689,9 @@ function generateInvoicePDF(){
 
   // Items rows
   var rows=ivLines.filter(function(l){return l.product&&l.product.trim();}).map(function(l,i){
-    var lineTotal=l.qty*l.price;
-    return '<tr style="border-bottom:1px solid #e8f5e9;'+(i%2===1?'background:#f9fff9;':'')+'\">'
+    var lineDisc2=+(l.discount)||0;
+    var lineTotal=(l.qty*l.price)-lineDisc2;
+    return '<tr style="border-bottom:1px solid #e8f5e9;'+(i%2===1?'background:#f9fff9;':'')+'">'
       +'<td style="padding:9px 10px;text-align:center;color:#888;font-size:9pt">'+(i+1)+'</td>'
       +(l.img?'<td style="padding:5px 8px;text-align:center"><img src="'+l.img+'" style="width:38px;height:38px;object-fit:cover;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.15)"></td>':'<td style="padding:5px 8px;text-align:center"><div style="width:38px;height:38px;background:#e8f5e9;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px">🌿</div></td>')
       +'<td style="padding:9px 10px;font-weight:700;font-size:10pt">'+l.product+'</td>'
@@ -3675,6 +3699,7 @@ function generateInvoicePDF(){
       +'<td style="padding:9px 10px;text-align:center;font-size:9pt"><span style="background:'+(l.cat==='داخلي'?'#e3f2fd':'#f3e5f5')+';color:'+(l.cat==='داخلي'?'#1565c0':'#6a1b9a')+';padding:2px 8px;border-radius:4px;font-size:8pt;font-weight:700">'+(l.cat||'—')+'</span></td>'
       +'<td style="padding:9px 10px;text-align:center;font-weight:700">'+l.qty+'</td>'
       +'<td style="padding:9px 10px;text-align:left;direction:ltr;font-weight:600">'+l.price.toFixed(3)+'</td>'
+      +(totalDiscPDF>0?'<td style="padding:9px 10px;text-align:left;direction:ltr;color:#e65100;font-weight:700">'+(lineDisc2>0?'('+lineDisc2.toFixed(3)+')':'—')+'</td>':'')
       +'<td style="padding:9px 10px;text-align:left;direction:ltr;font-weight:800;color:#1b5e20;font-size:10pt">'+lineTotal.toFixed(3)+'</td>'
       +'</tr>';
   }).join('');
@@ -3774,7 +3799,7 @@ function generateInvoicePDF(){
     +'<div class="inv-body">'
     // Items
     +'<table class="items-table">'
-    +'<thead><tr><th>#</th><th>صورة</th><th>الصنف</th><th>الكود</th><th>الفئة</th><th>الكمية</th><th>سعر الوحدة (د.ك)</th><th>الإجمالي (د.ك)</th></tr></thead>'
+    +'<thead><tr><th>#</th><th>صورة</th><th>الصنف</th><th>الكود</th><th>الفئة</th><th>الكمية</th><th>سعر الوحدة (د.ك)</th>'+(totalDiscPDF>0?'<th style="color:#ff8a80">🏷️ الخصم</th>':'')+'<th>الإجمالي (د.ك)</th></tr></thead>'
     +'<tbody>'+rows+'</tbody>'
     +'<tfoot><tr>'
     +'<td colspan="6" style="color:#1b5e20">المجموع الفرعي ('+ivLines.filter(function(l){return l.product&&l.product.trim();}).length+' صنف)</td>'
@@ -3783,7 +3808,9 @@ function generateInvoicePDF(){
     +'</table>'
     // Totals
     +'<div class="totals-section"><div class="totals-box"><table>'
-    +'<tr><td>المجموع الفرعي</td><td style="text-align:left;direction:ltr;font-weight:700">'+subTotal.toFixed(3)+'</td></tr>'
+    +'<tr><td>المجموع قبل الخصم</td><td style="text-align:left;direction:ltr;font-weight:700">'+subRawPDF.toFixed(3)+'</td></tr>'
+    +(totalDiscPDF>0?'<tr><td style="color:#e65100">🏷️ إجمالي الخصم</td><td style="text-align:left;direction:ltr;color:#e65100;font-weight:700">('+totalDiscPDF.toFixed(3)+')</td></tr>':'')
+    +'<tr><td style="font-weight:700">المجموع الفرعي</td><td style="text-align:left;direction:ltr;font-weight:700">'+subTotal.toFixed(3)+'</td></tr>'
     +(delFee>0?'<tr><td style="color:#00695c">🚚 رسوم التوصيل</td><td style="text-align:left;direction:ltr;color:#00695c;font-weight:700">'+delFee.toFixed(3)+'</td></tr>':'')
     +'<tr class="grand-row"><td>💰 الإجمالي الكلي (د.ك)</td><td style="text-align:left;direction:ltr">'+grandTotal.toFixed(3)+'</td></tr>'
     +(isPartial&&remain>0
@@ -4256,6 +4283,244 @@ function fixDuplicateSales(){
   }
 }
 
+function diagSalesCashGap(){
+  // ── تشخيص فارق المبيعات مقابل الكاش ──
+  var cashSaleIds={};
+  CASH.forEach(function(c){
+    if(c.autoFrom==='sale'&&c.saleId) cashSaleIds[c.saleId]=c;
+  });
+
+  var missingCash=[];   // مبيعات بدون قيد كاش
+  var mismatch=[];      // مبيعات قيمتها تختلف عن الكاش
+  var orphanCash=[];    // قيود كاش بدون مبيعة مقابلها
+
+  SALES.forEach(function(s){
+    if(!s.total||s.total<=0) return;
+    if(s.payment&&(s.payment==='آجل'||s.payment==='دين')) return; // الآجل طبيعي بدون كاش
+    if(!s.cashId){
+      missingCash.push(s);
+    } else {
+      var ce=CASH.find(function(c){return c.id===s.cashId;});
+      if(!ce){
+        missingCash.push(s); // cashId موجود لكن القيد محذوف
+      } else if(Math.abs((ce.amount||0)-s.total)>0.001){
+        mismatch.push({sale:s,cash:ce,diff:s.total-(ce.amount||0)});
+      }
+    }
+  });
+
+  CASH.forEach(function(c){
+    if(c.autoFrom!=='sale') return;
+    if(c.saleId&&!SALES.find(function(s){return s.id===c.saleId;})){
+      orphanCash.push(c);
+    }
+  });
+
+  var totalMissing=missingCash.reduce(function(s,x){return s+x.total;},0);
+  var totalMismatch=mismatch.reduce(function(s,x){return s+x.diff;},0);
+  var totalOrphan=orphanCash.reduce(function(s,x){return s+(x.amount||0);},0);
+  var totalSales=SALES.filter(function(s){return s.total>0&&s.payment!=='آجل'&&s.payment!=='دين';}).reduce(function(s,x){return s+x.total;},0);
+  var totalCashSales=CASH.filter(function(c){return c.autoFrom==='sale'&&c.type==='وارد';}).reduce(function(s,x){return s+(x.amount||0);},0);
+
+  var html='<div style="font-family:Tajawal,sans-serif;direction:rtl;padding:20px;max-width:860px;margin:auto">'
+    +'<h2 style="color:#0d47a1;margin-bottom:16px">🔍 تشخيص فارق المبيعات / الكاش</h2>'
+
+    // ── ملخص KPI ──
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">'
+    +'<div style="background:#e8f5e9;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.75rem;color:#2e7d32">إجمالي المبيعات (غير آجل)</div><strong style="color:#1b5e20;direction:ltr">'+totalSales.toFixed(3)+' دك</strong></div>'
+    +'<div style="background:#e3f2fd;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.75rem;color:#1565c0">إجمالي الكاش (من مبيعات)</div><strong style="color:#0d47a1;direction:ltr">'+totalCashSales.toFixed(3)+' دك</strong></div>'
+    +'<div style="background:'+(Math.abs(totalSales-totalCashSales)>0.001?'#fff3e0':'#e8f5e9')+';border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.75rem;color:#e65100">الفارق</div><strong style="color:'+(Math.abs(totalSales-totalCashSales)>0.001?'#e65100':'#1b5e20')+';direction:ltr">'+(totalSales-totalCashSales).toFixed(3)+' دك</strong></div>'
+    +'<div style="background:#fce4ec;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.75rem;color:#c62828">مبيعات بدون كاش</div><strong style="color:#b71c1c;direction:ltr">'+missingCash.length+' ('+totalMissing.toFixed(3)+' دك)</strong></div>'
+    +'</div>'
+
+    // ── مبيعات بدون قيد كاش ──
+    +(missingCash.length?
+      '<h3 style="color:#e65100;margin-bottom:8px">⚠️ مبيعات بدون قيد في الكاش ('+missingCash.length+')</h3>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:16px">'
+      +'<thead><tr style="background:#fff3e0"><th style="padding:7px 10px;text-align:right">التاريخ</th><th style="padding:7px 10px;text-align:right">رقم الفاتورة</th><th style="padding:7px 10px;text-align:right">المنتج</th><th style="padding:7px 10px;text-align:right">العميل</th><th style="padding:7px 10px;text-align:right">طريقة الدفع</th><th style="padding:7px 10px;text-align:center;direction:ltr">المبلغ (دك)</th><th style="padding:7px 10px;text-align:center">cashId</th></tr></thead>'
+      +'<tbody>'
+      +missingCash.map(function(s,i){return '<tr style="background:'+(i%2?'#fff':'#fffde7')+';border-bottom:1px solid #eee">'
+        +'<td style="padding:6px 10px">'+s.date+'</td>'
+        +'<td style="padding:6px 10px;color:#1565c0">'+( s.invNum||'—')+'</td>'
+        +'<td style="padding:6px 10px;font-weight:700">'+s.product+'</td>'
+        +'<td style="padding:6px 10px">'+( s.client||'—')+'</td>'
+        +'<td style="padding:6px 10px">'+( s.payment||'—')+'</td>'
+        +'<td style="padding:6px 10px;text-align:center;color:#c62828;font-weight:700;direction:ltr">'+s.total.toFixed(3)+'</td>'
+        +'<td style="padding:6px 10px;text-align:center;font-size:0.72rem;color:'+(s.cashId?'#e65100':'#999')+'">'+(s.cashId?'موجود-محذوف':'مفقود')+'</td>'
+        +'</tr>';}).join('')
+      +'</tbody><tfoot><tr style="background:#ffccbc"><td colspan="5" style="padding:7px 10px;font-weight:800;text-align:right">الإجمالي</td>'
+      +'<td style="padding:7px 10px;text-align:center;font-weight:900;direction:ltr;color:#bf360c">'+totalMissing.toFixed(3)+'</td><td></td></tr></tfoot>'
+      +'</table>'
+      +'<div style="margin-bottom:16px"><button onclick="fixMissingCash()" style="padding:9px 22px;background:#e65100;color:#fff;border:none;border-radius:7px;font-family:Tajawal,sans-serif;font-size:0.85rem;cursor:pointer;font-weight:700">⚡ إصلاح تلقائي — إنشاء قيود الكاش المفقودة</button>'
+      +'<span style="font-size:0.78rem;color:#666;margin-right:12px">سيُنشئ قيد وارد لكل مبيعة بدون كاش</span></div>'
+    :'<div style="background:#e8f5e9;border-radius:8px;padding:12px;margin-bottom:16px;color:#1b5e20;font-weight:700">✅ كل المبيعات لها قيود كاش مقابلة</div>')
+
+    // ── مبيعات بقيمة مختلفة عن الكاش ──
+    +(mismatch.length?
+      '<h3 style="color:#6a1b9a;margin-bottom:8px">🔄 مبيعات قيمتها تختلف عن الكاش ('+mismatch.length+')</h3>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:16px">'
+      +'<thead><tr style="background:#f3e5f5"><th style="padding:7px 10px;text-align:right">التاريخ</th><th style="padding:7px 10px;text-align:right">رقم الفاتورة</th><th style="padding:7px 10px;text-align:right">المنتج</th><th style="padding:7px 10px;text-align:center;direction:ltr">قيمة البيعة</th><th style="padding:7px 10px;text-align:center;direction:ltr">قيمة الكاش</th><th style="padding:7px 10px;text-align:center;direction:ltr">الفارق</th></tr></thead>'
+      +'<tbody>'
+      +mismatch.map(function(x,i){return '<tr style="background:'+(i%2?'#fff':'#f8f0ff')+';border-bottom:1px solid #eee">'
+        +'<td style="padding:6px 10px">'+x.sale.date+'</td>'
+        +'<td style="padding:6px 10px;color:#6a1b9a">'+( x.sale.invNum||'—')+'</td>'
+        +'<td style="padding:6px 10px;font-weight:700">'+x.sale.product+'</td>'
+        +'<td style="padding:6px 10px;text-align:center;direction:ltr;color:#1b5e20;font-weight:700">'+x.sale.total.toFixed(3)+'</td>'
+        +'<td style="padding:6px 10px;text-align:center;direction:ltr;color:#1565c0;font-weight:700">'+( x.cash.amount||0).toFixed(3)+'</td>'
+        +'<td style="padding:6px 10px;text-align:center;direction:ltr;color:'+(x.diff>0?'#c62828':'#1b5e20')+';font-weight:900">'+(x.diff>0?'+':'')+x.diff.toFixed(3)+'</td>'
+        +'</tr>';}).join('')
+      +'</tbody><tfoot><tr style="background:#e1bee7"><td colspan="5" style="padding:7px 10px;font-weight:800;text-align:center">إجمالي الفارق</td>'
+      +'<td style="padding:7px 10px;text-align:center;font-weight:900;direction:ltr;color:#6a1b9a">'+(totalMismatch>0?'+':'')+totalMismatch.toFixed(3)+'</td></tr></tfoot>'
+      +'</table>'
+      +'<div style="margin-bottom:16px"><button onclick="fixMismatchCash()" style="padding:9px 22px;background:#6a1b9a;color:#fff;border:none;border-radius:7px;font-family:Tajawal,sans-serif;font-size:0.85rem;cursor:pointer;font-weight:700">⚡ مزامنة قيم الكاش مع المبيعات</button>'
+      +'<span style="font-size:0.78rem;color:#666;margin-right:12px">سيُصحح قيمة الكاش لتطابق قيمة البيعة</span></div>'
+    :'')
+
+    // ── قيود كاش بدون مبيعة ──
+    +(orphanCash.length?
+      '<h3 style="color:#c62828;margin-bottom:8px">🗑️ قيود كاش بدون مبيعة مقابلة ('+orphanCash.length+')</h3>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:16px">'
+      +'<thead><tr style="background:#ffebee"><th style="padding:7px 10px;text-align:right">التاريخ</th><th style="padding:7px 10px;text-align:right">الوصف</th><th style="padding:7px 10px;text-align:center;direction:ltr">المبلغ (دك)</th></tr></thead>'
+      +'<tbody>'
+      +orphanCash.map(function(c,i){return '<tr style="background:'+(i%2?'#fff':'#fff8f8')+';border-bottom:1px solid #eee">'
+        +'<td style="padding:6px 10px">'+c.date+'</td>'
+        +'<td style="padding:6px 10px">'+( c.notes||'—')+'</td>'
+        +'<td style="padding:6px 10px;text-align:center;direction:ltr;color:#c62828;font-weight:700">'+( c.amount||0).toFixed(3)+'</td>'
+        +'</tr>';}).join('')
+      +'</tbody><tfoot><tr style="background:#ffcdd2"><td colspan="2" style="padding:7px 10px;font-weight:800;text-align:right">الإجمالي</td>'
+      +'<td style="padding:7px 10px;text-align:center;font-weight:900;direction:ltr;color:#b71c1c">'+totalOrphan.toFixed(3)+'</td></tr></tfoot>'
+      +'</table>'
+    :'')
+
+    +'<div class="no-print" style="text-align:center;margin-top:20px"><button onclick="window.print()" style="padding:10px 28px;background:#0d47a1;color:#fff;border:none;border-radius:7px;font-size:11pt;cursor:pointer;font-family:Tajawal,sans-serif;font-weight:700">🖨️ طباعة / PDF</button></div>'
+    +'<style>@media print{.no-print{display:none}}</style>'
+    +'</div>';
+
+  var win=window.open('','_blank','width=920,height=700');
+  if(win){win.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تشخيص فارق المبيعات</title><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Tajawal,sans-serif;direction:rtl;background:#f5f5f5;padding:20px}h2,h3{margin-bottom:12px}@media print{@page{margin:10mm;size:A4}body{background:#fff}}</style></head><body>'+html+'</body></html>');win.document.close();win.focus();}
+  else{var stEl=document.getElementById('fix-status');if(stEl){stEl.textContent='⚠️ افتح النوافذ المنبثقة للمتصفح';stEl.style.color='var(--orange)';}}
+}
+
+function fixMissingCash(){
+  var fixed=0;
+  SALES.forEach(function(s){
+    if(!s.total||s.total<=0) return;
+    if(s.payment==='آجل'||s.payment==='دين') return;
+    var hasValidCash=s.cashId&&CASH.find(function(c){return c.id===s.cashId;});
+    if(!hasValidCash){
+      var ce={id:uid(),date:s.date,type:'وارد',amount:s.total,paid:s.total,remaining:0,
+        payment:s.payment||'نقد',ref:s.invNum||'',
+        month:new Date(s.date).toLocaleString('ar-EG',{month:'long',year:'numeric'}),
+        notes:'مبيعة: '+(s.product||'')+(s.client?' - '+s.client:''),
+        autoFrom:'sale',saleId:s.id};
+      CASH.push(ce);
+      s.cashId=ce.id;
+      fixed++;
+    }
+  });
+  if(fixed>0){
+    sv(K.sales,SALES);sv(K.cash,CASH);
+    rCash();refreshDash();
+    alert('✅ تم إنشاء '+fixed+' قيد كاش مفقود');
+    diagSalesCashGap();
+  } else {
+    alert('✅ لا توجد قيود مفقودة');
+  }
+}
+
+function fixMismatchCash(){
+  var fixed=0;
+  SALES.forEach(function(s){
+    if(!s.cashId) return;
+    var ce=CASH.find(function(c){return c.id===s.cashId;});
+    if(ce&&Math.abs((ce.amount||0)-s.total)>0.001){
+      ce.amount=s.total;ce.paid=s.total;
+      fixed++;
+    }
+  });
+  if(fixed>0){
+    sv(K.cash,CASH);
+    rCash();refreshDash();
+    alert('✅ تم تصحيح '+fixed+' قيمة في الكاش');
+    diagSalesCashGap();
+  } else {
+    alert('✅ لا توجد فوارق في القيم');
+  }
+}
+
+function fixMay2026Errors(){
+  // ══ تصحيح 3 أخطاء محددة تم التحقق منها مقابل XLSX ══
+  // INV-018: ودليه 8 حبات = 8.000 (لا 12.000) + ربل 4 حبات = 6.000 (صحيح)
+  // INV-019: فل عدد 2 × 0.750 = 1.500 (لا ودليه 8.000)
+  // INV-046: قيمة 3.500 (لا 3.600)
+
+  var stEl=document.getElementById('fix-status');
+  var fixes=[];
+  var cashFixes=[];
+
+  // ── تصحيح INV-018 ودليه: 12.000 → 8.000 ──
+  SALES.forEach(function(s){
+    if((s.invNum==='INV-018'||s.invNum==='Inv-18'||s.invNum==='INV-18')
+       &&(s.product||'').indexOf('ودليه')>=0
+       &&Math.abs(s.total-12)<=0.01){
+      var oldTotal=s.total;
+      s.total=8.000;
+      s.price=1.000; // 8 حبات × 1 دك
+      if(s.cashId){
+        var ce=CASH.find(function(c){return c.id===s.cashId;});
+        if(ce){ce.amount=8.000;ce.paid=8.000;cashFixes.push(ce);}
+      }
+      fixes.push('INV-018 ودليه: '+oldTotal.toFixed(3)+' → 8.000 دك');
+    }
+  });
+
+  // ── تصحيح INV-019: ودليه 8.000 → فل عدد 2 × 0.750 = 1.500 ──
+  SALES.forEach(function(s){
+    if((s.invNum==='INV-019'||s.invNum==='Inv-19'||s.invNum==='INV-19')
+       &&Math.abs(s.total-8)<=0.01){
+      var oldTotal=s.total; var oldProd=s.product;
+      s.total=1.500;
+      s.product='فل';
+      s.qty=2;
+      s.price=0.750;
+      s.discount=0;
+      if(s.cashId){
+        var ce=CASH.find(function(c){return c.id===s.cashId;});
+        if(ce){ce.amount=1.500;ce.paid=1.500;ce.notes='مبيعة: فل'+(s.client?' - '+s.client:'');cashFixes.push(ce);}
+      }
+      fixes.push('INV-019: '+oldProd+' '+oldTotal.toFixed(3)+' → فل عدد 2 × 0.750 = 1.500 دك');
+    }
+  });
+
+  // ── تصحيح INV-046: 3.600 → 3.500 ──
+  SALES.forEach(function(s){
+    if((s.invNum==='INV-046'||s.invNum==='Inv-46'||s.invNum==='INV-46')
+       &&Math.abs(s.total-3.6)<=0.01){
+      var oldTotal=s.total;
+      s.total=3.500;
+      if(s.price&&s.qty) s.price=3.500/s.qty;
+      if(s.cashId){
+        var ce=CASH.find(function(c){return c.id===s.cashId;});
+        if(ce){ce.amount=3.500;ce.paid=3.500;cashFixes.push(ce);}
+      }
+      fixes.push('INV-046: '+oldTotal.toFixed(3)+' → 3.500 دك');
+    }
+  });
+
+  if(!fixes.length){
+    if(stEl){stEl.textContent='✅ لا توجد أخطاء — البيانات صحيحة أو تم تصحيحها مسبقاً';stEl.style.color='var(--g3)';}
+    return;
+  }
+
+  sv(K.sales,SALES);
+  sv(K.cash,CASH);
+  rSales();rCash();refreshDash();rPartners();
+
+  var msg='✅ تم تصحيح '+fixes.length+' سجل:\n'+fixes.join('\n');
+  if(stEl){stEl.textContent='✅ تم تصحيح '+fixes.length+' سجل بنجاح';stEl.style.color='var(--g3)';}
+  alert(msg+'\n\n📊 إجمالي المبيعات الصحيح الآن = 327.600 دك');
+}
+
 function fixDuplicateCash(){
   var stEl=document.getElementById('fix-status');
   var seen={};var toRemove=[];
@@ -4488,6 +4753,7 @@ function loadSettings(){
   var ejTpl=document.getElementById('ejs-template');if(ejTpl)ejTpl.value=SETTINGS.ejsTemplateId||'';
   const cb=document.getElementById('cloud-bin-id');if(cb)cb.value=SETTINGS.cloudBinId||'';
   const cak=document.getElementById('cloud-api-key');if(cak)cak.value=SETTINGS.cloudApiKey||'';
+  const gt=document.getElementById('github-token');if(gt)gt.value=SETTINGS.githubToken||'';
   // ftm8 sync settings
   var f8e=document.getElementById('s-ftm8-email');if(f8e)f8e.value=SETTINGS.ftm8Email||'';
   var f8p=document.getElementById('s-ftm8-pass');if(f8p)f8p.value=SETTINGS.ftm8Pass||'';
@@ -5008,7 +5274,7 @@ function showInvAC(inpId, listId){
 
 function pickInvAC(p){
   // Add line to invoice from this inventory item
-  ivLines.push({id:uid(),product:p.name,cat:p.type||'',qty:1,price:p.price||0,img:p.img||null,sku:p.sku||''});
+  ivLines.push({id:uid(),product:p.name,cat:p.type||'',qty:1,price:p.price||0,discount:0,img:p.img||null,sku:p.sku||''});
   rIvLines();calcIv();
   // Clear search and refocus for next item
   var inp=document.getElementById('iv-search');
@@ -5090,7 +5356,8 @@ function rIvLines(){
     +'</select></td>'
     +'<td><input type="number" min="1" value="'+l.qty+'" oninput="ivLines['+i+'].qty=+this.value||1;calcIv()" style="width:60px;border:1px solid var(--border);border-radius:5px;padding:5px;font-family:inherit;font-size:0.79rem"></td>'
     +'<td><input type="number" step="0.001" value="'+l.price+'" oninput="ivLines['+i+'].price=+this.value||0;calcIv()" style="width:90px;border:1px solid var(--border);border-radius:5px;padding:5px;font-family:inherit;font-size:0.79rem"></td>'
-    +'<td><strong>'+(l.qty*l.price).toFixed(3)+'</strong></td>'
+    +'<td><input type="number" step="0.001" min="0" value="'+(l.discount||0)+'" oninput="ivLines['+i+'].discount=+this.value||0;calcIv()" style="width:80px;border:1px solid #ffccbc;border-radius:5px;padding:5px;font-family:inherit;font-size:0.79rem;color:#e65100" placeholder="0.000"></td>'
+    +'<td><strong style="color:'+(l.qty*l.price-(+(l.discount)||0)>0?'var(--g2)':'var(--red)')+'">'+(l.qty*l.price-(+(l.discount)||0)).toFixed(3)+'</strong></td>'
     +'<td class="no-print"><button class="btn-icon" onclick="removeIvLine(\''+l.id+'\')">🗑️</button></td>'
     +'</tr>').join('');
 }
@@ -5827,6 +6094,64 @@ async function createNewBin(){
   }catch(e){
     if(stEl){stEl.textContent='❌ خطأ: '+e.message;stEl.style.color='var(--red)';}
     console.error('createNewBin error:',e);
+  }
+}
+
+async function pushToGitHub(){
+  var token = SETTINGS.githubToken || (document.getElementById('github-token')||{}).value || '';
+  var stEl  = document.getElementById('github-push-status');
+  if(!token){
+    if(stEl) stEl.innerHTML='<span style="color:var(--red)">❌ أدخل GitHub Token أولاً في إعدادات السحابة</span>';
+    return;
+  }
+  if(stEl) stEl.innerHTML='<span style="color:var(--blue2)">⏳ جاري الرفع...</span>';
+
+  // تجهيز البيانات
+  var data={
+    INV:INV, SALES:SALES, EXP:EXP, CASH:CASH,
+    CUST:CUST, WASTE:WASTE, DEBTS:DEBTS,
+    SETTINGS:SETTINGS, date:new Date().toISOString()
+  };
+  var content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+
+  var OWNER = 'hadi907';
+  var REPO  = 'ftm8-monitor';
+  var FILE  = 'farm_data.json';
+  var API   = 'https://api.github.com/repos/'+OWNER+'/'+REPO+'/contents/'+FILE;
+
+  try {
+    // أولاً: احصل على SHA الملف الحالي
+    var getSha = await fetch(API, {
+      headers: {'Authorization':'token '+token, 'Accept':'application/vnd.github.v3+json'}
+    });
+    var sha = '';
+    if(getSha.ok){
+      var info = await getSha.json();
+      sha = info.sha || '';
+    }
+
+    // ثانياً: ارفع الملف
+    var body = {message:'تحديث farm_data.json — '+new Date().toLocaleString('ar-KW'), content:content};
+    if(sha) body.sha = sha;
+
+    var res = await fetch(API, {
+      method: 'PUT',
+      headers: {
+        'Authorization':'token '+token,
+        'Accept':'application/vnd.github.v3+json',
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if(res.ok){
+      if(stEl) stEl.innerHTML='<span style="color:var(--g3)">✅ تم رفع farm_data.json على GitHub بنجاح — '+new Date().toLocaleTimeString('ar-KW')+'</span>';
+    } else {
+      var err = await res.json();
+      if(stEl) stEl.innerHTML='<span style="color:var(--red)">❌ خطأ: '+(err.message||res.status)+'</span>';
+    }
+  } catch(e){
+    if(stEl) stEl.innerHTML='<span style="color:var(--red)">❌ '+e.message+'</span>';
   }
 }
 

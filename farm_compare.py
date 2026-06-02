@@ -16,7 +16,7 @@ XLSX_PATH      = "Farm_Account.xlsx"
 EMAIL_FROM     = os.environ.get("EMAIL_FROM", "hadiishak@hotmail.com")
 EMAIL_PASS     = os.environ.get("EMAIL_PASS", "")
 EMAIL_TO       = "hadi@ftm8.com"
-SMTP_SERVER    = "smtp.office365.com"
+SMTP_SERVER    = "smtp.gmail.com"
 SMTP_PORT      = 587
 
 # ══ جلب بيانات التطبيق من GitHub Raw ══

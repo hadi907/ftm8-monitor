@@ -129,9 +129,9 @@ def send_email(html_body, diff_count):
     msg['From'] = EMAIL_FROM
     msg['To']   = EMAIL_TO
     msg.attach(MIMEText(html_body, 'html', 'utf-8'))
-    print(f"📧 SMTP: smtp.office365.com:587")
+    print(f"📧 SMTP: smtp.gmail.com:587")
     try:
-        with smtplib.SMTP('smtp.office365.com', 587) as srv:
+        with smtplib.SMTP('smtp.gmail.com', 587) as srv:
             srv.ehlo()
             srv.starttls()
             srv.ehlo()
@@ -139,7 +139,7 @@ def send_email(html_body, diff_count):
             srv.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
         print(f"✅ تم إرسال التقرير إلى {EMAIL_TO}")
     except Exception as e:
-        print(f"❌ فشل Outlook: {e}")
+        print(f"❌ فشل Gmail: {e}")
 
 if __name__ == '__main__':
     print(f"🌿 farm_compare.py — {TODAY} {datetime.datetime.now().strftime('%H:%M')}")

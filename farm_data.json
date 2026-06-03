@@ -614,7 +614,7 @@
     },
     {
       "id": "mp5w5gcqxzt",
-      "invNum": "INV-018",
+      "invNum": "INV-018a",
       "date": "2026-05-14",
       "client": "نقدا",
       "invItemId": "",
@@ -624,12 +624,10 @@
       "price": 1.5,
       "discount": 0,
       "total": 6,
-      "location": "فاتورة",
+      "location": "",
       "payment": "نقد",
-      "cashId": "mp5w5gcq6yl",
-      "img": null,
-      "notes": "",
-      "deliveryFee": 0
+      "cashId": "mpyht05c8cl",
+      "img": ""
     },
     {
       "id": "mpbm6r8xqth",
@@ -1768,19 +1766,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mp5w5gcq6yl",
-      "date": "2026-05-14",
-      "type": "وارد",
-      "amount": 6,
-      "paid": 6,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-018",
-      "month": "مايو ٢٠٢٦",
-      "notes": "فاتورة: ربلبل - نقدا",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mpbm6r93djc",
       "date": "2026-05-16",
       "type": "وارد",
@@ -2351,6 +2336,19 @@
       "month": "مايو ٢٠٢٦",
       "notes": "مبيعة: اخري",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mpyht05c8cl",
+      "date": "2026-05-14",
+      "type": "وارد",
+      "amount": 6,
+      "paid": 6,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-018a",
+      "month": "مايو ٢٠٢٦",
+      "notes": "مبيعة: ربلبل - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -2496,5 +2494,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-06-03T19:59:44.362Z"
+  "date": "2026-06-03T20:02:07.267Z"
 }

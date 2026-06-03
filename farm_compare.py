@@ -31,7 +31,7 @@ def load_app():
 def load_xlsx():
     rows = []
     try:
-        df = pd.read_excel(XLSX_PATH, sheet_name='المحفظة', header=None)
+        df = pd.read_excel(XLSX_PATH, sheet_name='كشف الحساب', header=None, skiprows=3)
         for _, row in df.iterrows():
             date_v  = row[0]
             ref     = str(row[1] if pd.notna(row[1]) else '').strip()

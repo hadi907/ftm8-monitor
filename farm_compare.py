@@ -1,225 +1,176 @@
-#!/usr/bin/env python3
-# farm_compare.py — مقارنة بيانات التطبيق مع Excel وإرسال تقرير يومي
-# الإصدار: v2 — Hotmail SMTP
-
-import json
-import os
-import smtplib
-import urllib.request
-from datetime import datetime
+import os, json, requests, openpyxl, smtplib, datetime
+import pandas as pd
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-# ══ الإعدادات ══
-GITHUB_RAW_URL = "https://raw.githubusercontent.com/hadi907/ftm8-monitor/main/farm_data.json"
-XLSX_PATH      = "Farm_Account.xlsx"
-EMAIL_FROM     = os.environ.get("EMAIL_FROM", "hadiishak@hotmail.com")
-EMAIL_PASS     = os.environ.get("EMAIL_PASS", "")
-EMAIL_TO       = "hadi@ftm8.com"
-SMTP_SERVER    = "smtp.mail.yahoo.com"
-SMTP_PORT      = 587
+GITHUB_RAW = 'https://raw.githubusercontent.com/hadi907/ftm8-monitor/main/farm_data.json'
+XLSX_PATH  = os.environ.get('XLSX_PATH', 'Farm_Account.xlsx')
+EMAIL_FROM = os.environ.get('EMAIL_FROM', '')
+EMAIL_PASS = os.environ.get('EMAIL_PASS', '')
+EMAIL_TO   = os.environ.get('EMAIL_TO', 'hadi@ftm8.com')
+TODAY      = datetime.date.today().isoformat()
 
-# ══ جلب بيانات التطبيق من GitHub Raw ══
-def fetch_app_data():
+def load_app():
     try:
-        with urllib.request.urlopen(GITHUB_RAW_URL, timeout=15) as resp:
-            raw = resp.read().decode("utf-8")
-            return json.loads(raw)
+        res = requests.get(GITHUB_RAW, timeout=15)
+        data = res.json()
+        sales = data.get('SALES', [])
+        print(f"✅ farm_data.json — {len(sales)} مبيعة")
+        return sales
     except Exception as e:
-        print(f"❌ خطأ في جلب farm_data.json: {e}")
-        return None
+        print(f"❌ خطأ farm_data.json: {e}")
+        return []
 
-# ══ قراءة بيانات Excel ══
-def read_xlsx():
+def load_xlsx():
+    rows = []
     try:
-        import openpyxl
-        wb = openpyxl.load_workbook(XLSX_PATH, data_only=True)
-        ws = wb.active
-        rows = []
-        headers = []
-        for i, row in enumerate(ws.iter_rows(values_only=True)):
-            if i == 0:
-                headers = [str(c).strip() if c else "" for c in row]
+        df = pd.read_excel(XLSX_PATH, sheet_name='المحفظة', header=None)
+        for _, row in df.iterrows():
+            date_v  = row[0]
+            ref     = str(row[1] if pd.notna(row[1]) else '').strip()
+            desc    = str(row[2] if pd.notna(row[2]) else '').strip()
+            credit_v= row[4]
+
+            if not ref or ref in ['0','nan','None'] or pd.isna(date_v):
+                continue
+            if hasattr(date_v, 'date'):
+                date_str = date_v.date().isoformat()
             else:
-                if any(c is not None for c in row):
-                    rows.append(dict(zip(headers, row)))
-        return headers, rows
+                continue
+            try:
+                c = float(credit_v) if pd.notna(credit_v) and str(credit_v).strip() not in ['—','-',''] else 0.0
+            except:
+                c = 0.0
+            if c <= 0:
+                continue
+            rows.append({
+                'date':     date_str,
+                'ref':      ref,
+                'ref_norm': ref.upper().replace(' ','').replace('-',''),
+                'desc':     desc,
+                'credit':   round(c, 3),
+            })
+        print(f"✅ XLSX (المحفظة) — {len(rows)} سطر، إجمالي={sum(r['credit'] for r in rows):.3f} دك")
     except Exception as e:
-        print(f"❌ خطأ في قراءة Excel: {e}")
-        return [], []
+        print(f"❌ خطأ XLSX: {e}")
+        import traceback; traceback.print_exc()
+    return rows
 
-# ══ بناء التقرير HTML ══
-def build_report(app_data, xlsx_rows, xlsx_headers):
-    today = datetime.now().strftime("%Y-%m-%d")
-    now   = datetime.now().strftime("%Y-%m-%d %H:%M")
+def compare(app_sales, xlsx_rows):
+    app_total   = round(sum(s.get('total', 0) for s in app_sales), 3)
+    xlsx_credit = round(sum(r['credit'] for r in xlsx_rows), 3)
 
-    # ── إحصائيات التطبيق ──
-    sales    = app_data.get("ps3_sales", []) if app_data else []
-    expenses = app_data.get("ps3_exp",   []) if app_data else []
-    inv      = app_data.get("ps3_inv",   []) if app_data else []
+    xlsx_by_ref = {}
+    for r in xlsx_rows:
+        xlsx_by_ref.setdefault(r['ref_norm'], []).append(r)
 
-    total_sales = sum(float(s.get("total", 0)) for s in sales)
-    total_exp   = sum(float(e.get("amount", 0)) for e in expenses)
-    app_profit  = total_sales - total_exp
-    inv_count   = len(inv)
-    low_stock   = [p for p in inv if float(p.get("remaining", 0)) <= float(p.get("minStock", 5))]
-    out_stock   = [p for p in inv if float(p.get("remaining", 0)) <= 0]
+    app_refs = set()
+    for s in app_sales:
+        ref = (s.get('invNum') or '').upper().replace(' ','').replace('-','')
+        if ref: app_refs.add(ref)
 
-    # ── إحصائيات Excel ──
-    xlsx_count = len(xlsx_rows)
+    diffs = []
+    seen  = set()
 
-    # ── حالة المقارنة ──
-    app_ok   = app_data is not None
-    xlsx_ok  = xlsx_count > 0
-    status   = "✅ كلا الملفين متاحان" if (app_ok and xlsx_ok) else "⚠️ تحقق من الملفات"
-    status_color = "#2e7d32" if (app_ok and xlsx_ok) else "#e65100"
+    for s in app_sales:
+        ref  = (s.get('invNum') or '').upper().replace(' ','').replace('-','')
+        amt  = round(s.get('total', 0), 3)
+        prod = s.get('product', '')
+        date = s.get('date', '')
+        if amt <= 0 or not ref: continue
 
-    # ── بناء HTML ──
-    low_rows = ""
-    for p in low_stock:
-        rem = float(p.get("remaining", 0))
-        mn  = float(p.get("minStock", 5))
-        color = "#ffebee" if rem <= 0 else "#fff8e1"
-        icon  = "🔴" if rem <= 0 else "🟡"
-        low_rows += f"""
-        <tr style="background:{color}">
-          <td>{icon} {p.get('name','—')}</td>
-          <td>{p.get('type','—')}</td>
-          <td style="text-align:center;font-weight:700">{int(rem)}</td>
-          <td style="text-align:center">{int(mn)}</td>
-        </tr>"""
+        matches = [r for r in xlsx_by_ref.get(ref, []) if r['credit'] > 0]
+        key = f"{ref}|{prod}"
+        if key in seen: continue
+        seen.add(key)
 
-    if not low_rows:
-        low_rows = '<tr><td colspan="4" style="text-align:center;color:#2e7d32;padding:12px">✅ جميع الأصناف فوق الحد الأدنى</td></tr>'
+        if not matches:
+            diffs.append({'type':'في التطبيق فقط','ref':ref,'desc':prod,'date':date,'app_val':amt,'xlsx_val':0,'diff':amt})
+        else:
+            xlsx_amt = round(sum(m['credit'] for m in matches), 3)
+            if abs(xlsx_amt - amt) > 0.005:
+                diffs.append({'type':'فارق في القيمة','ref':ref,'desc':prod,'date':date,'app_val':amt,'xlsx_val':xlsx_amt,'diff':round(amt-xlsx_amt,3)})
 
-    xlsx_preview = ""
-    for row in xlsx_rows[:10]:
-        cells = "".join(f"<td style='padding:5px 8px;border:1px solid #e0e0e0'>{v if v is not None else '—'}</td>" for v in list(row.values())[:6])
-        xlsx_preview += f"<tr>{cells}</tr>"
+    for ref_norm, rws in xlsx_by_ref.items():
+        if ref_norm in app_refs: continue
+        for r in rws:
+            key = f"{ref_norm}|xlsx"
+            if key in seen: continue
+            seen.add(key)
+            diffs.append({'type':'في XLSX فقط','ref':r['ref'],'desc':r['desc'],'date':r['date'],'app_val':0,'xlsx_val':r['credit'],'diff':-r['credit']})
 
-    if not xlsx_preview:
-        xlsx_preview = '<tr><td colspan="6" style="text-align:center;color:#e65100;padding:12px">⚠️ لم يتم العثور على بيانات في Excel</td></tr>'
+    return {
+        'app_total':   app_total,
+        'xlsx_credit': xlsx_credit,
+        'diff_total':  round(app_total - xlsx_credit, 3),
+        'diffs':       sorted(diffs, key=lambda x: x['date'], reverse=True),
+        'app_count':   len(app_sales),
+        'xlsx_count':  len(xlsx_rows),
+    }
 
-    header_cells = "".join(f"<th style='padding:6px 8px;background:#1b5e20;color:#fff;border:1px solid #388e3c'>{h}</th>" for h in xlsx_headers[:6])
-
-    html = f"""<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head>
-<meta charset="UTF-8">
-<style>
-  body {{ font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background:#f5f5f5; margin:0; padding:20px; direction:rtl; }}
-  .container {{ max-width:800px; margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.1); overflow:hidden; }}
-  .header {{ background:linear-gradient(135deg,#1b5e20,#388e3c); color:#fff; padding:24px 28px; }}
-  .header h1 {{ margin:0 0 6px; font-size:1.4rem; }}
-  .header p {{ margin:0; opacity:.85; font-size:.9rem; }}
-  .status-bar {{ background:{status_color}; color:#fff; padding:10px 28px; font-weight:700; font-size:.95rem; }}
-  .section {{ padding:20px 28px; border-bottom:1px solid #f0f0f0; }}
-  .section h2 {{ color:#1b5e20; font-size:1rem; margin:0 0 14px; padding-bottom:8px; border-bottom:2px solid #e8f5e9; }}
-  .kpi-grid {{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:4px; }}
-  .kpi {{ background:#f9f9f9; border-radius:8px; padding:14px; text-align:center; border:1px solid #e0e0e0; }}
-  .kpi .val {{ font-size:1.4rem; font-weight:800; color:#1b5e20; }}
-  .kpi .lbl {{ font-size:.75rem; color:#666; margin-top:4px; }}
-  table {{ width:100%; border-collapse:collapse; font-size:.85rem; }}
-  th {{ background:#e8f5e9; color:#1b5e20; padding:8px; text-align:right; border:1px solid #c8e6c9; }}
-  td {{ padding:7px 8px; border:1px solid #e0e0e0; }}
-  .footer {{ background:#f9f9f9; padding:14px 28px; text-align:center; font-size:.78rem; color:#888; }}
-</style>
-</head>
-<body>
-<div class="container">
-  <div class="header">
-    <h1>🌿 مزرعة هادي اسحاق — التقرير اليومي</h1>
-    <p>📅 {now} | تقرير تلقائي</p>
-  </div>
-  <div class="status-bar">{status}</div>
-
-  <div class="section">
-    <h2>📊 ملخص التطبيق</h2>
-    <div class="kpi-grid">
-      <div class="kpi"><div class="val">{total_sales:.3f}</div><div class="lbl">إجمالي المبيعات (د.ك)</div></div>
-      <div class="kpi"><div class="val">{total_exp:.3f}</div><div class="lbl">إجمالي المصروفات (د.ك)</div></div>
-      <div class="kpi"><div class="val" style="color:{'#2e7d32' if app_profit>=0 else '#c62828'}">{app_profit:.3f}</div><div class="lbl">صافي الربح (د.ك)</div></div>
-      <div class="kpi"><div class="val">{len(sales)}</div><div class="lbl">عدد المبيعات</div></div>
-      <div class="kpi"><div class="val">{inv_count}</div><div class="lbl">أصناف المخزون</div></div>
-      <div class="kpi"><div class="val" style="color:{'#c62828' if out_stock else '#2e7d32'}">{len(out_stock)}</div><div class="lbl">أصناف نافدة</div></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>⚠️ تنبيهات المخزون ({len(low_stock)} صنف)</h2>
-    <table>
-      <tr><th>الصنف</th><th>النوع</th><th style="text-align:center">المتبقي</th><th style="text-align:center">الحد الأدنى</th></tr>
-      {low_rows}
-    </table>
-  </div>
-
-  <div class="section">
-    <h2>📋 بيانات Excel — Farm_Account.xlsx ({xlsx_count} سطر)</h2>
-    <table>
-      <tr>{header_cells}</tr>
-      {xlsx_preview}
-    </table>
-    {"<p style='color:#888;font-size:.78rem;margin-top:8px'>* يعرض أول 10 صفوف فقط</p>" if xlsx_count > 10 else ""}
-  </div>
-
-  <div class="footer">
-    تقرير تلقائي — مزرعة هادي اسحاق | {now}<br>
-    المُرسَل إلى: {EMAIL_TO}
-  </div>
-</div>
-</body>
-</html>"""
-    return html
-
-# ══ إرسال الإيميل ══
-def send_email(html_content):
-    if not EMAIL_PASS:
-        print("❌ EMAIL_PASS غير موجود في Secrets")
-        return False
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"🌿 تقرير مزرعة هادي اسحاق — {datetime.now().strftime('%Y-%m-%d')}"
-    msg["From"]    = EMAIL_FROM
-    msg["To"]      = EMAIL_TO
-
-    msg.attach(MIMEText(html_content, "html", "utf-8"))
-
-    try:
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=30) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(EMAIL_FROM, EMAIL_PASS)
-            server.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
-        print(f"✅ تم إرسال التقرير إلى {EMAIL_TO}")
-        return True
-    except Exception as e:
-        print(f"❌ خطأ في إرسال الإيميل: {e}")
-        return False
-
-# ══ الدالة الرئيسية ══
-def main():
-    print(f"🌿 farm_compare.py — {datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    print(f"📧 من: {EMAIL_FROM} → إلى: {EMAIL_TO}")
-    print(f"🔗 SMTP: {SMTP_SERVER}:{SMTP_PORT}")
-
-    print("📥 جاري جلب بيانات التطبيق...")
-    app_data = fetch_app_data()
-    if app_data:
-        sales_count = len(app_data.get("ps3_sales", []))
-        print(f"✅ farm_data.json — {sales_count} مبيعة")
+def build_html(r):
+    dc = '#c62828' if abs(r['diff_total']) > 0.01 else '#1b5e20'
+    icon = '⚠️' if r['diffs'] else '✅'
+    status = f"{len(r['diffs'])} فارق بحاجة مراجعة" if r['diffs'] else "كل البيانات متطابقة"
+    rows_html = ''
+    if r['diffs']:
+        for d in r['diffs']:
+            tc = {'في التطبيق فقط':'#e65100','في XLSX فقط':'#1565c0','فارق في القيمة':'#6a1b9a'}.get(d['type'],'#555')
+            sign = '+' if d['diff'] > 0 else ''
+            rows_html += f'<tr><td style="padding:8px 12px;border-bottom:1px solid #eee">{d["date"]}</td><td style="padding:8px 12px;color:#1565c0;font-weight:700;border-bottom:1px solid #eee">{d["ref"]}</td><td style="padding:8px 12px;border-bottom:1px solid #eee">{d["desc"][:35]}</td><td style="padding:8px 12px;text-align:center;border-bottom:1px solid #eee"><span style="background:{tc}22;color:{tc};padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700">{d["type"]}</span></td><td style="padding:8px 12px;text-align:center;direction:ltr;border-bottom:1px solid #eee">{d["app_val"]:.3f}</td><td style="padding:8px 12px;text-align:center;direction:ltr;border-bottom:1px solid #eee">{d["xlsx_val"]:.3f}</td><td style="padding:8px 12px;text-align:center;direction:ltr;font-weight:900;color:{dc};border-bottom:1px solid #eee">{sign}{d["diff"]:.3f}</td></tr>'
     else:
-        print("⚠️ تعذّر جلب farm_data.json")
+        rows_html = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#1b5e20;font-size:16px">✅ لا توجد فوارق</td></tr>'
 
-    print("📊 جاري قراءة Farm_Account.xlsx...")
-    xlsx_headers, xlsx_rows = read_xlsx()
-    print(f"✅ Excel — {len(xlsx_rows)} سطر")
+    return f"""<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:Tajawal,Arial;direction:rtl;background:#f5f5f5;padding:20px}}.card{{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #e0e0e0}}.kpis{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}}.kpi{{background:#f8fffe;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0}}.kpi-lbl{{font-size:12px;color:#666;margin-bottom:4px}}.kpi-val{{font-size:20px;font-weight:900;direction:ltr}}table{{width:100%;border-collapse:collapse;font-size:13px}}th{{background:#1b5e20;color:#fff;padding:10px 12px;text-align:right}}tr:nth-child(even){{background:#f9f9f9}}</style></head>
+<body><div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1b5e20;padding-bottom:12px;margin-bottom:16px">
+<div><h1 style="font-size:18px;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</h1><p style="color:#555;font-size:13px">تقرير المقارنة — {TODAY}</p></div>
+<div style="background:{'#fff3e0' if r['diffs'] else '#e8f5e9'};padding:10px 20px;border-radius:8px;text-align:center"><div style="font-size:22px">{icon}</div><div style="font-size:12px;font-weight:700;color:{dc}">{status}</div></div></div>
+<div class="kpis">
+<div class="kpi"><div class="kpi-lbl">مبيعات التطبيق</div><div class="kpi-val" style="color:#1b5e20">{r['app_total']:.3f} دك</div><div style="font-size:11px;color:#999">{r['app_count']} سجل</div></div>
+<div class="kpi"><div class="kpi-lbl">مبيعات XLSX</div><div class="kpi-val" style="color:#1565c0">{r['xlsx_credit']:.3f} دك</div><div style="font-size:11px;color:#999">{r['xlsx_count']} سطر</div></div>
+<div class="kpi"><div class="kpi-lbl">الفارق</div><div class="kpi-val" style="color:{dc}">{r['diff_total']:+.3f} دك</div></div>
+<div class="kpi"><div class="kpi-lbl">الفوارق</div><div class="kpi-val" style="color:{dc}">{len(r['diffs'])}</div></div></div></div>
+<div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:12px">📋 تفاصيل الفوارق</h2>
+<table><thead><tr><th>التاريخ</th><th>الفاتورة</th><th>الوصف</th><th style="text-align:center">النوع</th><th style="text-align:center">التطبيق</th><th style="text-align:center">XLSX</th><th style="text-align:center">الفارق</th></tr></thead>
+<tbody>{rows_html}</tbody></table></div>
+<p style="text-align:center;color:#999;font-size:11px;margin-top:12px">GitHub Actions — {TODAY}</p>
+</body></html>"""
 
-    print("📝 جاري بناء التقرير...")
-    html = build_report(app_data, xlsx_rows, xlsx_headers)
+def send_email(html_body, diff_count):
+    subject = f"{'⚠️' if diff_count else '✅'} تقرير مزرعة هادي — {TODAY}"
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = EMAIL_FROM
+    msg['To']   = EMAIL_TO
+    msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+    print(f"📧 SMTP: smtp.mail.yahoo.com:587")
+    try:
+        with smtplib.SMTP('smtp.mail.yahoo.com', 587) as srv:
+            srv.ehlo(); srv.starttls(); srv.ehlo()
+            srv.login(EMAIL_FROM, EMAIL_PASS)
+            srv.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
+        print(f"✅ تم إرسال التقرير إلى {EMAIL_TO}")
+    except Exception as e:
+        print(f"❌ فشل 587: {e} — جاري SSL 465")
+        try:
+            with smtplib.SMTP_SSL('smtp.mail.yahoo.com', 465) as srv:
+                srv.login(EMAIL_FROM, EMAIL_PASS)
+                srv.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
+            print(f"✅ تم إرسال (SSL) إلى {EMAIL_TO}")
+        except Exception as e2:
+            print(f"❌ فشل SSL: {e2}")
 
-    print("📤 جاري إرسال التقرير...")
-    send_email(html)
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    print(f"🌿 farm_compare.py — {TODAY} {datetime.datetime.now().strftime('%H:%M')}")
+    print(f"📬 من: {EMAIL_FROM} → إلى: {EMAIL_TO}")
+    app_sales = load_app()
+    xlsx_rows = load_xlsx()
+    if not app_sales and not xlsx_rows:
+        print("❌ لا توجد بيانات"); exit(1)
+    result = compare(app_sales, xlsx_rows)
+    print(f"📊 تطبيق={result['app_total']:.3f} | XLSX={result['xlsx_credit']:.3f} | فارق={result['diff_total']:+.3f} | فوارق={len(result['diffs'])}")
+    html = build_html(result)
+    send_email(html, len(result['diffs']))

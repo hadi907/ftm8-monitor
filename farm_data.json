@@ -46,7 +46,7 @@
       "cost": 0,
       "price": 1,
       "qty": 500,
-      "remaining": 368,
+      "remaining": 344,
       "minStock": 5,
       "date": "2026-03-27",
       "color": "ابيض",
@@ -1142,6 +1142,23 @@
       "payment": "نقد",
       "cashId": "mpu7jpzmz6j",
       "img": ""
+    },
+    {
+      "id": "mpydcddwg7m",
+      "invNum": "INV-053",
+      "date": "2026-06-02",
+      "client": "نقدا",
+      "invItemId": "mn8jz6fmds2",
+      "product": "فل",
+      "category": "خارجي",
+      "qty": 24,
+      "price": 1,
+      "discount": 6,
+      "total": 18,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mpydcde3cj0",
+      "img": ""
     }
   ],
   "EXP": [
@@ -2233,6 +2250,19 @@
       "month": "مايو 2026",
       "notes": "مصروف: اسمدة - جبس لتغطيه المحميه",
       "autoFrom": "expense"
+    },
+    {
+      "id": "mpydcde3cj0",
+      "date": "2026-06-02",
+      "type": "وارد",
+      "amount": 18,
+      "paid": 18,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-053",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "مبيعة: فل - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -2378,5 +2408,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-06-03T14:58:41.957Z"
+  "date": "2026-06-03T17:57:13.128Z"
 }

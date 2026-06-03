@@ -1,5 +1,13 @@
-import os, json, requests, openpyxl, smtplib, datetime
+import os, json, requests, openpyxl, smtplib, datetime, re
 import pandas as pd
+
+def norm_ref(r):
+    """توحيد تنسيق رقم الفاتورة: INV-037 = INV037 = Inv-37 = INV37"""
+    if not r: return ''
+    r = str(r).upper().replace(' ','').replace('-','')
+    r = re.sub(r'^(INV)0+(\d+)$', r'\g<1>\2', r)
+    return r
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -46,7 +54,7 @@ def load_xlsx():
             rows.append({
                 'date':     date_str,
                 'ref':      ref,
-                'ref_norm': ref.upper().replace(' ','').replace('-',''),
+                'ref_norm': norm_ref(ref),
                 'desc':     desc,
                 'credit':   round(c, 3),
             })
@@ -66,14 +74,14 @@ def compare(app_sales, xlsx_rows):
 
     app_refs = set()
     for s in app_sales:
-        ref = (s.get('invNum') or '').upper().replace(' ','').replace('-','')
+        ref = norm_ref(s.get('invNum') or '')
         if ref: app_refs.add(ref)
 
     diffs = []
     seen  = set()
 
     for s in app_sales:
-        ref  = (s.get('invNum') or '').upper().replace(' ','').replace('-','')
+        ref  = norm_ref(s.get('invNum') or '')
         amt  = round(s.get('total', 0), 3)
         prod = s.get('product', '')
         date = s.get('date', '')

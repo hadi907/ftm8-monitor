@@ -2,10 +2,8 @@ name: 🌿 مزرعة هادي — تقرير المقارنة اليومي
 
 on:
   schedule:
-    # 10 مساءً بتوقيت الكويت (UTC+3) = 19:00 UTC
     - cron: '0 19 * * *'
   workflow_dispatch:
-    # تشغيل يدوي من GitHub عند الحاجة
 
 jobs:
   daily-compare:
@@ -22,14 +20,12 @@ jobs:
           python-version: '3.11'
 
       - name: 📦 Install dependencies
-        run: pip install requests openpyxl
+        run: pip install requests openpyxl pandas
 
       - name: 🔍 Run comparison & send report
         env:
-          JSONBIN_BIN_URL:  ${{ secrets.JSONBIN_BIN_URL }}
-          JSONBIN_API_KEY:  ${{ secrets.JSONBIN_API_KEY }}
-          XLSX_PATH:        Farm_Account.xlsx
-          EMAIL_FROM:       ${{ secrets.EMAIL_FROM }}
-          EMAIL_PASS:       ${{ secrets.EMAIL_PASS }}
-          EMAIL_TO:         hadi@ftm8.com
+          XLSX_PATH:  Farm_Account.xlsx
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO:   hadi@ftm8.com
         run: python farm_compare.py

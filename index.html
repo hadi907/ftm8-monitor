@@ -6275,9 +6275,11 @@ function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb
     buildAdmKpis(0,0,0);
     return;
   }
+  // المتبقي يبدأ من الإيراد التراكمي
+  balance=rows.reduce(function(s,r){return s+r.income;},0);
   tb.innerHTML=rows.map(function(r,i){
     totIncome+=r.income; totExp+=r.exp; totWalletPay+=r.walletPay;
-    // المتبقي يتغير عند: دفع من المحفظة + مصروف الشريك
+    // المتبقي = الإيراد التراكمي − الدفعات من المحفظة − مصروف الشريك
     if(r.affectsBalance) balance-=(r.walletPay||r.exp||0);
     var incStr=r.income>0?'<strong style="color:var(--g2);direction:ltr">'+r.income.toFixed(3)+'</strong>':'<span style="color:#ccc">—</span>';
     var expStr=r.exp>0?'<strong style="color:var(--red);direction:ltr">'+r.exp.toFixed(3)+'</strong>':'<span style="color:#ccc">—</span>';

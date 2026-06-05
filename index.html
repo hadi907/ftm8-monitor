@@ -6253,13 +6253,21 @@ function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb
     if(selMonth&&!(s.date||'').startsWith(selMonth)) return;
     rows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,walletPay:0,notes:(s.category||'')+(s.payment?' | '+s.payment:''),rowType:'sale'});
   });
-  // EXP → مصروف (يظهر للمعلومة — لا يؤثر في المتبقي)
-  // مصروفات الشريك (source=شريك + paidBy محدد) → تُدرج في المصروفات وتحرك المتبقي
+  // EXP → مصروف
+  // مصروفات المحفظة (source=مزرعة أو فارغ) → عمود "دفع من المحفظة"
+  // مصروفات الشريك (source=شريك + paidBy) → عمود المصروفات للمعلومية
+  // باقي المصروفات → عمود المصروفات للمعلومية
   EXP.forEach(function(e){
     if(selMonth&&!(e.date||'').startsWith(selMonth)) return;
+    var isWalletExp=(e.source==='مزرعة'||!e.source);
     var isPartnerExp=(e.source==='شريك'&&e.paidBy);
-    var partnerLabel=isPartnerExp?' 👥 '+e.paidBy:'';
-    rows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type)+partnerLabel,exp:e.amount,income:0,walletPay:0,notes:e.type+(e.vendor?' | '+e.vendor:''),rowType:isPartnerExp?'partner_exp':'exp',affectsBalance:isPartnerExp});
+    if(isWalletExp){
+      rows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type)+' 👜',exp:0,income:0,walletPay:e.amount,notes:e.type+(e.vendor?' | '+e.vendor:''),rowType:'wallet',affectsBalance:true});
+    } else if(isPartnerExp){
+      rows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type)+' 👥 '+e.paidBy,exp:e.amount,income:0,walletPay:0,notes:e.type+(e.vendor?' | '+e.vendor:''),rowType:'partner_exp',affectsBalance:false});
+    } else {
+      rows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type),exp:e.amount,income:0,walletPay:0,notes:e.type+(e.vendor?' | '+e.vendor:''),rowType:'exp',affectsBalance:false});
+    }
   });
   // WALLET manual payments (صادر) → هذه هي التي تحرك المتبقي أيضاً
   WALLET.forEach(function(w){

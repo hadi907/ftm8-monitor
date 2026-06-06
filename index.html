@@ -933,7 +933,6 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
 
   <!-- KPI SUMMARY -->
   <div class="kpi-grid" id="rep-kpis"></div>
-  <div id="rep-fin-summary"></div>
   <div style="background:#00695c;color:#fff;border-radius:8px;padding:10px 16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center"><span>👜 رصيد المحفظة: <strong id="rep-wallet-bal">0</strong> دك</span><button onclick="nav('wallet')" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">📋 المحفظة</button></div>
 
   <!-- SECTION A: SALES + COST -->
@@ -1009,7 +1008,7 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
   </div>
   <!-- KPIs -->
   <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)" id="adm-kpis"></div>
-  <div style="background:#00695c;color:#fff;border-radius:8px;padding:8px 14px;margin-bottom:12px">👜 رصيد المحفظة: <strong id="adm-wallet">0</strong> دك</div>
+  <div style="background:linear-gradient(135deg,#00695c,#00897b);color:#fff;border-radius:8px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><div><span style="font-size:0.82rem;opacity:.8">👜 رصيد المحفظة (صافي)</span><div id="adm-wallet" style="font-size:1.5rem;font-weight:900;direction:ltr">0 دك</div></div><button onclick="nav('wallet')" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.78rem">📋 المحفظة</button></div>
   <!-- Table -->
   <div class="tcard">
     <div class="tcard-head"><h3 id="adm-title">التقرير الإداري — كل الفترات</h3></div>
@@ -1022,9 +1021,7 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
           <th style="padding:9px 10px">التفاصيل</th>
           <th style="padding:9px 10px;color:#ff8a80">مصروفات (د.ك)</th>
           <th style="padding:9px 10px;color:#b9f6ca">إيراد (د.ك)</th>
-          <th style="padding:9px 10px;color:#ffe082">💸 دفع من المحفظة (د.ك)</th>
-          <th style="padding:9px 10px;color:#ffccbc">المتبقي (د.ك)</th>
-          <th style="padding:9px 10px;color:#b3e5fc">💰 صافي المحفظة (د.ك)</th>
+          <th style="padding:9px 10px">المتبقي (د.ك)</th>
           <th style="padding:9px 10px">ملاحظات</th>
         </tr>
       </thead>
@@ -1033,6 +1030,25 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
     </table></div>
   </div>
   <div id="adm-wallet-summary" style="margin-top:16px"></div>
+  <!-- الملخص الشهري + فائض الأشهر -->
+  <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
+    <!-- الملخص الشهري -->
+    <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border)">
+      <div style="background:linear-gradient(135deg,#37474f,#546e7a);color:#fff;padding:9px 16px;font-weight:700;display:flex;justify-content:space-between;align-items:center">
+        <span>📅 الملخص الشهري</span>
+        <span id="adm-monthly-badge" style="font-size:0.75rem;opacity:.85"></span>
+      </div>
+      <div id="adm-monthly-summary" style="background:#fff;overflow-y:auto"></div>
+    </div>
+    <!-- فائض الأشهر -->
+    <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border)">
+      <div style="background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;padding:9px 16px;font-weight:700;display:flex;justify-content:space-between;align-items:center">
+        <span>💰 فائض الأشهر</span>
+        <span id="adm-surplus-badge" style="font-size:0.75rem;opacity:.85"></span>
+      </div>
+      <div id="adm-surplus-summary" style="background:#fff;overflow-y:auto"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ── FULL REPORT ── -->
@@ -1056,7 +1072,6 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
   </div>
 
   <!-- 4 BOXES GRID -->
-  <div id="fr-fin-summary"></div>
   <div id="fr-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:4px 0">
 
     <!-- BOX 1: المبيعات -->
@@ -1136,7 +1151,6 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
   </div>
   <!-- KPIs -->
   <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px" id="pr2-kpis"></div>
-  <div id="pr2-fin-summary"></div>
   <!-- TABLE -->
   <div class="tcard">
     <div class="tcard-head"><h3 id="pr2-title">سجل العمليات — كل الفترة</h3></div>
@@ -1159,7 +1173,7 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
   </div>
   <div style="margin-top:16px;background:#00695c;color:#fff;border-radius:10px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><div><div style="font-size:0.78rem;opacity:.8">👜 رصيد المحفظة</div><div id="pr2-wallet-bal" style="font-size:1.6rem;font-weight:900;direction:ltr">0</div></div><button onclick="nav('wallet')" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-family:inherit;font-size:0.78rem">📋 المحفظة</button></div>
   <!-- BOTTOM GRID: ملخص الشركاء + الملخص الشهري -->
-  <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
     <!-- ملخص حسابات الشركاء -->
     <div>
       <div style="background:var(--g1);color:#fff;padding:9px 16px;border-radius:8px 8px 0 0;font-weight:700">👥 ملخص حسابات الشركاء</div>
@@ -3009,7 +3023,6 @@ function refreshDash(){
   document.getElementById('dash-alerts-box').innerHTML=alerts.length
     ?'<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:18px">'+alerts.slice(0,5).map(a=>'<div class="alert-item '+a.cls+'"><strong>'+a.title+'</strong>'+a.body+'</div>').join('')+(alerts.length>5?'<div style="font-size:0.77rem;color:var(--txt3);text-align:center">و '+(alerts.length-5)+' تنبيهات أخرى</div>':'')+'</div>':'';
   buildSalesChart();buildExpChart();buildStockChart();buildCashChart();
-  buildFinancialSummary('rep-fin-summary', fromM, toM);
   buildMonthCompare();
 }
 
@@ -6106,8 +6119,6 @@ async function createNewBin(){
 
 async function pushToGitHub(silent){
   var token = SETTINGS.githubToken || (document.getElementById('github-token')||{}).value || '';
-  // تنظيف الـ token من أي مسافات أو حروف غير ASCII
-  token = token.replace(/[^\x20-\x7E]/g,'').trim();
   var stEl  = silent ? null : document.getElementById('github-push-status');
   if(!token){
     if(stEl) stEl.innerHTML='<span style="color:var(--red)">❌ أدخل GitHub Token أولاً في إعدادات السحابة</span>';
@@ -6232,179 +6243,236 @@ function startAutoCloudSave(){
 }
 
 // ══ ADMIN REPORT ══
-function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb=getWalletBalance();_aw.textContent=_awb.toFixed(3)+' دك';}
+function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb=getWalletBalance();_aw.textContent=_awb.toFixed(3)+' دك';_aw.style.color=_awb<0?'#ff8a80':'#b9f6ca';}
   var mf=document.getElementById('adm-month');
   var selMonth=mf?mf.value:'';
   // Build all months from data
   var allMonths=new Set();
   SALES.forEach(function(s){if(s.date)allMonths.add(s.date.slice(0,7));});
   EXP.forEach(function(e){if(e.date)allMonths.add(e.date.slice(0,7));});
-  WALLET.forEach(function(w){if(w.date)allMonths.add(w.date.slice(0,7));});
+  CASH.filter(function(x){return x.autoFrom==='delivery_payment';}).forEach(function(x){if(x.date)allMonths.add(x.date.slice(0,7));});
   var months=Array.from(allMonths).sort();
   if(mf){
     var cur=mf.value;
     mf.innerHTML='<option value="">كل الفترات</option>'+months.map(function(m){return '<option value="'+m+'"'+(m===cur?' selected':'')+'>'+m+'</option>';}).join('');
   }
   document.getElementById('adm-title').textContent='التقرير الإداري'+(selMonth?' — '+selMonth:' — كل الفترات');
-  // Build combined transaction list from SALES + EXP + manual WALLET payments
+  // Build combined transaction list from SALES + EXP + manual CASH
   var rows=[];
-  // SALES → إيراد (يدخل المحفظة — لا يؤثر في المتبقي)
+  // SALES → إيراد
   SALES.forEach(function(s){
     if(selMonth&&!(s.date||'').startsWith(selMonth)) return;
-    rows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,walletPay:0,notes:(s.category||'')+(s.payment?' | '+s.payment:''),rowType:'sale'});
+    rows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,notes:(s.category||'')+(s.payment?' | '+s.payment:'')});
   });
   // EXP → مصروف
-  // مصروفات المحفظة (source=مزرعة أو فارغ) → عمود "دفع من المحفظة"
-  // مصروفات الشريك (source=شريك + paidBy) → عمود المصروفات للمعلومية
-  // باقي المصروفات → عمود المصروفات للمعلومية
   EXP.forEach(function(e){
     if(selMonth&&!(e.date||'').startsWith(selMonth)) return;
-    var isWalletExp=(e.source==='مزرعة'||!e.source);
-    var isPartnerExp=(e.source==='شريك'&&e.paidBy);
-    if(isWalletExp){
-      rows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type)+' 👜',exp:0,income:0,walletPay:e.amount,notes:e.type+(e.vendor?' | '+e.vendor:''),rowType:'wallet',affectsBalance:true});
-    } else if(isPartnerExp){
-      rows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type)+' 👥 '+e.paidBy,exp:e.amount,income:0,walletPay:0,notes:e.type+(e.vendor?' | '+e.vendor:''),rowType:'partner_exp',affectsBalance:false});
-    } else {
-      rows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type),exp:e.amount,income:0,walletPay:0,notes:e.type+(e.vendor?' | '+e.vendor:''),rowType:'exp',affectsBalance:false});
-    }
+    var isPartner=(e.source==='شريك');
+    var payerLabel=isPartner
+      ?(e.paidBy?'👤 '+e.paidBy:'👥 مصروف شريك')
+      :'👜 من المحفظة';
+    rows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type),exp:e.amount,income:0,notes:(e.type+(e.vendor?' | '+e.vendor:''))+' | '+payerLabel,isPartner:isPartner});
   });
-  // WALLET manual payments (صادر) → هذه هي التي تحرك المتبقي أيضاً
-  WALLET.forEach(function(w){
-    if(w.type!=='صادر') return;
-    if(selMonth&&!(w.date||'').startsWith(selMonth)) return;
-    var label=w.dest==='partner'?'تسديد شريك 👥':(w.dest==='expenses'?'مصروف من المحفظة 👜':'دفع من المحفظة 👜');
-    rows.push({date:w.date||'',ref:'👜',detail:label+(w.desc?' — '+w.desc:'')+(w.notes?' — '+w.notes:''),exp:0,income:0,walletPay:w.amount,notes:'محفظة',rowType:'wallet',affectsBalance:true});
+  // Manual CASH entries (not auto-linked to sales/exp or wallet)
+  CASH.forEach(function(x){
+    if(x.autoFrom==='sale'||x.autoFrom==='expense') return;
+    if(x.autoFrom==='partner_settle'){
+      if(selMonth&&!(x.date||'').startsWith(selMonth)) return;
+      rows.push({date:x.date||'',ref:x.ref||'—',detail:'💰 تسديد للشريك'+(x.notes?' — '+x.notes:''),exp:x.amount,income:0,notes:'تسديد من المحفظة',isPartner:false});
+      return;
+    }
+    if(x.ref==='محفظة') return;
+    if((x.notes||'').indexOf('من المحفظة')>=0) return;
+    if(selMonth&&!(x.date||'').startsWith(selMonth)) return;
+    var isDelivery=x.isDelivery;
+    rows.push({
+      date:x.date||'',ref:x.ref||'—',
+      detail:(x.notes||x.ref||'—')+(isDelivery?' 🚚':''),
+      exp:x.type==='صادر'?x.amount:0,
+      income:x.type==='وارد'&&!isDelivery?x.amount:0,
+      notes:x.payment||''
+    });
   });
   // Sort by date
   rows.sort(function(a,b){return a.date.localeCompare(b.date);});
+  // Calculate running balance
+  var balance=0;
+  var totIncome=0; var totExp=0;
   var tb=document.getElementById('adm-tb');
   if(!rows.length){
-    tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--txt3)">لا توجد بيانات في هذه الفترة</td></tr>';
+    tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--txt3)">لا توجد بيانات في هذه الفترة</td></tr>';
     document.getElementById('adm-foot').innerHTML='';
     buildAdmKpis(0,0,0);
-    return;
-  }
-  // Calculate totals
-  var totIncome=0; var totExp=0; var totWalletPay=0;
-  rows.forEach(function(r){ totIncome+=r.income; totExp+=r.exp; totWalletPay+=r.walletPay; });
-  // المتبقي = المصروفات − الدفع من المحفظة
-  var netBalance = totExp - totWalletPay;
-  // صافي المحفظة = الإيراد − الدفع من المحفظة
-  var netWallet = totIncome - totWalletPay;
-
-  var tb=document.getElementById('adm-tb');
-  if(!rows.length){
-    tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--txt3)">لا توجد بيانات في هذه الفترة</td></tr>';
-    document.getElementById('adm-foot').innerHTML='';
-    buildAdmKpis(0,0,0);
+    buildAdmMonthlySummary([]);
+    buildAdmSurplusSummary([]);
     return;
   }
   tb.innerHTML=rows.map(function(r,i){
+    totIncome+=r.income; totExp+=r.exp;
+    balance+=r.income-r.exp;
     var incStr=r.income>0?'<strong style="color:var(--g2);direction:ltr">'+r.income.toFixed(3)+'</strong>':'<span style="color:#ccc">—</span>';
     var expStr=r.exp>0?'<strong style="color:var(--red);direction:ltr">'+r.exp.toFixed(3)+'</strong>':'<span style="color:#ccc">—</span>';
-    var wPayStr=r.walletPay>0?'<strong style="color:#f57c00;direction:ltr">'+r.walletPay.toFixed(3)+'</strong>':'<span style="color:#ccc">—</span>';
-    var rowBg=r.rowType==='wallet'?'#fff8e1':r.rowType==='partner_exp'?'#e3f2fd':(i%2===0?'#ffffff':'#f8fffe');
-    var rowBorder=r.rowType==='wallet'?'border-right:3px solid #f57c00':r.rowType==='partner_exp'?'border-right:3px solid #1565c0':'';
-    return '<tr style="background:'+rowBg+';'+rowBorder+'">'
+    var balColor=balance>=0?'var(--g2)':'var(--red)';
+    var rowBg=i%2===0?'#ffffff':'#f8fffe';
+    return '<tr style="background:'+rowBg+'">'
       +'<td style="text-align:center;color:var(--txt3);font-size:0.78rem;padding:7px 8px">'+(i+1)+'</td>'
       +'<td style="padding:7px 8px;font-size:0.8rem;color:var(--txt2)">'+r.date+'</td>'
-      +'<td style="padding:7px 8px"><span style="background:'+(r.rowType==='wallet'?'#fff3e0':r.rowType==='partner_exp'?'#e8eaf6':'var(--g7)')+';color:'+(r.rowType==='wallet'?'#e65100':r.rowType==='partner_exp'?'#1565c0':'var(--g2)')+';padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:700">'+r.ref+'</span></td>'
+      +'<td style="padding:7px 8px"><span style="background:var(--g7);color:var(--g2);padding:2px 7px;border-radius:4px;font-size:0.75rem;font-weight:700">'+r.ref+'</span></td>'
       +'<td style="padding:7px 8px;font-size:0.82rem">'+r.detail+'</td>'
       +'<td style="padding:7px 8px;text-align:center">'+expStr+'</td>'
       +'<td style="padding:7px 8px;text-align:center">'+incStr+'</td>'
-      +'<td style="padding:7px 8px;text-align:center">'+wPayStr+'</td>'
-      +'<td style="padding:7px 8px;text-align:center"><span style="color:#ddd">—</span></td>'
-      +'<td style="padding:7px 8px;text-align:center"><span style="color:#ddd">—</span></td>'
+      +'<td style="padding:7px 8px;text-align:center;font-weight:800;color:'+balColor+';font-size:0.88rem;direction:ltr">'+balance.toFixed(3)+'</td>'
       +'<td style="padding:7px 8px;font-size:0.75rem;color:var(--txt3)">'+r.notes+'</td>'
       +'</tr>';
   }).join('');
-  // Footer totals row — هنا يظهر المتبقي وصافي المحفظة
-  var balColor=netBalance>=0?'#ffccbc':'#ff8a80';
-  var walColor=netWallet>=0?'#b3e5fc':'#ff8a80';
+  // Footer totals row
   var foot=document.getElementById('adm-foot');
   foot.innerHTML='<tr style="background:var(--g1);color:#fff;font-weight:800">'
     +'<td colspan="4" style="padding:9px 12px;text-align:right">الإجمالي الكلي</td>'
-    +'<td style="padding:9px 12px;text-align:center;direction:ltr;color:#ff8a80">'+totExp.toFixed(3)+'</td>'
-    +'<td style="padding:9px 12px;text-align:center;direction:ltr;color:#b9f6ca">'+totIncome.toFixed(3)+'</td>'
-    +'<td style="padding:9px 12px;text-align:center;direction:ltr;color:#ffe082">'+totWalletPay.toFixed(3)+'</td>'
-    +'<td style="padding:9px 12px;text-align:center;direction:ltr;color:'+balColor+'">'+netBalance.toFixed(3)+'</td>'
-    +'<td style="padding:9px 12px;text-align:center;direction:ltr;color:'+walColor+'">'+netWallet.toFixed(3)+'</td>'
+    +'<td style="padding:9px 12px;text-align:center;direction:ltr">'+totExp.toFixed(3)+'</td>'
+    +'<td style="padding:9px 12px;text-align:center;direction:ltr">'+totIncome.toFixed(3)+'</td>'
+    +'<td style="padding:9px 12px;text-align:center;direction:ltr;color:'+(balance>=0?'#b9f6ca':'#ff8a80')+'">'+balance.toFixed(3)+'</td>'
     +'<td></td></tr>';
-  buildAdmKpis(totIncome,totExp,netWallet);
+  buildAdmKpis(totIncome,totExp,balance);
   buildWalletPartnerWidget('adm-wallet-summary');
+  buildAdmMonthlySummary(rows);
+  buildAdmSurplusSummary(rows);
 }
 
 function buildAdmKpis(inc,exp,bal){
   var el=document.getElementById('adm-kpis');
   if(!el) return;
-  var walletPay=WALLET.filter(function(w){return w.type==='صادر';}).reduce(function(s,w){return s+w.amount;},0);
-  var netBal=exp-walletPay;
-  var netWal=inc-walletPay;
   el.innerHTML=
     '<div class="kpi g"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(inc)+'</div><div class="kpi-label">💰 إجمالي الإيرادات (د.ك)</div></div>'
     +'<div class="kpi r"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(exp)+'</div><div class="kpi-label">💸 إجمالي المصروفات (د.ك)</div></div>'
-    +'<div class="kpi orange"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(walletPay)+'</div><div class="kpi-label">👜 إجمالي الدفع من المحفظة (د.ك)</div></div>'
-    +'<div class="kpi '+(netBal<=0?'g':'r')+'"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(netBal)+'</div><div class="kpi-label">📋 المتبقي (مصروفات − محفظة)</div></div>'
-    +'<div class="kpi '+(netWal>=0?'b':'r')+'"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(netWal)+'</div><div class="kpi-label">💎 صافي المحفظة (إيراد − محفظة)</div></div>';
+    +'<div class="kpi '+(bal>=0?'g':'r')+'"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(bal)+'</div><div class="kpi-label">'+(bal>=0?'📈 صافي الربح':'📉 صافي الخسارة')+' (د.ك)</div></div>'
+    +'<div class="kpi b"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(inc-exp)+'</div><div class="kpi-label">💵 الرصيد التشغيلي (د.ك)</div></div>';
 }
 
-// دالة ملخص مالي مشترك لجميع التقارير
-function buildFinancialSummary(containerId, fromM, toM){
-  var el=document.getElementById(containerId);
+function buildAdmMonthlySummary(rows){
+  var el=document.getElementById('adm-monthly-summary');
+  var badge=document.getElementById('adm-monthly-badge');
   if(!el) return;
-  // فلترة البيانات حسب الفترة
-  var salesF=SALES.filter(function(s){
-    var m=(s.date||'').slice(0,7);
-    if(fromM&&m<fromM) return false;
-    if(toM&&m>toM) return false;
-    return true;
+  var months={};
+  (rows||[]).forEach(function(r){
+    var m=(r.date||'').slice(0,7);
+    if(!m) return;
+    if(!months[m]) months[m]={income:0,exp:0};
+    months[m].income+=r.income||0;
+    months[m].exp+=r.exp||0;
   });
-  var expF=EXP.filter(function(e){
-    var m=(e.date||'').slice(0,7);
-    if(fromM&&m<fromM) return false;
-    if(toM&&m>toM) return false;
-    return true;
+  var keys=Object.keys(months).sort();
+  if(!keys.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--txt3);font-size:0.82rem">لا توجد بيانات</div>';
+    if(badge) badge.textContent='';
+    return;
+  }
+  if(badge) badge.textContent=keys.length+' شهر';
+  var arM=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  function mlbl(ym){var p=ym.split('-');return (arM[parseInt(p[1])]||p[1])+' '+p[0];}
+  var grandInc=keys.reduce(function(s,k){return s+months[k].income;},0);
+  var grandExp=keys.reduce(function(s,k){return s+months[k].exp;},0);
+  var grandNet=grandInc-grandExp;
+  var rowsHtml=keys.map(function(m,i){
+    var d=months[m];
+    var net=d.income-d.exp;
+    var nc=net>=0?'var(--g2)':'var(--red)';
+    var bg=i%2===0?'#f8fffe':'#fff';
+    return '<tr style="background:'+bg+';border-bottom:1px solid var(--border)">'
+      +'<td style="padding:5px 6px;font-weight:700;color:#37474f;font-size:0.77rem;white-space:nowrap">'+mlbl(m)+'</td>'
+      +'<td style="padding:5px 4px;text-align:center;color:var(--g2);font-weight:700;font-size:0.76rem;direction:ltr">'+d.income.toFixed(3)+'</td>'
+      +'<td style="padding:5px 4px;text-align:center;color:var(--red);font-weight:700;font-size:0.76rem;direction:ltr">'+(d.exp>0?d.exp.toFixed(3):'—')+'</td>'
+      +'<td style="padding:5px 5px;text-align:center;font-weight:900;font-size:0.76rem;color:'+nc+';direction:ltr;white-space:nowrap">'+(net>=0?'':'-')+Math.abs(net).toFixed(3)+'</td>'
+      +'</tr>';
+  }).join('');
+  el.innerHTML='<table style="width:100%;border-collapse:collapse">'
+    +'<thead><tr style="background:#37474f;color:#fff;font-size:0.78rem">'
+    +'<th style="padding:5px 6px;text-align:right">📅 الشهر</th>'
+    +'<th style="padding:5px 4px;text-align:center;color:#b9f6ca">💰 المدخول</th>'
+    +'<th style="padding:5px 4px;text-align:center;color:#ff8a80">💸 المصروف</th>'
+    +'<th style="padding:5px 4px;text-align:center">📊 الصافي</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rowsHtml+'</tbody>'
+    +'<tfoot><tr style="background:#263238;color:#fff;font-weight:900;font-size:0.82rem">'
+    +'<td style="padding:6px 8px">الإجمالي</td>'
+    +'<td style="padding:6px 4px;text-align:center;color:#b9f6ca;direction:ltr;white-space:nowrap">'+grandInc.toFixed(3)+'</td>'
+    +'<td style="padding:6px 4px;text-align:center;color:#ff8a80;direction:ltr;white-space:nowrap">'+(grandExp>0?grandExp.toFixed(3):'—')+'</td>'
+    +'<td style="padding:8px 6px;text-align:center;color:'+(grandNet>=0?'#b9f6ca':'#ff8a80')+';direction:ltr;white-space:nowrap">'+(grandNet>=0?'':'-')+Math.abs(grandNet).toFixed(3)+'</td>'
+    +'</tr></tfoot>'
+    +'</table>';
+}
+
+function buildAdmSurplusSummary(rows){
+  var el=document.getElementById('adm-surplus-summary');
+  var badge=document.getElementById('adm-surplus-badge');
+  if(!el) return;
+  // نحسب فائض كل شهر = مدخول - مصروف (من المحفظة فقط — لا نشمل مصروفات الشريك)
+  var months={};
+  (rows||[]).forEach(function(r){
+    var m=(r.date||'').slice(0,7);
+    if(!m) return;
+    if(!months[m]) months[m]={income:0,exp:0};
+    months[m].income+=r.income||0;
+    if(!r.isPartner) months[m].exp+=r.exp||0;
   });
-  var walletF=WALLET.filter(function(w){
-    if(w.type!=='صادر') return false;
-    var m=(w.date||'').slice(0,7);
-    if(fromM&&m<fromM) return false;
-    if(toM&&m>toM) return false;
-    return true;
-  });
-  var totInc=salesF.reduce(function(s,x){return s+x.total;},0);
-  var totExp=expF.reduce(function(s,x){return s+x.amount;},0);
-  var totWPay=walletF.reduce(function(s,x){return s+x.amount;},0);
-  var netBal=totExp-totWPay;
-  var netWal=totInc-totWPay;
-  el.innerHTML=
-    '<div style="background:var(--g1);color:#fff;border-radius:10px;padding:14px 18px;margin:14px 0">'
-    +'<div style="font-size:0.85rem;font-weight:700;margin-bottom:10px;opacity:.85">📊 الملخص المالي'+(fromM||toM?' — '+(fromM||'')+(fromM&&toM?' إلى ':' ')+(toM||''):'')+'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">'
-    +'<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.1rem;font-weight:900;color:#b9f6ca">'+fmt(totInc)+'</div><div style="font-size:0.72rem;opacity:.8;margin-top:4px">💰 إجمالي الإيراد</div></div>'
-    +'<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.1rem;font-weight:900;color:#ff8a80">'+fmt(totExp)+'</div><div style="font-size:0.72rem;opacity:.8;margin-top:4px">💸 إجمالي المصروفات</div></div>'
-    +'<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.1rem;font-weight:900;color:#ffe082">'+fmt(totWPay)+'</div><div style="font-size:0.72rem;opacity:.8;margin-top:4px">👜 دفع من المحفظة</div></div>'
-    +'<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.1rem;font-weight:900;color:'+(netBal<=0?'#b9f6ca':'#ff8a80')+'">'+fmt(netBal)+'</div><div style="font-size:0.72rem;opacity:.8;margin-top:4px">📋 المتبقي</div></div>'
-    +'<div style="background:rgba(255,255,255,.1);border-radius:8px;padding:10px;text-align:center"><div style="font-size:1.1rem;font-weight:900;color:'+(netWal>=0?'#b3e5fc':'#ff8a80')+'">'+fmt(netWal)+'</div><div style="font-size:0.72rem;opacity:.8;margin-top:4px">💎 صافي المحفظة</div></div>'
-    +'</div></div>';
+  var keys=Object.keys(months).sort();
+  if(!keys.length){
+    el.innerHTML='<div style="padding:16px;text-align:center;color:var(--txt3);font-size:0.82rem">لا توجد بيانات</div>';
+    if(badge) badge.textContent='';
+    return;
+  }
+  if(badge) badge.textContent=keys.length+' شهر';
+  var arM=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  function mlbl(ym){var p=ym.split('-');return (arM[parseInt(p[1])]||p[1])+' '+p[0];}
+  var totalSurplus=0;
+  var rowsHtml=keys.map(function(m,i){
+    var d=months[m];
+    var surplus=d.income-d.exp;
+    totalSurplus+=surplus;
+    var sc=surplus>=0?'#1b5e20':'#c62828';
+    var sbg=surplus>=0?'#e8f5e9':'#ffebee';
+    var icon=surplus>=0?'📈':'📉';
+    var bg=i%2===0?'#f0f4ff':'#fff';
+    return '<tr style="background:'+bg+';border-bottom:1px solid var(--border)">'
+      +'<td style="padding:7px 10px;font-weight:700;color:#37474f;font-size:0.82rem">'+mlbl(m)+'</td>'
+      +'<td style="padding:7px 8px;text-align:center;font-size:0.75rem;color:var(--txt3);direction:ltr">'
+      +'<span style="display:block">📥 '+d.income.toFixed(3)+'</span>'
+      +'<span style="display:block;color:var(--red)">📤 '+d.exp.toFixed(3)+'</span>'
+      +'</td>'
+      +'<td style="padding:7px 8px;text-align:center;font-weight:900;font-size:0.82rem;color:'+sc+';direction:ltr">'
+      +icon+' '+(surplus>=0?'':'-')+Math.abs(surplus).toFixed(3)
+      +'</td>'
+      +'</tr>';
+  }).join('');
+  var totalC=totalSurplus>=0?'#1b5e20':'#c62828';
+  var totalBg=totalSurplus>=0?'#e8f5e9':'#ffebee';
+  el.innerHTML='<table style="width:100%;border-collapse:collapse">'
+    +'<thead><tr style="background:#1565c0;color:#fff;font-size:0.78rem">'
+    +'<th style="padding:7px 10px;text-align:right">📅 الشهر</th>'
+    +'<th style="padding:7px 8px;text-align:center;color:#b9f6ca">إيراد / مصروف</th>'
+    +'<th style="padding:7px 8px;text-align:center">💰 الفائض</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rowsHtml+'</tbody>'
+    +'<tfoot><tr style="background:#263238;color:#fff;font-weight:900;font-size:0.82rem">'
+    +'<td style="padding:8px 10px">الإجمالي</td>'
+    +'<td style="padding:8px;text-align:center;font-size:0.75rem;opacity:.85;direction:ltr">—</td>'
+    +'<td style="padding:8px;text-align:center;color:'+(totalSurplus>=0?'#b9f6ca':'#ff8a80')+';direction:ltr">'+(totalSurplus>=0?'':'-')+Math.abs(totalSurplus).toFixed(3)+'</td>'
+    +'</tr></tfoot>'
+    +'</table>';
 }
 
 function exportAdminExcel(){
   var mf=document.getElementById('adm-month');
   var selMonth=mf?mf.value:'';
-  var rows=[['#','التاريخ','المرجع / رقم الفاتورة','التفاصيل','مصروفات (د.ك)','إيراد (د.ك)','دفع من المحفظة (د.ك)','المتبقي (د.ك)','ملاحظات']];
+  var rows=[['#','التاريخ','المرجع / رقم الفاتورة','التفاصيل','مصروفات (د.ك)','إيراد (د.ك)','المتبقي (د.ك)','ملاحظات']];
   var balance=0;
   var allRows=[];
-  SALES.forEach(function(s){if(!selMonth||(s.date||'').startsWith(selMonth)){allRows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,walletPay:0,notes:(s.payment||'')});}});
-  EXP.forEach(function(e){if(!selMonth||(e.date||'').startsWith(selMonth)){allRows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type),exp:e.amount,income:0,walletPay:0,notes:e.type});}});
-  WALLET.forEach(function(w){if(w.type!=='صادر') return;if(selMonth&&!(w.date||'').startsWith(selMonth)) return;var label=w.dest==='partner'?'تسديد شريك':(w.dest==='expenses'?'مصروف من المحفظة':'دفع من المحفظة');allRows.push({date:w.date||'',ref:'👜',detail:label+(w.desc?' — '+w.desc:''),exp:0,income:0,walletPay:w.amount,notes:'محفظة'});});
+  SALES.forEach(function(s){if(!selMonth||(s.date||'').startsWith(selMonth)){allRows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,notes:(s.payment||'')});}});
+  EXP.forEach(function(e){if(!selMonth||(e.date||'').startsWith(selMonth)){allRows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type),exp:e.amount,income:0,notes:e.type});}});
+  CASH.forEach(function(x){if(x.autoFrom==='sale'||x.autoFrom==='expense') return;if(selMonth&&!(x.date||'').startsWith(selMonth)) return;allRows.push({date:x.date||'',ref:x.ref||'—',detail:x.notes||x.ref||'—',exp:x.type==='صادر'?x.amount:0,income:x.type==='وارد'&&!x.isDelivery?x.amount:0,notes:x.payment||''});});
   allRows.sort(function(a,b){return a.date.localeCompare(b.date);});
-  allRows.forEach(function(r,i){balance-=r.walletPay;rows.push([i+1,r.date,r.ref,r.detail,r.exp||'',r.income||'',r.walletPay||'',r.walletPay>0?balance.toFixed(3):'—',r.notes]);});
-  var totInc=allRows.reduce(function(s,r){return s+r.income;},0);
-  var totExp=allRows.reduce(function(s,r){return s+r.exp;},0);
-  var totWPay=allRows.reduce(function(s,r){return s+r.walletPay;},0);
-  rows.push(['','','','','الإجمالي',totExp.toFixed(3),totInc.toFixed(3),totWPay.toFixed(3),balance.toFixed(3),'']);
+  allRows.forEach(function(r,i){balance+=r.income-r.exp;rows.push([i+1,r.date,r.ref,r.detail,r.exp||'',r.income||'',balance.toFixed(3),r.notes]);});
+  rows.push(['','','','','الإجمالي',allRows.reduce(function(s,r){return s+r.exp;},0).toFixed(3),allRows.reduce(function(s,r){return s+r.income;},0).toFixed(3),balance.toFixed(3)]);
   var wb=XLSX.utils.book_new();
   var ws=XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb,ws,'التقرير الإداري');
@@ -6416,14 +6484,13 @@ function exportAdminPDF(){
   var selMonth=mf?mf.value:'';
   var today=new Date().toLocaleDateString('ar-KW',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   var allRows=[];
-  SALES.forEach(function(s){if(!selMonth||(s.date||'').startsWith(selMonth)){allRows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,walletPay:0,notes:s.payment||''});}});
-  EXP.forEach(function(e){if(!selMonth||(e.date||'').startsWith(selMonth)){allRows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type),exp:e.amount,income:0,walletPay:0,notes:e.type});}});
-  WALLET.forEach(function(w){if(w.type!=='صادر') return;if(selMonth&&!(w.date||'').startsWith(selMonth)) return;var label=w.dest==='partner'?'تسديد شريك 👥':'مصروف من المحفظة 👜';allRows.push({date:w.date||'',ref:'👜',detail:label+(w.desc?' — '+w.desc:''),exp:0,income:0,walletPay:w.amount,notes:'محفظة'});});
+  SALES.forEach(function(s){if(!selMonth||(s.date||'').startsWith(selMonth)){allRows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,notes:s.payment||''});}});
+  EXP.forEach(function(e){if(!selMonth||(e.date||'').startsWith(selMonth)){allRows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type),exp:e.amount,income:0,notes:e.type});}});
+  CASH.forEach(function(x){if(x.autoFrom==='sale'||x.autoFrom==='expense')return;if(selMonth&&!(x.date||'').startsWith(selMonth))return;allRows.push({date:x.date||'',ref:x.ref||'—',detail:x.notes||x.ref||'—',exp:x.type==='صادر'?x.amount:0,income:x.type==='وارد'&&!x.isDelivery?x.amount:0,notes:x.payment||''});});
   allRows.sort(function(a,b){return a.date.localeCompare(b.date);});
   var balance=0;
   var totInc=allRows.reduce(function(s,r){return s+r.income;},0);
   var totExp=allRows.reduce(function(s,r){return s+r.exp;},0);
-  var totWPay=allRows.reduce(function(s,r){return s+r.walletPay;},0);
   var html='<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>التقرير الإداري</title>'
     +'<style>@import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap");'
     +'*{margin:0;padding:0;box-sizing:border-box}body{font-family:"Tajawal",Arial,sans-serif;direction:rtl;background:#fff;font-size:9pt}'
@@ -6435,31 +6502,28 @@ function exportAdminPDF(){
     +'thead th{padding:7px 8px;text-align:right;border:1px solid #0d3d12}'
     +'tbody tr:nth-child(even){background:#f1f8f1}'
     +'tbody td{padding:6px 8px;border:1px solid #ddd}'
-    +'.wallet-row{background:#fff8e1!important}'
     +'.grand{background:#1b5e20;color:#fff;font-weight:800}'
     +'.grand td{padding:8px 10px;border:1px solid #0d3d12}'
     +'@media print{@page{margin:8mm;size:A4}}'
     +'</style></head><body>'
     +'<div class="header"><h1>مزرعة هادي اسحاق</h1><h2>ADMINISTRATIVE REPORT — التقرير الإداري'+(selMonth?' — '+selMonth:'')+'</h2></div>'
-    +'<div class="sub"><span>التاريخ: '+today+'</span><span>إيرادات: '+totInc.toFixed(3)+' | مصروفات: '+totExp.toFixed(3)+' | دفعات المحفظة: '+totWPay.toFixed(3)+' دك</span></div>'
+    +'<div class="sub"><span>التاريخ: '+today+'</span><span>إيرادات: '+totInc.toFixed(3)+' | مصروفات: '+totExp.toFixed(3)+' | الرصيد: '+(totInc-totExp).toFixed(3)+' دك</span></div>'
     +'<table><thead><tr>'
     +'<th>#</th><th>التاريخ</th><th>المرجع</th><th>التفاصيل</th>'
     +'<th style="color:#ff8a80">مصروفات (دك)</th><th style="color:#b9f6ca">إيراد (دك)</th>'
-    +'<th style="color:#ffe082">💸 دفع من المحفظة (دك)</th><th>المتبقي (دك)</th><th>ملاحظات</th>'
+    +'<th>المتبقي (دك)</th><th>ملاحظات</th>'
     +'</tr></thead><tbody>';
   allRows.forEach(function(r,i){
-    balance-=r.walletPay;
-    var isW=r.walletPay>0;
-    var bg=isW?'#fff8e1':(i%2===0?'#fff':'#f1f8f1');
+    balance+=r.income-r.exp;
+    var bg=i%2===0?'#fff':'#f1f8f1';
     html+='<tr style="background:'+bg+'">'
       +'<td style="text-align:center;color:#888">'+(i+1)+'</td>'
       +'<td>'+r.date+'</td>'
-      +'<td style="font-weight:700;color:'+(isW?'#e65100':'#1b5e20')+'">'+r.ref+'</td>'
+      +'<td style="font-weight:700;color:#1b5e20">'+r.ref+'</td>'
       +'<td>'+r.detail+'</td>'
       +'<td style="text-align:center;color:#b71c1c;font-weight:700;direction:ltr">'+(r.exp>0?r.exp.toFixed(3):'—')+'</td>'
       +'<td style="text-align:center;color:#1b5e20;font-weight:700;direction:ltr">'+(r.income>0?r.income.toFixed(3):'—')+'</td>'
-      +'<td style="text-align:center;color:#e65100;font-weight:700;direction:ltr">'+(isW?r.walletPay.toFixed(3):'—')+'</td>'
-      +'<td style="text-align:center;font-weight:800;color:'+(isW?(balance>=0?'#1b5e20':'#b71c1c'):'#ccc')+';direction:ltr">'+(isW?balance.toFixed(3):'—')+'</td>'
+      +'<td style="text-align:center;font-weight:800;color:'+(balance>=0?'#1b5e20':'#b71c1c')+';direction:ltr">'+balance.toFixed(3)+'</td>'
       +'<td style="color:#888;font-size:7.5pt">'+r.notes+'</td>'
       +'</tr>';
   });
@@ -6467,7 +6531,6 @@ function exportAdminPDF(){
     +'<td colspan="4" style="text-align:right">الإجمالي الكلي</td>'
     +'<td style="text-align:center;direction:ltr">'+totExp.toFixed(3)+'</td>'
     +'<td style="text-align:center;direction:ltr">'+totInc.toFixed(3)+'</td>'
-    +'<td style="text-align:center;direction:ltr;color:#ffe082">'+totWPay.toFixed(3)+'</td>'
     +'<td style="text-align:center;direction:ltr;color:'+(balance>=0?'#b9f6ca':'#ff8a80')+'">'+balance.toFixed(3)+'</td>'
     +'<td></td></tr></tfoot></table>'
     +'<div style="background:#0a2e0a;color:#a5d6a7;padding:7px 18px;text-align:center;font-size:7.5pt;margin-top:10px">مزرعة هادي اسحاق — التقرير الإداري — '+today+'</div>'
@@ -6563,7 +6626,6 @@ function rFullReport(){
     +'<div style="text-align:center"><div style="font-size:0.72rem;opacity:.8">رصيد الكاش</div><div style="font-size:1.1rem;font-weight:900">'+cashBal.toFixed(3)+' دك</div></div>'
     +'<div style="text-align:center"><div style="font-size:0.72rem;opacity:.8">ديون معلقة</div><div style="font-size:1.1rem;font-weight:900;color:#ffcc80">'+tDebtPending.toFixed(3)+' دك</div></div>'
     +'<div style="text-align:center;background:rgba(0,105,92,.35);border-radius:8px;padding:6px 12px"><div style="font-size:0.72rem;opacity:.8">👜 المحفظة</div><div style="font-size:1.1rem;font-weight:900;color:'+(getWalletBalance()>=0?'#b9f6ca':'#ff8a80')+'">'+getWalletBalance().toFixed(3)+' دك</div></div>';
-  buildFinancialSummary('fr-fin-summary', selMonth, selMonth);
 }
 
 function _frRow(label,value,color){
@@ -6933,9 +6995,6 @@ function rPartners(){
   buildPr2PartnerSummary();
   buildPr2MonthlySummary(rows);
   buildWalletPartnerWidget('pr2-wallet-summary');
-  var fromPr=document.getElementById('pr2-from')?document.getElementById('pr2-from').value:'';
-  var toPr=document.getElementById('pr2-to')?document.getElementById('pr2-to').value:'';
-  buildFinancialSummary('pr2-fin-summary', fromPr, toPr);
   // Update wallet balance
   var wbEl=document.getElementById('pr2-wallet-bal');
   if(wbEl){var wb=getWalletBalance();wbEl.textContent=wb.toFixed(3)+' دك';wbEl.style.color=wb<0?'#ff8a80':'#b9f6ca';}

@@ -7,6 +7,29 @@ def norm_ref(r):
     r = re.sub(r'^(INV)0+(\d+)$', r'\g<1>\2', r)
     return r
 
+def parse_date(date_v):
+    """يحلّل التاريخ سواء كان datetime أو string — لضمان عدم إهمال أي صف"""
+    if pd.isna(date_v) if not hasattr(date_v, '__len__') else False:
+        return None
+    if hasattr(date_v, 'date'):
+        return date_v.date().isoformat()
+    s = str(date_v).strip()
+    if not s or s in ['nan','None','NaT','']:
+        return None
+    # محاولة تحليل صيغ مختلفة
+    for fmt in ('%Y-%m-%d','%d/%m/%Y','%m/%d/%Y','%d-%m-%Y','%Y/%m/%d'):
+        try:
+            return datetime.datetime.strptime(s, fmt).date().isoformat()
+        except:
+            pass
+    # pandas parse كملاذ أخير
+    try:
+        return pd.to_datetime(s, dayfirst=True).date().isoformat()
+    except:
+        pass
+    # إذا فشل كل شيء أعد السلسلة كما هي (أفضل من إهمال الصف)
+    return s
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -32,25 +55,48 @@ def load_xlsx():
     rows = []
     try:
         df = pd.read_excel(XLSX_PATH, sheet_name='كشف الحساب', header=None, skiprows=3)
+        skipped_date = 0
+        skipped_ref  = 0
+        skipped_zero = 0
         for _, row in df.iterrows():
             date_v  = row[0]
             ref     = str(row[1] if pd.notna(row[1]) else '').strip()
             desc    = str(row[2] if pd.notna(row[2]) else '').strip()
             credit_v= row[4]
-            if not ref or ref in ['0','nan','None'] or pd.isna(date_v):
+
+            if not ref or ref in ['0','nan','None']:
+                skipped_ref += 1
                 continue
-            if hasattr(date_v, 'date'):
-                date_str = date_v.date().isoformat()
-            else:
+
+            date_str = parse_date(date_v)
+            if not date_str:
+                skipped_date += 1
+                print(f"  ⚠️ تاريخ غير قابل للتحليل — ref={ref}, date_v={date_v!r}")
                 continue
+
             try:
                 c = float(credit_v) if pd.notna(credit_v) and str(credit_v).strip() not in ['—','-',''] else 0.0
             except:
                 c = 0.0
+
             if c <= 0:
+                skipped_zero += 1
                 continue
-            rows.append({'date':date_str,'ref':ref,'ref_norm':norm_ref(ref),'desc':desc,'credit':round(c,3)})
-        print(f"✅ XLSX (المحفظة) — {len(rows)} سطر، إجمالي={sum(r['credit'] for r in rows):.3f} دك")
+
+            rows.append({
+                'date':date_str,
+                'ref':ref,
+                'ref_norm':norm_ref(ref),
+                'desc':desc,
+                'credit':round(c,3)
+            })
+
+        total = sum(r['credit'] for r in rows)
+        print(f"✅ XLSX (كشف الحساب) — {len(rows)} سطر، إجمالي={total:.3f} دك")
+        if skipped_date: print(f"  ⚠️ تجاهلت {skipped_date} صف بسبب تاريخ غير صالح")
+        if skipped_ref:  print(f"  ℹ️ تجاهلت {skipped_ref} صف بدون مرجع")
+        if skipped_zero: print(f"  ℹ️ تجاهلت {skipped_zero} صف credit=0")
+
     except Exception as e:
         print(f"❌ خطأ XLSX: {e}")
         import traceback; traceback.print_exc()
@@ -59,15 +105,19 @@ def load_xlsx():
 def compare(app_sales, xlsx_rows):
     app_total   = round(sum(s.get('total', 0) for s in app_sales), 3)
     xlsx_credit = round(sum(r['credit'] for r in xlsx_rows), 3)
+
     xlsx_by_ref = {}
     for r in xlsx_rows:
         xlsx_by_ref.setdefault(r['ref_norm'], []).append(r)
+
     app_refs = set()
     for s in app_sales:
         ref = norm_ref(s.get('invNum') or '')
         if ref: app_refs.add(ref)
+
     diffs = []
     seen  = set()
+
     for s in app_sales:
         ref  = norm_ref(s.get('invNum') or '')
         amt  = round(s.get('total', 0), 3)
@@ -84,6 +134,7 @@ def compare(app_sales, xlsx_rows):
             xlsx_amt = round(sum(m['credit'] for m in matches), 3)
             if abs(xlsx_amt - amt) > 0.005:
                 diffs.append({'type':'فارق في القيمة','ref':ref,'desc':prod,'date':date,'app_val':amt,'xlsx_val':xlsx_amt,'diff':round(amt-xlsx_amt,3)})
+
     for ref_norm, rws in xlsx_by_ref.items():
         if ref_norm in app_refs: continue
         for r in rws:
@@ -91,7 +142,15 @@ def compare(app_sales, xlsx_rows):
             if key in seen: continue
             seen.add(key)
             diffs.append({'type':'في XLSX فقط','ref':r['ref'],'desc':r['desc'],'date':r['date'],'app_val':0,'xlsx_val':r['credit'],'diff':-r['credit']})
-    return {'app_total':app_total,'xlsx_credit':xlsx_credit,'diff_total':round(app_total-xlsx_credit,3),'diffs':sorted(diffs,key=lambda x:x['date'],reverse=True),'app_count':len(app_sales),'xlsx_count':len(xlsx_rows)}
+
+    return {
+        'app_total':app_total,
+        'xlsx_credit':xlsx_credit,
+        'diff_total':round(app_total-xlsx_credit,3),
+        'diffs':sorted(diffs,key=lambda x:x['date'],reverse=True),
+        'app_count':len(app_sales),
+        'xlsx_count':len(xlsx_rows)
+    }
 
 def build_html(r):
     dc = '#c62828' if abs(r['diff_total']) > 0.01 else '#1b5e20'
@@ -102,9 +161,21 @@ def build_html(r):
         for d in r['diffs']:
             tc = {'في التطبيق فقط':'#e65100','في XLSX فقط':'#1565c0','فارق في القيمة':'#6a1b9a'}.get(d['type'],'#555')
             sign = '+' if d['diff'] > 0 else ''
-            rows_html += f'<tr><td style="padding:8px 12px;border-bottom:1px solid #eee">{d["date"]}</td><td style="padding:8px 12px;color:#1565c0;font-weight:700;border-bottom:1px solid #eee">{d["ref"]}</td><td style="padding:8px 12px;border-bottom:1px solid #eee">{d["desc"][:35]}</td><td style="padding:8px 12px;text-align:center;border-bottom:1px solid #eee"><span style="background:{tc}22;color:{tc};padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700">{d["type"]}</span></td><td style="padding:8px 12px;text-align:center;direction:ltr;border-bottom:1px solid #eee">{d["app_val"]:.3f}</td><td style="padding:8px 12px;text-align:center;direction:ltr;border-bottom:1px solid #eee">{d["xlsx_val"]:.3f}</td><td style="padding:8px 12px;text-align:center;direction:ltr;font-weight:900;color:{dc};border-bottom:1px solid #eee">{sign}{d["diff"]:.3f}</td></tr>'
+            rows_html += (
+                f'<tr>'
+                f'<td style="padding:8px 12px;border-bottom:1px solid #eee">{d["date"]}</td>'
+                f'<td style="padding:8px 12px;color:#1565c0;font-weight:700;border-bottom:1px solid #eee">{d["ref"]}</td>'
+                f'<td style="padding:8px 12px;border-bottom:1px solid #eee">{d["desc"][:35]}</td>'
+                f'<td style="padding:8px 12px;text-align:center;border-bottom:1px solid #eee">'
+                f'<span style="background:{tc}22;color:{tc};padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700">{d["type"]}</span></td>'
+                f'<td style="padding:8px 12px;text-align:center;direction:ltr;border-bottom:1px solid #eee">{d["app_val"]:.3f}</td>'
+                f'<td style="padding:8px 12px;text-align:center;direction:ltr;border-bottom:1px solid #eee">{d["xlsx_val"]:.3f}</td>'
+                f'<td style="padding:8px 12px;text-align:center;direction:ltr;font-weight:900;color:{dc};border-bottom:1px solid #eee">{sign}{d["diff"]:.3f}</td>'
+                f'</tr>'
+            )
     else:
         rows_html = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#1b5e20;font-size:16px">✅ لا توجد فوارق</td></tr>'
+
     return f"""<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:Tajawal,Arial;direction:rtl;background:#f5f5f5;padding:20px}}.card{{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #e0e0e0}}.kpis{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}}.kpi{{background:#f8fffe;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0}}.kpi-lbl{{font-size:12px;color:#666;margin-bottom:4px}}.kpi-val{{font-size:20px;font-weight:900;direction:ltr}}table{{width:100%;border-collapse:collapse;font-size:13px}}th{{background:#1b5e20;color:#fff;padding:10px 12px;text-align:right}}tr:nth-child(even){{background:#f9f9f9}}</style></head>

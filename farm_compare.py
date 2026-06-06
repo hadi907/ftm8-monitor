@@ -1,37 +1,56 @@
-import os, json, requests, openpyxl, smtplib, datetime, re
+import os, json, requests, smtplib, datetime, re
 import pandas as pd
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+# ── خريطة الشهور العربية والإنجليزية ──
+AR_MONTHS = {
+    'يناير':1,'فبراير':2,'مارس':3,'أبريل':4,'ابريل':4,'مايو':5,
+    'يونيو':6,'يونيه':6,'يوليو':7,'يوليه':7,'أغسطس':8,'اغسطس':8,
+    'سبتمبر':9,'أكتوبر':10,'اكتوبر':10,'نوفمبر':11,'ديسمبر':12,
+    'jan':1,'feb':2,'mar':3,'apr':4,'may':5,'jun':6,
+    'jul':7,'aug':8,'sep':9,'oct':10,'nov':11,'dec':12
+}
+AR_DIGITS = str.maketrans('٠١٢٣٤٥٦٧٨٩','0123456789')
+
+def parse_date(date_v):
+    """يحلّل التاريخ بجميع الصيغ: datetime، عربي، إنجليزي، أرقام عربية"""
+    if date_v is None: return None
+    try:
+        if pd.isna(date_v): return None
+    except: pass
+    # datetime مباشر
+    if hasattr(date_v, 'date'):
+        return date_v.date().isoformat()
+    s = str(date_v).strip().translate(AR_DIGITS)
+    if not s or s in ['nan','None','NaT','']: return None
+    # صيغة: "4-يونيو-26" أو "٤-يونيو-٢٦" أو "4-يونيو-2026"
+    m = re.match(r'^(\d{1,2})[-/\s]+([^\d\s\-]+)[-/\s]+(\d{2,4})$', s)
+    if m:
+        day, month_str, year = m.group(1), m.group(2).strip().lower(), m.group(3)
+        month_num = AR_MONTHS.get(month_str)
+        if month_num:
+            yr = int(year)
+            if yr < 100: yr += 2000
+            try:
+                return datetime.date(yr, month_num, int(day)).isoformat()
+            except: pass
+    # صيغ رقمية
+    for fmt in ('%Y-%m-%d','%d/%m/%Y','%m/%d/%Y','%d-%m-%Y','%Y/%m/%d'):
+        try: return datetime.datetime.strptime(s, fmt).date().isoformat()
+        except: pass
+    # pandas كملاذ أخير
+    try: return pd.to_datetime(s, dayfirst=True).date().isoformat()
+    except: pass
+    # أبقِ النص كما هو — لا تتجاهل الصف أبداً
+    return s
 
 def norm_ref(r):
+    """تطبيع المرجع: INV-057 = inv-57 = INV057 = INV57"""
     if not r: return ''
     r = str(r).upper().replace(' ','').replace('-','')
     r = re.sub(r'^(INV)0+(\d+)$', r'\g<1>\2', r)
     return r
-
-def parse_date(date_v):
-    """يحلّل التاريخ سواء كان datetime أو string — لضمان عدم إهمال أي صف"""
-    if pd.isna(date_v) if not hasattr(date_v, '__len__') else False:
-        return None
-    if hasattr(date_v, 'date'):
-        return date_v.date().isoformat()
-    s = str(date_v).strip()
-    if not s or s in ['nan','None','NaT','']:
-        return None
-    # محاولة تحليل صيغ مختلفة
-    for fmt in ('%Y-%m-%d','%d/%m/%Y','%m/%d/%Y','%d-%m-%Y','%Y/%m/%d'):
-        try:
-            return datetime.datetime.strptime(s, fmt).date().isoformat()
-        except:
-            pass
-    # pandas parse كملاذ أخير
-    try:
-        return pd.to_datetime(s, dayfirst=True).date().isoformat()
-    except:
-        pass
-    # إذا فشل كل شيء أعد السلسلة كما هي (أفضل من إهمال الصف)
-    return s
-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 GITHUB_RAW = 'https://raw.githubusercontent.com/hadi907/ftm8-monitor/main/farm_data.json'
 XLSX_PATH  = os.environ.get('XLSX_PATH', 'Farm_Account.xlsx')
@@ -55,23 +74,20 @@ def load_xlsx():
     rows = []
     try:
         df = pd.read_excel(XLSX_PATH, sheet_name='كشف الحساب', header=None, skiprows=3)
-        skipped_date = 0
-        skipped_ref  = 0
+        skipped_date = []
         skipped_zero = 0
         for _, row in df.iterrows():
-            date_v  = row[0]
-            ref     = str(row[1] if pd.notna(row[1]) else '').strip()
-            desc    = str(row[2] if pd.notna(row[2]) else '').strip()
-            credit_v= row[4]
+            date_v   = row[0]
+            ref      = str(row[1] if pd.notna(row[1]) else '').strip()
+            desc     = str(row[2] if pd.notna(row[2]) else '').strip()
+            credit_v = row[4]
 
             if not ref or ref in ['0','nan','None']:
-                skipped_ref += 1
                 continue
 
             date_str = parse_date(date_v)
             if not date_str:
-                skipped_date += 1
-                print(f"  ⚠️ تاريخ غير قابل للتحليل — ref={ref}, date_v={date_v!r}")
+                skipped_date.append(f"ref={ref}, raw={date_v!r}")
                 continue
 
             try:
@@ -84,19 +100,20 @@ def load_xlsx():
                 continue
 
             rows.append({
-                'date':date_str,
-                'ref':ref,
-                'ref_norm':norm_ref(ref),
-                'desc':desc,
-                'credit':round(c,3)
+                'date':     date_str,
+                'ref':      ref,
+                'ref_norm': norm_ref(ref),
+                'desc':     desc,
+                'credit':   round(c, 3)
             })
 
         total = sum(r['credit'] for r in rows)
         print(f"✅ XLSX (كشف الحساب) — {len(rows)} سطر، إجمالي={total:.3f} دك")
-        if skipped_date: print(f"  ⚠️ تجاهلت {skipped_date} صف بسبب تاريخ غير صالح")
-        if skipped_ref:  print(f"  ℹ️ تجاهلت {skipped_ref} صف بدون مرجع")
-        if skipped_zero: print(f"  ℹ️ تجاهلت {skipped_zero} صف credit=0")
-
+        if skipped_date:
+            print(f"  ⚠️ تجاهلت {len(skipped_date)} صف بسبب تاريخ غير صالح:")
+            for s in skipped_date: print(f"    - {s}")
+        if skipped_zero:
+            print(f"  ℹ️ تجاهلت {skipped_zero} صف credit=0 (مدين أو فارغ)")
     except Exception as e:
         print(f"❌ خطأ XLSX: {e}")
         import traceback; traceback.print_exc()
@@ -144,22 +161,22 @@ def compare(app_sales, xlsx_rows):
             diffs.append({'type':'في XLSX فقط','ref':r['ref'],'desc':r['desc'],'date':r['date'],'app_val':0,'xlsx_val':r['credit'],'diff':-r['credit']})
 
     return {
-        'app_total':app_total,
-        'xlsx_credit':xlsx_credit,
-        'diff_total':round(app_total-xlsx_credit,3),
-        'diffs':sorted(diffs,key=lambda x:x['date'],reverse=True),
-        'app_count':len(app_sales),
-        'xlsx_count':len(xlsx_rows)
+        'app_total':   app_total,
+        'xlsx_credit': xlsx_credit,
+        'diff_total':  round(app_total - xlsx_credit, 3),
+        'diffs':       sorted(diffs, key=lambda x: x['date'], reverse=True),
+        'app_count':   len(app_sales),
+        'xlsx_count':  len(xlsx_rows)
     }
 
 def build_html(r):
-    dc = '#c62828' if abs(r['diff_total']) > 0.01 else '#1b5e20'
-    icon = '⚠️' if r['diffs'] else '✅'
+    dc     = '#c62828' if abs(r['diff_total']) > 0.01 else '#1b5e20'
+    icon   = '⚠️' if r['diffs'] else '✅'
     status = f"{len(r['diffs'])} فارق بحاجة مراجعة" if r['diffs'] else "كل البيانات متطابقة"
     rows_html = ''
     if r['diffs']:
         for d in r['diffs']:
-            tc = {'في التطبيق فقط':'#e65100','في XLSX فقط':'#1565c0','فارق في القيمة':'#6a1b9a'}.get(d['type'],'#555')
+            tc   = {'في التطبيق فقط':'#e65100','في XLSX فقط':'#1565c0','فارق في القيمة':'#6a1b9a'}.get(d['type'],'#555')
             sign = '+' if d['diff'] > 0 else ''
             rows_html += (
                 f'<tr>'
@@ -197,18 +214,16 @@ def send_email(html_body, diff_count):
     subject = f"{'⚠️' if diff_count else '✅'} تقرير مزرعة هادي — {TODAY}"
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
-    msg['From'] = EMAIL_FROM
-    msg['To']   = EMAIL_TO
+    msg['From']    = EMAIL_FROM
+    msg['To']      = EMAIL_TO
     msg.attach(MIMEText(html_body, 'html', 'utf-8'))
-    print(f"📧 SMTP: smtp.gmail.com:587")
+    print(f"📧 SMTP: smtp.gmail.com:587 → {EMAIL_TO}")
     try:
         with smtplib.SMTP('smtp.gmail.com', 587) as srv:
-            srv.ehlo()
-            srv.starttls()
-            srv.ehlo()
+            srv.ehlo(); srv.starttls(); srv.ehlo()
             srv.login(EMAIL_FROM, EMAIL_PASS)
             srv.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
-        print(f"✅ تم إرسال التقرير إلى {EMAIL_TO}")
+        print(f"✅ تم إرسال التقرير")
     except Exception as e:
         print(f"❌ فشل Gmail: {e}")
 

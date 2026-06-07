@@ -6484,9 +6484,16 @@ function exportAdminPDF(){
   var selMonth=mf?mf.value:'';
   var today=new Date().toLocaleDateString('ar-KW',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   var allRows=[];
-  SALES.forEach(function(s){if(!selMonth||(s.date||'').startsWith(selMonth)){allRows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,notes:s.payment||''});}});
-  EXP.forEach(function(e){if(!selMonth||(e.date||'').startsWith(selMonth)){allRows.push({date:e.date||'',ref:e.invRef||'—',detail:'مصروف: '+(e.desc||e.type),exp:e.amount,income:0,notes:e.type});}});
-  CASH.forEach(function(x){if(x.autoFrom==='sale'||x.autoFrom==='expense')return;if(selMonth&&!(x.date||'').startsWith(selMonth))return;allRows.push({date:x.date||'',ref:x.ref||'—',detail:x.notes||x.ref||'—',exp:x.type==='صادر'?x.amount:0,income:x.type==='وارد'&&!x.isDelivery?x.amount:0,notes:x.payment||''});});
+  SALES.forEach(function(s){if(!selMonth||(s.date||'').startsWith(selMonth)){allRows.push({date:s.date||'',ref:s.invNum||'—',detail:'مبيعة: '+s.product+(s.client?' | '+s.client:''),exp:0,income:s.total,notes:s.payment||'',isPartner:false});}});
+  EXP.forEach(function(e){
+    if(!selMonth||(e.date||'').startsWith(selMonth)){
+      var isPartner=(e.source==='شريك');
+      var srcLabel=isPartner?(e.paidBy?'👤 '+e.paidBy:'👥 شريك'):'👜 محفظة';
+      var detail='مصروف: '+(e.desc||e.type)+' | '+srcLabel;
+      allRows.push({date:e.date||'',ref:e.invRef||'—',detail:detail,exp:e.amount,income:0,notes:e.type,isPartner:isPartner});
+    }
+  });
+  CASH.forEach(function(x){if(x.autoFrom==='sale'||x.autoFrom==='expense')return;if(selMonth&&!(x.date||'').startsWith(selMonth))return;allRows.push({date:x.date||'',ref:x.ref||'—',detail:(x.notes||x.ref||'—')+' | 👜 محفظة',exp:x.type==='صادر'?x.amount:0,income:x.type==='وارد'&&!x.isDelivery?x.amount:0,notes:x.payment||'',isPartner:false});});
   allRows.sort(function(a,b){return a.date.localeCompare(b.date);});
   var balance=0;
   var totInc=allRows.reduce(function(s,r){return s+r.income;},0);
@@ -6515,12 +6522,13 @@ function exportAdminPDF(){
     +'</tr></thead><tbody>';
   allRows.forEach(function(r,i){
     balance+=r.income-r.exp;
-    var bg=i%2===0?'#fff':'#f1f8f1';
+    var bg=r.isPartner?'#e3f2fd':(i%2===0?'#fff':'#f1f8f1');
+    var detailColor=r.isPartner?'#1565c0':'inherit';
     html+='<tr style="background:'+bg+'">'
       +'<td style="text-align:center;color:#888">'+(i+1)+'</td>'
       +'<td>'+r.date+'</td>'
       +'<td style="font-weight:700;color:#1b5e20">'+r.ref+'</td>'
-      +'<td>'+r.detail+'</td>'
+      +'<td style="color:'+detailColor+'">'+r.detail+'</td>'
       +'<td style="text-align:center;color:#b71c1c;font-weight:700;direction:ltr">'+(r.exp>0?r.exp.toFixed(3):'—')+'</td>'
       +'<td style="text-align:center;color:#1b5e20;font-weight:700;direction:ltr">'+(r.income>0?r.income.toFixed(3):'—')+'</td>'
       +'<td style="text-align:center;font-weight:800;color:'+(balance>=0?'#1b5e20':'#b71c1c')+';direction:ltr">'+balance.toFixed(3)+'</td>'
@@ -6532,8 +6540,131 @@ function exportAdminPDF(){
     +'<td style="text-align:center;direction:ltr">'+totExp.toFixed(3)+'</td>'
     +'<td style="text-align:center;direction:ltr">'+totInc.toFixed(3)+'</td>'
     +'<td style="text-align:center;direction:ltr;color:'+(balance>=0?'#b9f6ca':'#ff8a80')+'">'+balance.toFixed(3)+'</td>'
-    +'<td></td></tr></tfoot></table>'
-    +'<div style="background:#0a2e0a;color:#a5d6a7;padding:7px 18px;text-align:center;font-size:7.5pt;margin-top:10px">مزرعة هادي اسحاق — التقرير الإداري — '+today+'</div>'
+    +'<td></td></tr></tfoot></table>';
+
+  // ── الملخص الشهري + فائض الأشهر ──
+  var arM2=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  function mlbl2(ym){var p=ym.split('-');return (arM2[parseInt(p[1])]||p[1])+' '+p[0];}
+
+  // بناء بيانات الأشهر
+  var monthsData={};
+  allRows.forEach(function(r){
+    var m=(r.date||'').slice(0,7);
+    if(!m) return;
+    if(!monthsData[m]) monthsData[m]={income:0,exp:0};
+    monthsData[m].income+=r.income||0;
+    monthsData[m].exp+=r.exp||0;
+  });
+  var monthKeys=Object.keys(monthsData).sort();
+
+  if(monthKeys.length>0){
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;page-break-inside:avoid">';
+
+    // ── الملخص الشهري ──
+    var gInc=monthKeys.reduce(function(s,k){return s+monthsData[k].income;},0);
+    var gExp=monthKeys.reduce(function(s,k){return s+monthsData[k].exp;},0);
+    var gNet=gInc-gExp;
+    html+='<div style="border-radius:8px;overflow:hidden;border:1px solid #ccc">'
+      +'<div style="background:linear-gradient(135deg,#37474f,#546e7a);color:#fff;padding:8px 14px;font-weight:700;font-size:9pt">📅 الملخص الشهري</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:8pt">'
+      +'<thead><tr style="background:#37474f;color:#fff">'
+      +'<th style="padding:5px 8px;text-align:right">الشهر</th>'
+      +'<th style="padding:5px 6px;text-align:center;color:#b9f6ca">المدخول</th>'
+      +'<th style="padding:5px 6px;text-align:center;color:#ff8a80">المصروف</th>'
+      +'<th style="padding:5px 6px;text-align:center">الصافي</th>'
+      +'</tr></thead><tbody>';
+    monthKeys.forEach(function(m,i){
+      var d=monthsData[m];
+      var net=d.income-d.exp;
+      var bg=i%2===0?'#f8fffe':'#fff';
+      html+='<tr style="background:'+bg+';border-bottom:1px solid #e0e0e0">'
+        +'<td style="padding:5px 8px;font-weight:700;color:#37474f">'+mlbl2(m)+'</td>'
+        +'<td style="padding:5px 6px;text-align:center;color:#1b5e20;font-weight:700;direction:ltr">'+d.income.toFixed(3)+'</td>'
+        +'<td style="padding:5px 6px;text-align:center;color:#b71c1c;font-weight:700;direction:ltr">'+(d.exp>0?d.exp.toFixed(3):'—')+'</td>'
+        +'<td style="padding:5px 6px;text-align:center;font-weight:900;color:'+(net>=0?'#1b5e20':'#c62828')+';direction:ltr">'+(net>=0?'':'-')+Math.abs(net).toFixed(3)+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody><tfoot><tr style="background:#263238;color:#fff;font-weight:900">'
+      +'<td style="padding:6px 8px">الإجمالي</td>'
+      +'<td style="padding:6px;text-align:center;color:#b9f6ca;direction:ltr">'+gInc.toFixed(3)+'</td>'
+      +'<td style="padding:6px;text-align:center;color:#ff8a80;direction:ltr">'+(gExp>0?gExp.toFixed(3):'—')+'</td>'
+      +'<td style="padding:6px;text-align:center;color:'+(gNet>=0?'#b9f6ca':'#ff8a80')+';direction:ltr">'+(gNet>=0?'':'-')+Math.abs(gNet).toFixed(3)+'</td>'
+      +'</tr></tfoot></table></div>';
+
+    // ── فائض الأشهر (بدون مصروفات الشريك) ──
+    var monthsSurplus={};
+    allRows.forEach(function(r){
+      var m=(r.date||'').slice(0,7);
+      if(!m) return;
+      if(!monthsSurplus[m]) monthsSurplus[m]={income:0,exp:0};
+      monthsSurplus[m].income+=r.income||0;
+      if(!r.isPartner) monthsSurplus[m].exp+=r.exp||0;
+    });
+    var totalSurplus=0;
+    html+='<div style="border-radius:8px;overflow:hidden;border:1px solid #ccc">'
+      +'<div style="background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;padding:8px 14px;font-weight:700;font-size:9pt">💰 فائض الأشهر</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:8pt">'
+      +'<thead><tr style="background:#1565c0;color:#fff">'
+      +'<th style="padding:5px 8px;text-align:right">الشهر</th>'
+      +'<th style="padding:5px 8px;text-align:center;color:#b9f6ca">إيراد / مصروف</th>'
+      +'<th style="padding:5px 8px;text-align:center">الفائض</th>'
+      +'</tr></thead><tbody>';
+    monthKeys.forEach(function(m,i){
+      var d=monthsSurplus[m]||{income:0,exp:0};
+      var surplus=d.income-d.exp;
+      totalSurplus+=surplus;
+      var sc=surplus>=0?'#1b5e20':'#c62828';
+      var bg=i%2===0?'#f0f4ff':'#fff';
+      var icon=surplus>=0?'📈':'📉';
+      html+='<tr style="background:'+bg+';border-bottom:1px solid #e0e0e0">'
+        +'<td style="padding:6px 10px;font-weight:700;color:#37474f">'+mlbl2(m)+'</td>'
+        +'<td style="padding:6px 8px;text-align:center;font-size:7.5pt;color:#555;direction:ltr">'
+        +'<span style="display:block;color:#1b5e20">📥 '+d.income.toFixed(3)+'</span>'
+        +'<span style="display:block;color:#b71c1c">📤 '+d.exp.toFixed(3)+'</span>'
+        +'</td>'
+        +'<td style="padding:6px 8px;text-align:center;font-weight:900;color:'+sc+';direction:ltr">'+icon+' '+(surplus>=0?'':'-')+Math.abs(surplus).toFixed(3)+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody><tfoot><tr style="background:#263238;color:#fff;font-weight:900">'
+      +'<td style="padding:8px 10px">الإجمالي</td>'
+      +'<td style="padding:8px;text-align:center;opacity:.85;direction:ltr">—</td>'
+      +'<td style="padding:8px;text-align:center;color:'+(totalSurplus>=0?'#b9f6ca':'#ff8a80')+';direction:ltr">'+(totalSurplus>=0?'':'-')+Math.abs(totalSurplus).toFixed(3)+'</td>'
+      +'</tr></tfoot></table></div>';
+
+    html+='</div>'; // end grid
+  }
+
+  // ── مربع ديون الشركاء ──
+  var pd3=getPartnerData('','');
+  PARTNERS.forEach(function(p){if(!pd3[p.name])pd3[p.name]={name:p.name,totalPaid:0,totalSettled:0};});
+  var pNames3=Object.keys(pd3);
+  if(pNames3.length){
+    html+='<div style="margin-top:14px;border-radius:8px;overflow:hidden;border:2px solid #0d47a1">'
+      +'<div style="background:linear-gradient(135deg,#0d47a1,#1565c0);color:#fff;padding:10px 16px;font-weight:700;font-size:10pt">👥 ملخص مستحقات الشركاء</div>'
+      +'<div style="padding:14px;display:grid;grid-template-columns:'+(pNames3.length===1?'1fr':'1fr 1fr')+';gap:12px;background:#e8eaf6">';
+    pNames3.forEach(function(n){
+      var p=pd3[n];
+      var paid=p.totalPaid||0;
+      var settled=p.totalSettled||0;
+      var rem=paid-settled;
+      html+='<div style="border:1.5px solid #bbdefb;border-top:4px solid #0d47a1;border-radius:8px;padding:14px;background:#ffffff">'
+        +'<div style="font-weight:900;color:#0d47a1;font-size:12pt;margin-bottom:10px">👤 '+n+'</div>'
+        +'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e3f2fd">'
+        +'<span style="color:#555;font-size:9pt">دفع من ماله</span>'
+        +'<strong style="color:#c62828;font-size:10pt;direction:ltr">'+paid.toFixed(3)+' دك</strong></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e3f2fd">'
+        +'<span style="color:#555;font-size:9pt">تم تسديده</span>'
+        +'<strong style="color:#1b5e20;font-size:10pt;direction:ltr">'+settled.toFixed(3)+' دك</strong></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:8px 0 4px;border-top:2px solid #bbdefb;margin-top:6px">'
+        +'<span style="font-weight:800;color:#333;font-size:10pt">مستحق له</span>'
+        +'<strong style="color:'+(rem>0?'#e65100':'#2e7d32')+';font-size:12pt;font-weight:900;direction:ltr">'+rem.toFixed(3)+' دك</strong></div>'
+        +(rem<=0?'<div style="text-align:center;background:#e8f5e9;border-radius:5px;padding:4px;margin-top:6px;font-size:8.5pt;color:#2e7d32">✅ لا توجد مستحقات</div>':'')
+        +'</div>';
+    });
+    html+='</div></div>';
+  }
+
+  html+='<div style="background:#0a2e0a;color:#a5d6a7;padding:7px 18px;text-align:center;font-size:7.5pt;margin-top:10px">مزرعة هادي اسحاق — التقرير الإداري — '+today+'</div>'
     +'</body></html>';
   var win=window.open('','_blank','width=1000,height=700');
   if(win){win.document.write(html);win.document.close();win.focus();setTimeout(function(){win.print();},600);}
@@ -7129,29 +7260,185 @@ function printPartnersReport(){
   var toM=toSel?toSel.value:'';
   var periodStr=(fromM||toM)?(fromM||'البداية')+' → '+(toM||'الآن'):'كل الفترة';
   var today=new Date().toLocaleDateString('ar-KW',{year:'numeric',month:'long',day:'numeric'});
-  var wb=getWalletBalance();
-  var tbl=document.getElementById('pr2-table');
-  var tblHtml=tbl?tbl.outerHTML:'<p>لا توجد بيانات</p>';
+  var walletBal=getWalletBalance();
 
-  var html='<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تقرير الشركاء</title>'
+  // ── بناء صفوف الجدول ──
+  var rows=[];
+  SALES.forEach(function(s){
+    var m=(s.date||'').slice(0,7);
+    if(fromM&&m<fromM) return;
+    if(toM&&m>toM) return;
+    rows.push({date:s.date||'',ref:s.invNum||'—',desc:'مبيعة: '+(s.product||'')+(s.client?' — '+s.client:''),debit:0,credit:s.total||0,type:'sale',partnerAmt:0});
+  });
+  EXP.forEach(function(e){
+    var m=(e.date||'').slice(0,7);
+    if(fromM&&m<fromM) return;
+    if(toM&&m>toM) return;
+    var isPartner=(e.source==='شريك');
+    var srcLabel=isPartner?(e.paidBy?'👤 '+e.paidBy:'👥 شريك'):'👜 محفظة';
+    var desc='مصروف: '+(e.type||'')+(e.desc?' — '+e.desc:'')+' | '+srcLabel;
+    rows.push({date:e.date||'',ref:e.invRef||'—',desc:desc,debit:isPartner?0:(e.amount||0),credit:0,type:isPartner?'partner_exp':'expense',partnerAmt:isPartner?(e.amount||0):0});
+  });
+  rows.sort(function(a,b){return a.date.localeCompare(b.date);});
+
+  var balance=0,totD=0,totC=0,totPartner=0;
+  var tbodyHtml=rows.map(function(r,i){
+    totD+=r.debit; totC+=r.credit;
+    if(r.type==='partner_exp') totPartner+=r.partnerAmt;
+    balance+=r.credit-r.debit;
+    var balC=balance>=0?'#1b5e20':'#c62828';
+    if(r.type==='partner_exp'){
+      return '<tr style="background:#e3f2fd;border-bottom:1px solid #90caf9">'
+        +'<td style="padding:5px 7px;font-size:8pt;color:#1565c0">'+r.date+'</td>'
+        +'<td style="padding:5px 7px;font-size:8pt;color:#0d47a1;font-weight:700">'+r.ref+'</td>'
+        +'<td style="padding:5px 7px;font-size:8pt;color:#0d47a1">'+r.desc+'</td>'
+        +'<td colspan="2" style="padding:5px 7px;text-align:center;font-size:7.5pt;color:#1565c0;font-style:italic">'+r.partnerAmt.toFixed(3)+' دك — لا يُخصم</td>'
+        +'<td style="padding:5px 7px;text-align:center;font-weight:800;font-size:8pt;color:'+balC+';direction:ltr">'+balance.toFixed(3)+'</td>'
+        +'</tr>';
+    }
+    var bg=i%2===0?'#ffffff':'#f1f8f1';
+    return '<tr style="background:'+bg+';border-bottom:1px solid #e0e0e0">'
+      +'<td style="padding:5px 7px;font-size:8pt">'+r.date+'</td>'
+      +'<td style="padding:5px 7px;font-size:8pt;font-weight:700;color:#00695c">'+r.ref+'</td>'
+      +'<td style="padding:5px 7px;font-size:8pt;color:'+(r.type==='sale'?'#1b5e20':'#555')+'">'+r.desc+'</td>'
+      +'<td style="padding:5px 7px;text-align:center;font-weight:700;font-size:8pt;color:#c62828;direction:ltr">'+(r.debit>0?r.debit.toFixed(3):'—')+'</td>'
+      +'<td style="padding:5px 7px;text-align:center;font-weight:700;font-size:8pt;color:#1b5e20;direction:ltr">'+(r.credit>0?r.credit.toFixed(3):'—')+'</td>'
+      +'<td style="padding:5px 7px;text-align:center;font-weight:800;font-size:8pt;color:'+balC+';direction:ltr">'+balance.toFixed(3)+'</td>'
+      +'</tr>';
+  }).join('');
+
+  // ── ملخص حسابات الشركاء (من getPartnerData) ──
+  var pd2=getPartnerData('','');
+  var pNames2=Object.keys(pd2);
+  // إضافة شركاء بدون مصروفات
+  PARTNERS.forEach(function(p){if(!pd2[p.name])pd2[p.name]={name:p.name,totalPaid:0,totalSettled:0};});
+  pNames2=Object.keys(pd2);
+
+  var partnerCardsHtml='';
+  pNames2.forEach(function(n){
+    var p=pd2[n];
+    var paid=p.totalPaid||0;
+    var settled=p.totalSettled||0;
+    var rem=paid-settled;
+    partnerCardsHtml+='<div style="border:1.5px solid #bbdefb;border-top:4px solid #0d47a1;border-radius:8px;padding:14px;background:#ffffff">'
+      +'<div style="font-weight:900;color:#0d47a1;font-size:12pt;margin-bottom:10px">👤 '+n+'</div>'
+      +'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0">'
+      +'<span style="color:#666;font-size:9pt">دفع من ماله</span>'
+      +'<strong style="color:#c62828;font-size:10pt;direction:ltr">'+paid.toFixed(3)+' دك</strong></div>'
+      +'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0">'
+      +'<span style="color:#666;font-size:9pt">تم تسديده</span>'
+      +'<strong style="color:#1b5e20;font-size:10pt;direction:ltr">'+settled.toFixed(3)+' دك</strong></div>'
+      +'<div style="display:flex;justify-content:space-between;padding:8px 0 4px 0;border-top:2px solid #e3f2fd;margin-top:6px">'
+      +'<span style="font-weight:800;color:#333;font-size:10pt">مستحق له</span>'
+      +'<strong style="color:'+(rem>0?'#e65100':'#2e7d32')+';font-size:12pt;font-weight:900;direction:ltr">'+rem.toFixed(3)+' دك</strong></div>'
+      +(rem<=0?'<div style="text-align:center;background:#e8f5e9;border-radius:5px;padding:4px;margin-top:6px;font-size:8.5pt;color:#2e7d32">✅ لا توجد مستحقات</div>':'')
+      +'</div>';
+  });
+
+  // ── الملخص الشهري ──
+  var mdata2={};
+  rows.forEach(function(r){
+    var m=(r.date||'').slice(0,7);
+    if(!m) return;
+    if(!mdata2[m]) mdata2[m]={credit:0,debit:0,partnerExp:0};
+    mdata2[m].credit+=r.credit;
+    mdata2[m].debit+=r.debit;
+    mdata2[m].partnerExp+=r.partnerAmt;
+  });
+  var mkeys2=Object.keys(mdata2).sort();
+  var arM=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  function mlblP(ym){var p=ym.split('-');return (arM[parseInt(p[1])]||p[1])+' '+p[0];}
+  var gCr2=mkeys2.reduce(function(s,k){return s+mdata2[k].credit;},0);
+  var gDb2=mkeys2.reduce(function(s,k){return s+mdata2[k].debit+mdata2[k].partnerExp;},0);
+  var gNet2=gCr2-gDb2;
+  var monthlyHtml=mkeys2.map(function(m,i){
+    var d=mdata2[m];
+    var tot=d.debit+d.partnerExp;
+    var net=d.credit-tot;
+    var bg=i%2===0?'#f8fffe':'#ffffff';
+    var detail='';
+    if(d.partnerExp>0&&d.debit>0) detail=' <span style="font-size:7pt;color:#1565c0;display:block">👜'+d.debit.toFixed(3)+' + 👤'+d.partnerExp.toFixed(3)+'</span>';
+    else if(d.partnerExp>0) detail=' <span style="font-size:7pt;color:#1565c0;display:block">👤 مصروف شريك</span>';
+    return '<tr style="background:'+bg+';border-bottom:1px solid #e0e0e0">'
+      +'<td style="padding:6px 10px;font-weight:700">'+mlblP(m)+'</td>'
+      +'<td style="padding:6px 8px;text-align:center;color:#1b5e20;font-weight:700;direction:ltr">'+d.credit.toFixed(3)+'</td>'
+      +'<td style="padding:6px 8px;text-align:center;color:#c62828;font-weight:700;direction:ltr">'+(tot>0?tot.toFixed(3)+detail:'—')+'</td>'
+      +'<td style="padding:6px 8px;text-align:center;font-weight:900;color:'+(net>=0?'#1b5e20':'#c62828')+';direction:ltr">'+(net>=0?'':'-')+Math.abs(net).toFixed(3)+'</td>'
+      +'</tr>';
+  }).join('');
+
+  // ── HTML الكامل ──
+  var html='<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">'
+    +'<title>تقرير الشركاء</title>'
     +'<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">'
-    +'<style>*{margin:0;padding:0;box-sizing:border-box}'
-    +'body{font-family:Tajawal,Arial,sans-serif;direction:rtl;padding:18px;font-size:10pt;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}'
-    +'table{width:100%;border-collapse:collapse;font-size:9pt;margin-top:10px}'
-    +'th{background:#1b5e20!important;color:#fff!important;padding:8px;text-align:right}'
-    +'td{padding:6px 8px;border-bottom:1px solid #e0e0e0;text-align:right}'
-    +'tr:nth-child(even){background:#f0fff4!important}'
-    +'tfoot tr{background:#1b5e20!important}'
-    +'tfoot td{padding:8px;border:none;color:#fff!important;font-weight:900}'
+    +'<style>'
+    +'*{margin:0;padding:0;box-sizing:border-box}'
+    +'body{font-family:Tajawal,Arial,sans-serif;direction:rtl;background:#fff;font-size:9pt;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}'
     +'.no-print{text-align:center;margin-top:16px}'
-    +'@media print{@page{margin:8mm;size:A4}.no-print{display:none}body{padding:0}}</style></head><body>'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1b5e20;padding-bottom:10px;margin-bottom:12px">'
-    +'<div><h1 style="font-size:15pt;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</h1>'
-    +'<p style="color:#555;font-size:10pt">تقرير الشركاء — '+periodStr+'</p></div>'
-    +'<div style="text-align:left;font-size:8pt;color:#888">'+today+'</div></div>'
-    +'<div style="background:#00695c;color:#fff;border-radius:6px;padding:8px 14px;margin-bottom:12px;display:flex;justify-content:space-between"><span>👜 رصيد المحفظة</span><strong style="direction:ltr">KWD '+wb.toFixed(3)+'</strong></div>'
-    +tblHtml
-    +'<div class="no-print" style="margin-top:16px"><button onclick="window.print()" style="padding:10px 28px;background:#1b5e20;color:#fff;border:none;border-radius:7px;font-size:12pt;cursor:pointer;font-family:inherit;font-weight:700">🖨️ طباعة / PDF</button></div>'
+    +'@media print{@page{margin:8mm;size:A4}.no-print{display:none}body{padding:0}}'
+    +'</style></head><body style="padding:16px">'
+
+    // الهيدر
+    +'<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1b5e20;padding-bottom:10px;margin-bottom:14px">'
+    +'<div><div style="font-size:16pt;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</div>'
+    +'<div style="color:#555;font-size:10pt;margin-top:2px">تقرير الشركاء — '+periodStr+'</div></div>'
+    +'<div style="text-align:left;font-size:8.5pt;color:#888">'+today+'</div></div>'
+
+    // رصيد المحفظة
+    +'<div style="background:#00695c;color:#fff;border-radius:7px;padding:9px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">'
+    +'<span style="font-size:10pt">👜 رصيد المحفظة الحالي</span>'
+    +'<strong style="direction:ltr;font-size:12pt">'+walletBal.toFixed(3)+' دك</strong></div>'
+
+    // ── مربع ملخص الشركاء (قبل الجدول) ──
+    +'<div style="margin-bottom:16px;border-radius:8px;overflow:hidden;border:2px solid #1b5e20">'
+    +'<div style="background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;padding:10px 16px;font-weight:700;font-size:11pt">👥 ملخص حسابات الشركاء</div>'
+    +'<div style="padding:14px;display:grid;grid-template-columns:'+(pNames2.length===1?'1fr':'1fr 1fr')+';gap:12px;background:#f9fbe7">'
+    +partnerCardsHtml
+    +'</div></div>'
+
+    // ── جدول العمليات ──
+    +'<div style="font-weight:700;font-size:10pt;color:#1b5e20;margin-bottom:6px;padding-right:2px">📋 سجل العمليات</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:8pt">'
+    +'<thead><tr style="background:#1b5e20">'
+    +'<th style="padding:7px 8px;text-align:right;color:#fff">التاريخ</th>'
+    +'<th style="padding:7px 8px;text-align:right;color:#fff">المرجع</th>'
+    +'<th style="padding:7px 8px;text-align:right;color:#fff">التفاصيل</th>'
+    +'<th style="padding:7px 8px;text-align:center;color:#ff8a80">DEBITS</th>'
+    +'<th style="padding:7px 8px;text-align:center;color:#b9f6ca">CREDITS</th>'
+    +'<th style="padding:7px 8px;text-align:center;color:#fff">BALANCE</th>'
+    +'</tr></thead>'
+    +'<tbody>'+tbodyHtml+'</tbody>'
+    +'<tfoot><tr style="background:#1b5e20">'
+    +'<td colspan="3" style="padding:8px 10px;color:#fff;font-weight:900;text-align:right">GRAND TOTAL</td>'
+    +'<td style="padding:8px;text-align:center;color:#ff8a80;font-weight:900;direction:ltr">'+totD.toFixed(3)+'</td>'
+    +'<td style="padding:8px;text-align:center;color:#b9f6ca;font-weight:900;direction:ltr">'+totC.toFixed(3)+'</td>'
+    +'<td style="padding:8px;text-align:center;color:'+(balance>=0?'#b9f6ca':'#ff8a80')+';font-weight:900;direction:ltr">'+balance.toFixed(3)+'</td>'
+    +'</tr>'
+    +(totPartner>0?'<tr style="background:#1565c0"><td colspan="5" style="padding:7px 10px;color:#fff;font-size:8pt;text-align:right">👥 إجمالي مستحقات الشركاء (لا تُحتسب في الأرباح)</td><td style="padding:7px;text-align:center;color:#fff;font-weight:900;direction:ltr">'+totPartner.toFixed(3)+'</td></tr>':'')
+    +'</tfoot></table>'
+
+    // ── الملخص الشهري ──
+    +(mkeys2.length?
+      '<div style="margin-top:16px;border-radius:8px;overflow:hidden;border:1px solid #ccc">'
+      +'<div style="background:linear-gradient(135deg,#37474f,#546e7a);color:#fff;padding:9px 16px;font-weight:700;font-size:10pt;display:flex;justify-content:space-between">'
+      +'<span>📅 الملخص الشهري</span><span style="font-size:8pt;opacity:.85">'+mkeys2.length+' شهر</span></div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:8.5pt">'
+      +'<thead><tr style="background:#37474f">'
+      +'<th style="padding:7px 10px;text-align:right;color:#fff">الشهر</th>'
+      +'<th style="padding:7px 8px;text-align:center;color:#b9f6ca">المدخول</th>'
+      +'<th style="padding:7px 8px;text-align:center;color:#ff8a80">المصروف</th>'
+      +'<th style="padding:7px 8px;text-align:center;color:#fff">الصافي</th>'
+      +'</tr></thead>'
+      +'<tbody>'+monthlyHtml+'</tbody>'
+      +'<tfoot><tr style="background:#263238">'
+      +'<td style="padding:8px 10px;color:#fff;font-weight:900">الإجمالي</td>'
+      +'<td style="padding:8px;text-align:center;color:#b9f6ca;font-weight:900;direction:ltr">'+gCr2.toFixed(3)+'</td>'
+      +'<td style="padding:8px;text-align:center;color:#ff8a80;font-weight:900;direction:ltr">'+(gDb2>0?gDb2.toFixed(3):'—')+'</td>'
+      +'<td style="padding:8px;text-align:center;color:'+(gNet2>=0?'#b9f6ca':'#ff8a80')+';font-weight:900;direction:ltr">'+(gNet2>=0?'':'-')+Math.abs(gNet2).toFixed(3)+'</td>'
+      +'</tr></tfoot></table></div>'
+    :'')
+
+    +'<div class="no-print" style="margin-top:18px"><button onclick="window.print()" style="padding:10px 30px;background:#1b5e20;color:#fff;border:none;border-radius:7px;font-size:12pt;cursor:pointer;font-family:inherit;font-weight:700">🖨️ طباعة / PDF</button></div>'
     +'</body></html>';
 
   var win=window.open('','_blank','width=1000,height=750');

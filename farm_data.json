@@ -179,7 +179,7 @@
       "cost": 0,
       "price": 4,
       "qty": 10,
-      "remaining": 3,
+      "remaining": 1,
       "minStock": 5,
       "date": "2026-04-05",
       "color": "اخضر",
@@ -1232,13 +1232,13 @@
       "invItemId": "mnm6zva0zr0",
       "product": "دارسينا خضراء",
       "category": "داخلي",
-      "qty": 1,
+      "qty": 3,
       "price": 4,
-      "discount": 1,
-      "total": 3,
+      "discount": 11,
+      "total": 1,
       "location": "محل",
       "payment": "نقد",
-      "cashId": "mq3rbfk3gfg",
+      "cashId": "mq3rllc70zc",
       "img": ""
     },
     {
@@ -2528,19 +2528,6 @@
       "autoFrom": "expense"
     },
     {
-      "id": "mq3rbfk3gfg",
-      "date": "2026-06-06",
-      "type": "وارد",
-      "amount": 3,
-      "paid": 3,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-058",
-      "month": "يونيو ٢٠٢٦",
-      "notes": "مبيعة: دارسينا خضراء - نقدا",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mq3red6v6if",
       "date": "2026-06-06",
       "type": "وارد",
@@ -2551,6 +2538,19 @@
       "ref": "INV-060",
       "month": "يونيو ٢٠٢٦",
       "notes": "مبيعة: دارسينا حمراء ( كوردلينا ) - نقدا",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "mq3rllc70zc",
+      "date": "2026-06-06",
+      "type": "وارد",
+      "amount": 1,
+      "paid": 1,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-058",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "مبيعة: دارسينا خضراء - نقدا",
       "autoFrom": "sale"
     }
   ],
@@ -2697,5 +2697,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-06-07T12:29:31.367Z"
+  "date": "2026-06-07T12:35:08.532Z"
 }

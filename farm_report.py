@@ -70,9 +70,9 @@ if raw is None:
     sys.exit(1)
 
 # ══ استخراج البيانات ══
-sales   = raw.get("ps3_sales", [])
-exps    = raw.get("ps3_exp", [])
-cash    = raw.get("ps3_cash", [])
+sales   = raw.get("SALES", raw.get("ps3_sales", []))
+exps    = raw.get("EXP", raw.get("ps3_exp", []))
+cash    = raw.get("CASH", raw.get("ps3_cash", []))
 
 print(f"✅ مبيعات: {len(sales)} | مصروفات: {len(exps)} | كاش: {len(cash)}")
 

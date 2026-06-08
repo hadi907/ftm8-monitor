@@ -1,0 +1,38 @@
+name: 📊 تقرير إداري — طلب فوري
+
+on:
+  repository_dispatch:
+    types: [send-report]
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: التحقق من كلمة السر
+        run: |
+          if [ "${{ github.event.client_payload.password }}" != "${{ secrets.REPORT_PASSWORD }}" ]; then
+            echo "❌ كلمة السر غير صحيحة"
+            exit 1
+          fi
+          echo "✅ كلمة السر صحيحة"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: توليد وإرسال التقرير
+        env:
+          EMAIL_FROM:      ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASS:      ${{ secrets.EMAIL_PASS }}
+          JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
+        run: |
+          MONTH="${{ github.event.client_payload.month }}"
+          if [ -n "$MONTH" ]; then
+            python3 farm_report.py "$MONTH"
+          else
+            python3 farm_report.py
+          fi

@@ -1,0 +1,31 @@
+name: ماليتي — تنبيهات يومية
+
+on:
+  schedule:
+    # كل يوم 8:00 صباحاً توقيت الكويت (UTC+3) = 05:00 UTC
+    - cron: "0 5 * * *"
+  workflow_dispatch:   # تشغيل يدوي للاختبار
+
+jobs:
+  send-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run maleety alerts
+        env:
+          SUPABASE_URL: ${{ secrets.MALEETY_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.MALEETY_SUPABASE_KEY }}
+          GMAIL_USER:   ${{ secrets.MALEETY_GMAIL_USER }}
+          GMAIL_PASS:   ${{ secrets.MALEETY_GMAIL_PASS }}
+          EMAIL_TO:     ${{ secrets.MALEETY_EMAIL_TO }}
+        run: python maleety_alerts.py

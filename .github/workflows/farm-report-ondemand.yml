@@ -7,6 +7,8 @@ on:
         description: 'الشهر (مثال: 2026-05) — اتركه فارغاً لكل الأشهر'
         required: false
         default: ''
+  repository_dispatch:
+    types: [send-report]
 
 jobs:
   send-report:
@@ -20,16 +22,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install requests
-
       - name: Generate & Send Report
         env:
-          EMAIL_FROM:    ${{ secrets.EMAIL_FROM }}
-          EMAIL_PASS:    ${{ secrets.EMAIL_PASS }}
+          EMAIL_FROM:      ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASS:      ${{ secrets.EMAIL_PASS }}
           JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
         run: |
-          MONTH="${{ github.event.inputs.month }}"
+          MONTH="${{ github.event.inputs.month }}${{ github.event.client_payload.month }}"
           if [ -n "$MONTH" ]; then
             python3 farm_report.py "$MONTH"
           else

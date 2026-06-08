@@ -17,8 +17,8 @@ JSONBIN_KEY   = os.environ.get("JSONBIN_API_KEY", "")
 EMAIL_FROM    = os.environ.get("EMAIL_FROM", "hishak8@yahoo.com")
 EMAIL_PASS    = os.environ.get("EMAIL_PASS", "")
 EMAIL_TO      = "hadi@ftm8.com"
-SMTP_HOST     = "smtp.mail.yahoo.com"
-SMTP_PORT     = 587
+SMTP_HOST     = "smtp.gmail.com"
+SMTP_PORT   = 587
 
 sel_month = sys.argv[1].strip() if len(sys.argv) > 1 else ""
 

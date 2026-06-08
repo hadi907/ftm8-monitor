@@ -1,0 +1,37 @@
+name: 📊 التقرير الإداري — مزرعة هادي اسحاق
+
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: 'الشهر (مثال: 2026-05) — اتركه فارغاً لكل الأشهر'
+        required: false
+        default: ''
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Generate & Send Report
+        env:
+          EMAIL_FROM:    ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASS:    ${{ secrets.EMAIL_PASS }}
+          JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
+        run: |
+          MONTH="${{ github.event.inputs.month }}"
+          if [ -n "$MONTH" ]; then
+            python3 farm_report.py "$MONTH"
+          else
+            python3 farm_report.py
+          fi

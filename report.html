@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 طلب التقرير — مزرعة هادي اسحاق</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#071a07,#1b5e20);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl}
+.card{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.logo{text-align:center;margin-bottom:24px}
+.logo-icon{width:70px;height:70px;background:linear-gradient(135deg,#43a047,#1b5e20);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 12px}
+.logo h1{font-size:1.25rem;font-weight:900;color:#1b5e20}
+.logo p{font-size:0.8rem;color:#888;margin-top:3px}
+.section-title{font-size:0.85rem;font-weight:800;color:#555;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8f5e9}
+.btn-all{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;border:none;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;margin-bottom:20px;transition:.2s}
+.btn-all:hover{opacity:.9;transform:scale(.98)}
+.months-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.btn-month{padding:12px 8px;background:#f1f8f1;border:2px solid #c8e6c9;color:#1b5e20;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:.2s;text-align:center}
+.btn-month:hover,.btn-month.active{background:#1b5e20;color:#fff;border-color:#1b5e20}
+.custom-row{display:flex;gap:8px;align-items:center;margin-bottom:20px}
+.custom-input{flex:1;padding:11px 12px;border:2px solid #c8e6c9;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:0.9rem;color:#333;outline:none;direction:ltr;text-align:center}
+.custom-input:focus{border-color:#1b5e20}
+.btn-custom{padding:11px 16px;background:#e8f5e9;border:2px solid #1b5e20;color:#1b5e20;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;white-space:nowrap;transition:.2s}
+.btn-custom:hover{background:#1b5e20;color:#fff}
+.status{padding:14px;border-radius:10px;font-size:0.88rem;font-weight:700;text-align:center;display:none;margin-top:4px}
+.status.loading{background:#fff8e1;color:#f57f17;display:block}
+.status.success{background:#e8f5e9;color:#1b5e20;display:block}
+.status.error{background:#fff0f0;color:#c62828;display:block}
+.info{font-size:0.75rem;color:#aaa;text-align:center;margin-top:16px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🌿</div>
+    <h1>مزرعة هادي اسحاق</h1>
+    <p>طلب التقرير الإداري</p>
+  </div>
+
+  <!-- كل الأشهر -->
+  <div class="section-title">📊 تقرير شامل</div>
+  <button class="btn-all" onclick="sendReport('')">
+    📊 كل الأشهر — تقرير كامل
+  </button>
+
+  <!-- أشهر سريعة -->
+  <div class="section-title">📅 شهر محدد</div>
+  <div class="months-grid" id="months-grid">
+    <!-- تُبنى تلقائياً -->
+  </div>
+
+  <!-- شهر يدوي -->
+  <div class="custom-row">
+    <input class="custom-input" id="custom-month" placeholder="2026-05" maxlength="7">
+    <button class="btn-custom" onclick="sendCustom()">📤 إرسال</button>
+  </div>
+
+  <div class="status" id="status"></div>
+  <p class="info">سيصل التقرير على إيميلك<br><strong>hadi@ftm8.com</strong><br>خلال دقيقة واحدة</p>
+</div>
+
+<script>
+// ══ إعدادات ══
+var GITHUB_TOKEN = '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';
+var REPO         = 'hadi907/ftm8-monitor';
+var WORKFLOW     = 'farm-report-ondemand.yml';
+var API_URL      = 'https://api.github.com/repos/' + REPO + '/actions/workflows/' + WORKFLOW + '/dispatches';
+
+// ══ بناء أزرار الأشهر ══
+function buildMonths() {
+  var grid = document.getElementById('months-grid');
+  var now = new Date();
+  var months = [];
+  var arM = ['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  for (var i = 0; i < 6; i++) {
+    var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var ym = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    var label = arM[d.getMonth()+1] + ' ' + d.getFullYear();
+    months.push({ym: ym, label: label});
+  }
+  grid.innerHTML = months.map(function(m) {
+    return '<button class="btn-month" onclick="sendReport(\'' + m.ym + '\')">' + m.label + '</button>';
+  }).join('');
+}
+
+// ══ إرسال التقرير ══
+async function sendReport(month) {
+  var st = document.getElementById('status');
+  st.className = 'status loading';
+  st.textContent = '⏳ جاري الإرسال... انتظر لحظة';
+
+  // تمييز الزر المضغوط
+  document.querySelectorAll('.btn-month').forEach(function(b) {
+    b.classList.remove('active');
+    if (month && b.textContent.trim() !== '' && b.getAttribute('onclick') && b.getAttribute('onclick').includes(month)) {
+      b.classList.add('active');
+    }
+  });
+
+  try {
+    var body = { ref: 'main', inputs: { month: month || '' } };
+    var resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + GITHUB_TOKEN,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (resp.status === 204 || resp.ok) {
+      st.className = 'status success';
+      st.textContent = '✅ تم! التقرير في طريقه إلى إيميلك 📧';
+    } else {
+      var err = await resp.text();
+      st.className = 'status error';
+      st.textContent = '❌ خطأ: ' + resp.status + ' — ' + err;
+    }
+  } catch(e) {
+    st.className = 'status error';
+    st.textContent = '❌ فشل الاتصال: ' + e.message;
+  }
+}
+
+function sendCustom() {
+  var v = document.getElementById('custom-month').value.trim();
+  if (!v || !/^\d{4}-\d{2}$/.test(v)) {
+    alert('أدخل الشهر بصيغة صحيحة مثل: 2026-05');
+    return;
+  }
+  sendReport(v);
+}
+
+buildMonths();
+</script>
+</body>
+</html>

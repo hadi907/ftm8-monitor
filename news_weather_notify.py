@@ -17,19 +17,22 @@ CITIES = [
 # المصادر مع تصنيفها
 NEWS_SOURCES = [
     # 🇰🇼 كويتية
-    {"name": "القبس",            "url": "https://www.alqabas.com/feed",                        "cat": "kw"},
-    {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss",                       "cat": "kw"},
-    {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/rss",                        "cat": "kw"},
-    {"name": "الراي",            "url": "https://www.alraimedia.com/rss.xml",                  "cat": "kw"},
-    {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",      "cat": "kw"},
-    # 🌍 عالمية/عامة
-    {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",             "cat": "world"},
-    {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",               "cat": "world"},
-    {"name": "الجزيرة",          "url": "https://www.aljazeera.net/feed/mostviewed",            "cat": "world"},
+    {"name": "القبس",            "url": "https://www.alqabas.com/feed/",                            "cat": "kw"},
+    {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss/",                           "cat": "kw"},
+    {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                           "cat": "kw"},
+    {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                         "cat": "kw"},
+    {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",           "cat": "kw"},
+    # 🌍 عالمية
+    {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                  "cat": "world"},
+    {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                    "cat": "world"},
+    {"name": "الجزيرة",          "url": "https://www.aljazeera.net/xml/rss/all.xml",                "cat": "world"},
+    {"name": "RT عربي",          "url": "https://arabic.rt.com/rss/",                              "cat": "world"},
     # 💰 اقتصاد
-    {"name": "الاقتصادية",       "url": "https://www.aleqt.com/rss.xml",                       "cat": "economy"},
+    {"name": "الاقتصادية",       "url": "https://www.aleqt.com/rss.xml",                            "cat": "economy"},
+    {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                       "cat": "economy"},
     # 💻 تقنية
-    {"name": "نبض تقني",         "url": "https://feeds.feedburner.com/Nabd-Tech",              "cat": "tech"},
+    {"name": "عالم التقنية",     "url": "https://www.the-tech-world.com/feed/",                     "cat": "tech"},
+    {"name": "أندرويد عربي",     "url": "https://androideraar.com/feed/",                           "cat": "tech"},
 ]
 
 # ─── جلب الطقس ───────────────────────────────────────────────
@@ -100,7 +103,7 @@ def get_news():
     seen = set()
     sections = []
 
-    # 🇰🇼 أخبار الكويت — 15 خبر
+    # 🇰🇼 أخبار الكويت — 15 خبر من كل المصادر الكويتية
     kw_items = []
     for src in [s for s in NEWS_SOURCES if s["cat"] == "kw"]:
         for name, title in fetch_titles(src, 5):
@@ -108,8 +111,6 @@ def get_news():
             if key not in seen:
                 seen.add(key)
                 kw_items.append((name, title))
-            if len(kw_items) >= 15:
-                break
         if len(kw_items) >= 15:
             break
 

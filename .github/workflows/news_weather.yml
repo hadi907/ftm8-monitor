@@ -2,16 +2,13 @@ name: 📰 نشرة الأخبار والطقس
 
 on:
   schedule:
-    # 9:00 صباحاً بتوقيت الكويت (UTC+3) = 06:00 UTC
-    - cron: '0 6 * * *'
-    # 5:00 مساءً بتوقيت الكويت (UTC+3) = 14:00 UTC
-    - cron: '0 14 * * *'
-  workflow_dispatch:  # تشغيل يدوي للاختبار
+    - cron: '0 6 * * *'   # 9:00 صباحاً بتوقيت الكويت
+    - cron: '0 14 * * *'  # 5:00 مساءً بتوقيت الكويت
+  workflow_dispatch:
 
 jobs:
   send-notification:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,7 +23,7 @@ jobs:
 
       - name: Run notification script
         env:
-          OWM_API_KEY:      ${{ secrets.OWM_API_KEY }}
-          CALLMEBOT_PHONE:  ${{ secrets.CALLMEBOT_PHONE }}
-          CALLMEBOT_KEY:    ${{ secrets.CALLMEBOT_KEY }}
+          OWM_API_KEY:       ${{ secrets.OWM_API_KEY }}
+          TELEGRAM_TOKEN:    ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID:  ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python news_weather_notify.py

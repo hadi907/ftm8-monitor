@@ -1,7 +1,7 @@
 import os
 import requests
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 # ─── الإعدادات ────────────────────────────────────────────────
 CALLMEBOT_PHONE = os.environ.get("CALLMEBOT_PHONE", "+96599014431").strip()
@@ -110,8 +110,10 @@ def send_whatsapp(message: str):
 
 # ─── التجميع والإرسال ────────────────────────────────────────
 def main():
-    now    = datetime.now().strftime("%A، %d %B %Y — %I:%M %p")
-    period = "🌅 الصباحية" if datetime.now().hour < 12 else "🌆 المسائية"
+    kuwait_tz = timezone(timedelta(hours=3))
+    now_kw    = datetime.now(kuwait_tz)
+    now       = now_kw.strftime("%A، %d %B %Y — %I:%M %p")
+    period    = "🌅 الصباحية" if now_kw.hour < 12 else "🌆 المسائية"
 
     header  = f"*📋 نشرة {period}*\n_{now}_\n"
     weather = get_weather()

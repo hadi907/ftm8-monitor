@@ -20,6 +20,10 @@ NEWS_SOURCES = [
     {"name": "KUNA",      "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar"},
 ]
 
+# ─── تشخيص ───────────────────────────────────────────────────
+print(f"DEBUG TOKEN length: {len(TELEGRAM_TOKEN)} | first5: {TELEGRAM_TOKEN[:5]}")
+print(f"DEBUG CHAT_ID: '{TELEGRAM_CHAT_ID}'")
+
 # ─── جلب الطقس ───────────────────────────────────────────────
 def get_weather_owm(city):
     url = (f"https://api.openweathermap.org/data/2.5/weather"

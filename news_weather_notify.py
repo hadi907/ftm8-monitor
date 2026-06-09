@@ -1,6 +1,7 @@
 import os
 import requests
 import urllib.parse
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 
 # ─── الإعدادات ────────────────────────────────────────────────
@@ -13,16 +14,23 @@ CITIES = [
     {"name": "الوفرة",  "q_owm": "Al Wafra,KW",   "q_wttr": "Al-Wafra"},
 ]
 
+# المصادر مع تصنيفها
 NEWS_SOURCES = [
-    {"name": "الجزيرة",   "url": "https://www.aljazeera.net/feed/mostviewed"},
-    {"name": "BBC عربي",  "url": "https://feeds.bbci.co.uk/arabic/rss.xml"},
-    {"name": "سكاي نيوز", "url": "https://www.skynewsarabia.com/rss.xml"},
-    {"name": "KUNA",      "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar"},
+    # 🇰🇼 كويتية
+    {"name": "القبس",            "url": "https://www.alqabas.com/feed",                        "cat": "kw"},
+    {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss",                       "cat": "kw"},
+    {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/rss",                        "cat": "kw"},
+    {"name": "الراي",            "url": "https://www.alraimedia.com/rss.xml",                  "cat": "kw"},
+    {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",      "cat": "kw"},
+    # 🌍 عالمية/عامة
+    {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",             "cat": "world"},
+    {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",               "cat": "world"},
+    {"name": "الجزيرة",          "url": "https://www.aljazeera.net/feed/mostviewed",            "cat": "world"},
+    # 💰 اقتصاد
+    {"name": "الاقتصادية",       "url": "https://www.aleqt.com/rss.xml",                       "cat": "economy"},
+    # 💻 تقنية
+    {"name": "نبض تقني",         "url": "https://feeds.feedburner.com/Nabd-Tech",              "cat": "tech"},
 ]
-
-# ─── تشخيص ───────────────────────────────────────────────────
-print(f"DEBUG TOKEN length: {len(TELEGRAM_TOKEN)} | first5: {TELEGRAM_TOKEN[:5]}")
-print(f"DEBUG CHAT_ID: '{TELEGRAM_CHAT_ID}'")
 
 # ─── جلب الطقس ───────────────────────────────────────────────
 def get_weather_owm(city):
@@ -50,13 +58,11 @@ def get_weather_wttr(city):
     r = requests.get(url, timeout=10, headers={"User-Agent": "curl/7.0"})
     r.raise_for_status()
     d = r.json()
-    cur      = d["current_condition"][0]
-    temp     = cur["temp_C"]
-    feels    = cur["FeelsLikeC"]
-    humidity = cur["humidity"]
-    wind     = cur["windspeedKmph"]
-    desc     = cur["weatherDesc"][0]["value"]
-    code     = int(cur["weatherCode"])
+    cur  = d["current_condition"][0]
+    temp = cur["temp_C"]; feels = cur["FeelsLikeC"]
+    humidity = cur["humidity"]; wind = cur["windspeedKmph"]
+    desc = cur["weatherDesc"][0]["value"]
+    code = int(cur["weatherCode"])
     icon = ("☀️" if code == 113 else "⛅" if code in [116,119,122] else
             "🌧️" if code >= 263 else "🌡️")
     return (f"{icon} *{city['name']}:* {temp}°م (يبدو {feels}°م)\n"
@@ -66,10 +72,7 @@ def get_weather():
     lines = ["☁️ *الطقس الآن*"]
     for city in CITIES:
         try:
-            if OWM_API_KEY:
-                lines.append(get_weather_owm(city))
-            else:
-                raise ValueError("no key")
+            lines.append(get_weather_owm(city) if OWM_API_KEY else (_ for _ in ()).throw(ValueError()))
         except Exception:
             try:
                 lines.append(get_weather_wttr(city))
@@ -78,24 +81,69 @@ def get_weather():
     return "\n".join(lines)
 
 # ─── جلب الأخبار ─────────────────────────────────────────────
+def fetch_titles(src, limit):
+    titles = []
+    try:
+        r = requests.get(src["url"], timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        root = ET.fromstring(r.content)
+        for item in root.findall(".//item")[:limit*2]:
+            t = item.findtext("title","").strip()
+            if t:
+                titles.append((src["name"], t))
+            if len(titles) >= limit:
+                break
+    except Exception:
+        pass
+    return titles
+
 def get_news():
-    import xml.etree.ElementTree as ET
-    lines = ["📰 *أبرز الأخبار*"]
-    for src in NEWS_SOURCES:
-        try:
-            r = requests.get(src["url"], timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-            root = ET.fromstring(r.content)
-            items = root.findall(".//item")[:2]
-            if not items:
-                continue
-            lines.append(f"\n🔹 *{src['name']}*")
-            for item in items:
-                title = item.findtext("title", "").strip()
-                if title:
-                    lines.append(f"  • {title}")
-        except Exception:
-            pass
-    return "\n".join(lines)
+    seen = set()
+    sections = []
+
+    # 🇰🇼 أخبار الكويت — 15 خبر
+    kw_items = []
+    for src in [s for s in NEWS_SOURCES if s["cat"] == "kw"]:
+        for name, title in fetch_titles(src, 5):
+            key = title[:30]
+            if key not in seen:
+                seen.add(key)
+                kw_items.append((name, title))
+            if len(kw_items) >= 15:
+                break
+        if len(kw_items) >= 15:
+            break
+
+    if kw_items:
+        lines = ["\n🇰🇼 *أخبار الكويت*"]
+        for i, (src, title) in enumerate(kw_items[:15], 1):
+            lines.append(f"{i}. {title} _{src}_")
+        sections.append("\n".join(lines))
+
+    # باقي الفئات — 2 خبر لكل فئة
+    categories = [
+        ("world",   "🌍 *عالمية*"),
+        ("economy", "💰 *اقتصاد*"),
+        ("tech",    "💻 *تقنية*"),
+    ]
+    for cat, label in categories:
+        items = []
+        for src in [s for s in NEWS_SOURCES if s["cat"] == cat]:
+            for name, title in fetch_titles(src, 3):
+                key = title[:30]
+                if key not in seen:
+                    seen.add(key)
+                    items.append((name, title))
+                if len(items) >= 2:
+                    break
+            if len(items) >= 2:
+                break
+        if items:
+            lines = [f"\n{label}"]
+            for i, (src, title) in enumerate(items[:2], 1):
+                lines.append(f"{i}. {title} _{src}_")
+            sections.append("\n".join(lines))
+
+    return "📰 *أبرز الأخبار*\n" + "\n".join(sections)
 
 # ─── إرسال تيليغرام ──────────────────────────────────────────
 def send_telegram(message: str):

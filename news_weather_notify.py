@@ -16,22 +16,26 @@ CITIES = [
 
 # المصادر مع تصنيفها
 NEWS_SOURCES = [
-    # 🇰🇼 أخبار الكويت
-    {"name": "أخبار الكويت",     "url": "https://news.google.com/rss/search?q=الكويت&hl=ar&gl=KW&ceid=KW:ar",          "cat": "kw"},
-    {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",                               "cat": "kw"},
-    {"name": "القبس",            "url": "https://www.alqabas.com/feed/",                                                "cat": "kw"},
-    {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss/",                                               "cat": "kw"},
-    {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                                               "cat": "kw"},
-    {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                                             "cat": "kw"},
+    # 🇰🇼 أخبار الكويت — استعلامات متعددة
+    {"name": "أخبار الكويت",     "url": "https://news.google.com/rss/search?q=الكويت&hl=ar&gl=KW&ceid=KW:ar",                      "cat": "kw"},
+    {"name": "حكومة الكويت",     "url": "https://news.google.com/rss/search?q=مجلس+الوزراء+الكويت&hl=ar&gl=KW&ceid=KW:ar",         "cat": "kw"},
+    {"name": "أمن الكويت",       "url": "https://news.google.com/rss/search?q=الداخلية+الكويت+الجيش&hl=ar&gl=KW&ceid=KW:ar",       "cat": "kw"},
+    {"name": "مجلس الأمة",       "url": "https://news.google.com/rss/search?q=مجلس+الأمة+الكويت&hl=ar&gl=KW&ceid=KW:ar",           "cat": "kw"},
+    {"name": "الكويت اليوم",     "url": "https://news.google.com/rss/search?q=الكويت+اليوم&hl=ar&gl=KW&ceid=KW:ar",                "cat": "kw"},
+    {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",                                           "cat": "kw"},
+    {"name": "القبس",            "url": "https://www.alqabas.com/feed/",                                                            "cat": "kw"},
+    {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss/",                                                           "cat": "kw"},
+    {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                                                           "cat": "kw"},
+    {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                                                         "cat": "kw"},
     # 🌍 عالمية
-    {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                      "cat": "world"},
-    {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                        "cat": "world"},
-    {"name": "RT عربي",          "url": "https://arabic.rt.com/rss/",                                                   "cat": "world"},
+    {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                                  "cat": "world"},
+    {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                                    "cat": "world"},
+    {"name": "RT عربي",          "url": "https://arabic.rt.com/rss/",                                                               "cat": "world"},
     # 💰 اقتصاد
-    {"name": "اقتصاد الكويت",    "url": "https://news.google.com/rss/search?q=اقتصاد+الكويت&hl=ar&gl=KW&ceid=KW:ar",  "cat": "economy"},
-    {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                                           "cat": "economy"},
+    {"name": "اقتصاد الكويت",    "url": "https://news.google.com/rss/search?q=اقتصاد+الكويت&hl=ar&gl=KW&ceid=KW:ar",              "cat": "economy"},
+    {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                                                       "cat": "economy"},
     # 💻 تقنية
-    {"name": "تقنية",            "url": "https://news.google.com/rss/search?q=تقنية+ذكاء+اصطناعي&hl=ar&gl=KW&ceid=KW:ar", "cat": "tech"},
+    {"name": "تقنية",            "url": "https://news.google.com/rss/search?q=تقنية+ذكاء+اصطناعي&hl=ar&gl=KW&ceid=KW:ar",         "cat": "tech"},
 ]
 
 # ─── جلب الطقس ───────────────────────────────────────────────

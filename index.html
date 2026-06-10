@@ -6243,7 +6243,9 @@ function startAutoCloudSave(){
 }
 
 // ══ ADMIN REPORT ══
-function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb=getWalletBalance();_aw.textContent=_awb.toFixed(3)+' دك';_aw.style.color=_awb<0?'#ff8a80':'#b9f6ca';}
+var _rAdminBusy=false;
+function rAdmin(){if(_rAdminBusy)return;_rAdminBusy=true;try{_rAdminImpl();}finally{_rAdminBusy=false;}}
+function _rAdminImpl(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb=getWalletBalance();_aw.textContent=_awb.toFixed(3)+' دك';_aw.style.color=_awb<0?'#ff8a80':'#b9f6ca';}
   var mf=document.getElementById('adm-month');
   var selMonth=mf?mf.value:'';
   // Build all months from data

@@ -19,12 +19,10 @@ def parse_date(date_v):
     try:
         if pd.isna(date_v): return None
     except: pass
-    # datetime مباشر
     if hasattr(date_v, 'date'):
         return date_v.date().isoformat()
     s = str(date_v).strip().translate(AR_DIGITS)
     if not s or s in ['nan','None','NaT','']: return None
-    # صيغة: "4-يونيو-26" أو "٤-يونيو-٢٦" أو "4-يونيو-2026"
     m = re.match(r'^(\d{1,2})[-/\s]+([^\d\s\-]+)[-/\s]+(\d{2,4})$', s)
     if m:
         day, month_str, year = m.group(1), m.group(2).strip().lower(), m.group(3)
@@ -35,14 +33,11 @@ def parse_date(date_v):
             try:
                 return datetime.date(yr, month_num, int(day)).isoformat()
             except: pass
-    # صيغ رقمية
     for fmt in ('%Y-%m-%d','%d/%m/%Y','%m/%d/%Y','%d-%m-%Y','%Y/%m/%d'):
         try: return datetime.datetime.strptime(s, fmt).date().isoformat()
         except: pass
-    # pandas كملاذ أخير
     try: return pd.to_datetime(s, dayfirst=True).date().isoformat()
     except: pass
-    # أبقِ النص كما هو — لا تتجاهل الصف أبداً
     return s
 
 def norm_ref(r):
@@ -211,7 +206,7 @@ def build_html(r):
 </body></html>"""
 
 def send_email(html_body, diff_count):
-    subject = f"{'⚠️' if diff_count else '✅'} تقرير مزرعة هادي — {TODAY}"
+    subject = f"{'⚠️' if diff_count else '✅'} مزرعة هادي اسحاق - مقارنة — {TODAY}"
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From']    = EMAIL_FROM

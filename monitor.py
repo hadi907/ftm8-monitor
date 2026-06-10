@@ -2,8 +2,8 @@ import os, sys, requests, json
 from datetime import datetime
 
 # ── Config from GitHub Secrets ──
-WA_PHONE   = os.environ.get('WA_PHONE',  '')
-WA_APIKEY  = os.environ.get('WA_APIKEY', '')
+TELEGRAM_TOKEN  = os.environ.get('TELEGRAM_TOKEN', '')
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
 ADMIN_PASS  = os.environ.get('ADMIN_PASS',  '')
 
@@ -45,20 +45,21 @@ def write_jsonbin(data):
         log(f"JSONBin write error: {e}")
     return False
 
-# ── WhatsApp via CallMeBot ──
-def send_whatsapp(msg):
-    if not WA_PHONE or not WA_APIKEY:
-        log("WhatsApp: no credentials, skipping")
+# ── Telegram ──
+def send_telegram(msg):
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+        log("Telegram: no credentials, skipping")
         return
     try:
-        url = (f"https://api.callmebot.com/whatsapp.php"
-               f"?phone={requests.utils.quote(WA_PHONE)}"
-               f"&text={requests.utils.quote(msg)}"
-               f"&apikey={WA_APIKEY}")
-        r = requests.get(url, timeout=20)
-        log(f"WhatsApp sent: HTTP {r.status_code}")
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        r = requests.post(url, json={
+            'chat_id': TELEGRAM_CHAT_ID,
+            'text': msg,
+            'parse_mode': 'HTML'
+        }, timeout=20)
+        log(f"Telegram sent: HTTP {r.status_code}")
     except Exception as e:
-        log(f"WhatsApp error (non-fatal): {e}")
+        log(f"Telegram error (non-fatal): {e}")
 
 # ── ftm8: Login ──
 def ftm8_login():
@@ -153,7 +154,6 @@ def main():
     # 2. Find new sales after last_id
     new_sales = []
     if not last_id:
-        # First run: mark latest as seen, don't notify old data
         latest = sales[-1]
         new_last_id = latest.get('id', '')
         log(f"First run — marking latest as seen: {new_last_id}")
@@ -162,13 +162,11 @@ def main():
         log("No notification on first run — exit OK")
         return
     else:
-        # Find index of last_id
         ids = [s.get('id','') for s in sales]
         if last_id in ids:
             idx = ids.index(last_id)
             new_sales = sales[idx+1:]
         else:
-            # last_id not found — take last 5 max (safety)
             new_sales = sales[-5:]
 
     # Remove duplicates by ID
@@ -190,8 +188,8 @@ def main():
     token = ftm8_login()
 
     # 4. Process new sales
-    lines = ['🌿 مبيعات جديدة — مزرعة هادي']
-    for s in unique_new[:10]:  # max 10 per run
+    lines = ['🌿 <b>مبيعات جديدة — مزرعة هادي اسحاق</b>']
+    for s in unique_new[:10]:
         name   = s.get('itemName', s.get('name', 'صنف'))
         qty    = s.get('qty', 0)
         total  = s.get('total', 0)
@@ -202,14 +200,13 @@ def main():
         if invnum: line += f" | {invnum}"
         lines.append(line)
 
-        # Create order in ftm8
         if token:
             ftm8_create_order(token, s)
 
-    # 5. Send WhatsApp (one message)
+    # 5. Send Telegram (one message)
     msg = '\n'.join(lines)
-    log(f"Sending WhatsApp:\n{msg}")
-    send_whatsapp(msg)
+    log(f"Sending Telegram:\n{msg}")
+    send_telegram(msg)
 
     # 6. Update last_id in JSONBin
     new_last = unique_new[-1].get('id', last_id)
@@ -226,9 +223,8 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        # NEVER exit with error code — prevents failure emails
         log(f"Unexpected error (caught): {e}")
         import traceback
         traceback.print_exc()
 
-    sys.exit(0)  # Always exit 0
+    sys.exit(0)

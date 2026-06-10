@@ -19,10 +19,6 @@ body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#071a07,
 .months-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
 .btn-month{padding:12px 8px;background:#f1f8f1;border:2px solid #c8e6c9;color:#1b5e20;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:.2s;text-align:center}
 .btn-month.active{background:#1b5e20;color:#fff;border-color:#1b5e20}
-.custom-row{display:flex;gap:8px;align-items:center;margin-bottom:20px}
-.custom-input{flex:1;padding:11px 12px;border:2px solid #c8e6c9;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:0.9rem;color:#333;outline:none;direction:ltr;text-align:center}
-.custom-input:focus{border-color:#1b5e20}
-.btn-custom{padding:11px 16px;background:#e8f5e9;border:2px solid #1b5e20;color:#1b5e20;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;white-space:nowrap}
 .pass-box{margin-bottom:18px}
 .pass-box label{font-size:0.82rem;font-weight:800;color:#555;display:block;margin-bottom:6px}
 .pass-input{width:100%;padding:12px 14px;border:2px solid #c8e6c9;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:1rem;color:#333;outline:none;text-align:right}
@@ -53,8 +49,6 @@ body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#071a07,
   <div class="section-title">📅 شهر محدد</div>
   <div class="months-grid" id="months-grid"></div>
 
-
-
   <div class="status" id="status"></div>
   <p class="info">سيصل التقرير على إيميلك<br><strong>hadi@ftm8.com</strong><br>خلال دقيقة واحدة ⏱️</p>
 </div>
@@ -65,7 +59,7 @@ var _b='RYwODhaaMB';
 var _c='ta8ArBRj8U';
 var _d='G8gu36wbcf';
 var REPO='hadi907/ftm8-monitor';
-var PASS='\u0627\u0644\u062a\u0642\u0631\u064a\u0631 \u0627\u0644\u0627\u062f\u0627\u0631\u064a';
+var PASS='0008';
 
 function buildMonths(){
   var grid=document.getElementById('months-grid');
@@ -113,12 +107,6 @@ async function sendReport(month){
     st.className='status error';
     st.textContent='❌ فشل الاتصال';
   }
-}
-
-function sendCustom(){
-  var v=document.getElementById('custom-month').value.trim();
-  if(!v||!/^\d{4}-\d{2}$/.test(v)){alert('أدخل الشهر بصيغة: 2026-05');return;}
-  sendReport(v);
 }
 
 buildMonths();

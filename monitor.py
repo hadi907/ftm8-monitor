@@ -220,6 +220,16 @@ def main():
 
 # ── Entry Point ──
 if __name__ == '__main__':
+    # إذا تم التشغيل يدوياً مع argument test — أرسل رسالة تجريبية فقط
+    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+        log("=== Test Mode ===")
+        send_telegram(f"✅ <b>اختبار تيليغرام — مزرعة هادي اسحاق</b>
+
+النظام يعمل بنجاح ✔️
+{datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        log("Test message sent")
+        sys.exit(0)
+
     try:
         main()
     except Exception as e:

@@ -75,7 +75,9 @@ function buildMonths(){
   grid.innerHTML=html;
 }
 
+var _sending=false;
 async function sendReport(month){
+  if(_sending)return;
   var pass=document.getElementById('pass-input').value.trim();
   var st=document.getElementById('status');
   if(pass!==PASS){
@@ -83,6 +85,7 @@ async function sendReport(month){
     st.textContent='❌ كلمة السر غير صحيحة';
     return;
   }
+  _sending=true;
   st.className='status loading';
   st.textContent='⏳ جاري الإرسال...';
   try{
@@ -102,10 +105,12 @@ async function sendReport(month){
     } else {
       st.className='status error';
       st.textContent='❌ خطأ '+resp.status;
+      _sending=false;
     }
   } catch(e){
     st.className='status error';
     st.textContent='❌ فشل الاتصال';
+    _sending=false;
   }
 }
 

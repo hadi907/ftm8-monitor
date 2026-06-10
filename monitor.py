@@ -188,7 +188,7 @@ def main():
     token = ftm8_login()
 
     # 4. Process new sales
-    lines = ['🌿 <b>مبيعات جديدة — مزرعة هادي اسحاق</b>']
+    lines = ['🌿 <b>تحديث FTM8</b>']
     for s in unique_new[:10]:
         name   = s.get('itemName', s.get('name', 'صنف'))
         qty    = s.get('qty', 0)

@@ -1,4 +1,4 @@
-name: 🌿 مزرعة هادي اسحاق — تنبيه واتس اب
+name: 🌿 مزرعة هادي اسحاق — تنبيه تيليغرام
 
 on:
   schedule:
@@ -8,7 +8,16 @@ on:
     - cron: '0 9 * * *'
     # 5:00 مساءً بتوقيت الكويت (14:00 UTC)
     - cron: '0 14 * * *'
-  workflow_dispatch:  # تشغيل يدوي من GitHub
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'أرسل رسالة تجريبية فقط'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   farm-alert:
@@ -27,11 +36,16 @@ jobs:
         run: pip install requests
 
       - name: تشغيل مراقب المخزون
-        run: python monitor.py
+        run: |
+          if [ "${{ github.event.inputs.test_mode }}" = "true" ]; then
+            python monitor.py test
+          else
+            python monitor.py
+          fi
         env:
           JSONBIN_BIN_URL:  ${{ secrets.JSONBIN_BIN_URL }}
           JSONBIN_API_KEY:  ${{ secrets.JSONBIN_API_KEY }}
-          WA_PHONE:         ${{ secrets.WA_PHONE }}
-          WA_APIKEY:        ${{ secrets.WA_APIKEY }}
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ADMIN_EMAIL:      ${{ secrets.FTM8_EMAIL }}
           ADMIN_PASS:       ${{ secrets.FTM8_PASS }}

@@ -1,13 +1,8 @@
 name: 🌿 مزرعة هادي اسحاق — تنبيه تيليغرام
-
 on:
   schedule:
-    # 7:00 صباحاً بتوقيت الكويت (04:00 UTC)
-    - cron: '0 4 * * *'
-    # 12:00 ظهراً بتوقيت الكويت (09:00 UTC)
-    - cron: '0 9 * * *'
-    # 5:00 مساءً بتوقيت الكويت (14:00 UTC)
-    - cron: '0 14 * * *'
+    - cron: '0 6 * * *'   # 9:00 صباحاً بتوقيت الكويت
+    - cron: '0 14 * * *'  # 5:00 مساءً بتوقيت الكويت
   workflow_dispatch:
     inputs:
       test_mode:
@@ -18,23 +13,18 @@ on:
         options:
           - 'false'
           - 'true'
-
 jobs:
   farm-alert:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: إعداد Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
       - name: تثبيت المكتبات
         run: pip install requests
-
       - name: تشغيل مراقب المخزون
         run: |
           if [ "${{ github.event.inputs.test_mode }}" = "true" ]; then

@@ -129,6 +129,28 @@ def build_alerts(D):
                 "detail": f"📅 {exp} · ⏰ {sl(days)}"
             })
 
+    # القضايا المفتوحة — جلسات قادمة ضمن 30 يوم
+    for c in D.get("cases", []):
+        if c.get("caseStatus") == "مغلق":
+            continue
+        exp = c.get("nextSession")
+        if not exp:
+            continue
+        days = days_left(exp)
+        if days <= 30:
+            num = c.get("caseNumber") or c.get("autoNumber") or ""
+            label = f"قضية ({num})" if num else "قضية"
+            person = c.get("personName", "")
+            charge = c.get("charge", "")
+            detail = f"📅 {exp} · ⏰ {sl(days)}"
+            if charge:
+                detail += f" · 📋 {charge[:50]}"
+            alerts.append({
+                "section": "⚖️ قضايا",
+                "line": f"{icon(days)} {label}: {person}",
+                "detail": detail
+            })
+
     return alerts
 
 # ── بناء HTML الإيميل ────────────────────────────────────────

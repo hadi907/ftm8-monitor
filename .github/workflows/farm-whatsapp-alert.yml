@@ -35,7 +35,7 @@ jobs:
         env:
           JSONBIN_BIN_URL:  ${{ secrets.JSONBIN_BIN_URL }}
           JSONBIN_API_KEY:  ${{ secrets.JSONBIN_API_KEY }}
-          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TOKEN:   ${{ secrets.FARM_TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ADMIN_EMAIL:      ${{ secrets.FTM8_EMAIL }}
           ADMIN_PASS:       ${{ secrets.FTM8_PASS }}

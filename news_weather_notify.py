@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 
 # ─── الإعدادات ────────────────────────────────────────────────
 OWM_API_KEY      = os.environ.get("OWM_API_KEY", "").strip()
-TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "").strip()
+TELEGRAM_TOKEN   = os.environ.get("NEWS_TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 
 CITIES = [

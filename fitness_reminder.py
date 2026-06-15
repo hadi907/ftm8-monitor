@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 TOKEN = os.environ.get("TELEGRAM_TOKEN", "8937123757:AAEKKqNkosJc0WSK5hOigNboKmejd5QwKTM")
-CHAT_ID = "22039859"
+CHAT_ID = 22039859
 
 hour = datetime.utcnow().hour
 

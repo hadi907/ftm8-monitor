@@ -84,7 +84,7 @@
       "cost": 0,
       "price": 2,
       "qty": 756,
-      "remaining": 753,
+      "remaining": 752,
       "minStock": 5,
       "date": "2026-03-28",
       "color": "اسود",
@@ -1469,6 +1469,23 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mqiitlq8mw4",
+      "img": ""
+    },
+    {
+      "id": "mqiiuuoeui6",
+      "invNum": "INV-071",
+      "date": "2026-06-17",
+      "client": "ومض",
+      "invItemId": "mnam5aq20ns",
+      "product": "دراسينا اسود",
+      "category": "داخلي",
+      "qty": 1,
+      "price": 2,
+      "discount": 0.5,
+      "total": 1.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mqiiuuojgbh",
       "img": ""
     }
   ],
@@ -3102,6 +3119,19 @@
       "month": "يونيو ٢٠٢٦",
       "notes": "مبيعة: الافوربيا - ومض",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mqiiuuojgbh",
+      "date": "2026-06-17",
+      "type": "وارد",
+      "amount": 1.5,
+      "paid": 1.5,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-071",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "مبيعة: دراسينا اسود - ومض",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -3261,5 +3291,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-06-17T20:25:58.481Z"
+  "date": "2026-06-17T20:26:56.632Z"
 }

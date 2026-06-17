@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 
-TOKEN = os.environ.get("TELEGRAM_TOKEN", "8937123757:AAEKKqNkosJc0WSK5hOigNboKmejd5QwKTM")
+TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 CHAT_ID = 22039859
 
 hour = datetime.utcnow().hour
@@ -17,8 +17,9 @@ elif hour == 17:
 else:
     msg = f"⏰ تذكير تمارين اللياقة الساعة {hour} UTC 💪"
 
-url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+url  = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
 data = json.dumps({"chat_id": CHAT_ID, "text": msg}).encode("utf-8")
-req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json; charset=utf-8"})
+req  = urllib.request.Request(url, data=data,
+       headers={"Content-Type": "application/json; charset=utf-8"})
 urllib.request.urlopen(req)
 print(f"Done - hour {hour}:00 UTC")

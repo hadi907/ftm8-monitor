@@ -8,7 +8,7 @@
       "cost": 0,
       "price": 1.5,
       "qty": 236,
-      "remaining": 234,
+      "remaining": 233,
       "minStock": 5,
       "date": "2026-03-27",
       "color": "وردي",
@@ -1428,13 +1428,13 @@
       "invItemId": "",
       "product": "ربل",
       "category": "داخلي",
-      "qty": 7,
-      "price": 1,
+      "qty": 5,
+      "price": 2,
       "discount": 0,
-      "total": 7,
+      "total": 10,
       "location": "محل",
       "payment": "نقد",
-      "cashId": "mqh2s0l20sl",
+      "cashId": "mqh5al7urb1",
       "img": ""
     },
     {
@@ -1452,6 +1452,23 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mqh2u0c9c7c",
+      "img": ""
+    },
+    {
+      "id": "mqiitlq0vef",
+      "invNum": "INV-070",
+      "date": "2026-06-17",
+      "client": "ومض",
+      "invItemId": "mn8jcwciujo",
+      "product": "الافوربيا",
+      "category": "خارجي",
+      "qty": 1,
+      "price": 1.5,
+      "discount": 0.75,
+      "total": 0.75,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mqiitlq8mw4",
       "img": ""
     }
   ],
@@ -1474,7 +1491,9 @@
       "notes": "restored",
       "cashId": "cash_exr1",
       "img": "",
-      "settledAmt": 0
+      "settledAmt": 45,
+      "settleSource": "wallet",
+      "settleDate": "2026-06-16"
     },
     {
       "id": "exr2",
@@ -1494,7 +1513,9 @@
       "notes": "restored",
       "cashId": "cash_exr2",
       "img": "",
-      "settledAmt": 0
+      "settledAmt": 55,
+      "settleSource": "wallet",
+      "settleDate": "2026-06-16"
     },
     {
       "id": "exr3",
@@ -1514,7 +1535,9 @@
       "notes": "restored",
       "cashId": "cash_exr3",
       "img": "",
-      "settledAmt": 0
+      "settledAmt": 7,
+      "settleSource": "wallet",
+      "settleDate": "2026-06-16"
     },
     {
       "id": "exr4",
@@ -1905,14 +1928,33 @@
       "paid": 107.5,
       "remaining": 0,
       "status": "مدفوع",
-      "source": "مزرعة",
-      "paidBy": "",
+      "source": "شريك",
+      "paidBy": "ابواسحاق",
       "payment": "نقد",
       "vendor": "موسسه القصر الاخضر",
       "invRef": "478",
       "month": "يونيو 2026",
       "notes": "",
-      "cashId": "mqe8f33q0zw",
+      "cashId": "mqh3jcyamrq",
+      "img": ""
+    },
+    {
+      "id": "mqh3pgpcely",
+      "date": "2026-06-15",
+      "type": "أخرى",
+      "desc": "اقامه عبدول",
+      "amount": 25,
+      "paid": 25,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "يونبو 2026",
+      "notes": "",
+      "cashId": "mqh3pgpchbq",
       "img": ""
     }
   ],
@@ -2958,19 +3000,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mqe8f33q0zw",
-      "date": "2026-06-14",
-      "type": "صادر",
-      "amount": 107.5,
-      "paid": 107.5,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-478",
-      "month": "يونيو 2026",
-      "notes": "مصروف: أخرى - عصايا عدد 2000 +250 احواض معلقه - موسسه القصر الاخضر",
-      "autoFrom": "expense"
-    },
-    {
       "id": "mqh2nabuy1v",
       "date": "2026-06-16",
       "type": "وارد",
@@ -2997,19 +3026,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mqh2s0l20sl",
-      "date": "2026-06-16",
-      "type": "وارد",
-      "amount": 7,
-      "paid": 7,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-068",
-      "month": "يونيو ٢٠٢٦",
-      "notes": "مبيعة: ربل - ومض",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mqh2u0c9c7c",
       "date": "2026-06-16",
       "type": "وارد",
@@ -3020,6 +3036,71 @@
       "ref": "INV-069",
       "month": "يونيو ٢٠٢٦",
       "notes": "مبيعة: فل - ومض",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "mqh3jcyamrq",
+      "date": "2026-06-14",
+      "type": "صادر",
+      "amount": 107.5,
+      "paid": 107.5,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-478",
+      "month": "يونيو 2026",
+      "notes": "مصروف: أخرى - عصايا عدد 2000 +250 احواض معلقه - موسسه القصر الاخضر",
+      "autoFrom": "expense"
+    },
+    {
+      "id": "mqh3pgpchbq",
+      "date": "2026-06-15",
+      "type": "صادر",
+      "amount": 25,
+      "paid": 25,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "—",
+      "month": "يونبو 2026",
+      "notes": "مصروف: أخرى - اقامه عبدول",
+      "autoFrom": "expense"
+    },
+    {
+      "id": "mqh48sksrrb",
+      "date": "2026-06-16",
+      "type": "صادر",
+      "amount": 107,
+      "paid": 107,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "محفظة",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "تسديد شريك ابواسحاق من المحفظة",
+      "autoFrom": "partner_settle"
+    },
+    {
+      "id": "mqh5al7urb1",
+      "date": "2026-06-16",
+      "type": "وارد",
+      "amount": 10,
+      "paid": 10,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-068",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "مبيعة: ربل - ومض",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "mqiitlq8mw4",
+      "date": "2026-06-17",
+      "type": "وارد",
+      "amount": 0.75,
+      "paid": 0.75,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-070",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "مبيعة: الافوربيا - ومض",
       "autoFrom": "sale"
     }
   ],
@@ -3047,9 +3128,9 @@
       "client": "ابواسحاق",
       "desc": "مستحقات شريك: صيانة — تبديل كمبريسور ثلاجة العمال - يوسف",
       "total": 45,
-      "paid": 0,
-      "remaining": 45,
-      "status": "معلق",
+      "paid": 45,
+      "remaining": 0,
+      "status": "مسدد",
       "lastPayDate": "",
       "notes": "دفع ابواسحاق من ماله الخاص",
       "expId": "exr1",
@@ -3061,9 +3142,9 @@
       "client": "ابواسحاق",
       "desc": "مستحقات شريك: صيانة — فلاتر وكيميكال لمحطة التحلية - زمزم",
       "total": 55,
-      "paid": 0,
-      "remaining": 55,
-      "status": "معلق",
+      "paid": 55,
+      "remaining": 0,
+      "status": "مسدد",
       "lastPayDate": "",
       "notes": "دفع ابواسحاق من ماله الخاص",
       "expId": "exr2",
@@ -3075,9 +3156,9 @@
       "client": "ابواسحاق",
       "desc": "مستحقات شريك: صيانة — ديزل ماكينة الكهرباء - بوفهد",
       "total": 20,
-      "paid": 0,
-      "remaining": 20,
-      "status": "معلق",
+      "paid": 7,
+      "remaining": 13,
+      "status": "جزئي",
       "lastPayDate": "",
       "notes": "دفع ابواسحاق من ماله الخاص",
       "expId": "exr3",
@@ -3152,6 +3233,20 @@
       "notes": "دفع ابواسحاق من ماله الخاص",
       "expId": "mpm45w1na40",
       "isPartnerDebt": true
+    },
+    {
+      "id": "debt_p_mqe8f33qril",
+      "date": "2026-06-14",
+      "client": "ابواسحاق",
+      "desc": "مستحقات شريك: أخرى — عصايا عدد 2000 +250 احواض معلقه",
+      "total": 107.5,
+      "paid": 0,
+      "remaining": 107.5,
+      "status": "معلق",
+      "lastPayDate": "",
+      "notes": "دفع ابواسحاق من ماله الخاص",
+      "expId": "mqe8f33qril",
+      "isPartnerDebt": true
     }
   ],
   "SETTINGS": {
@@ -3166,5 +3261,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-06-16T20:10:37.278Z"
+  "date": "2026-06-17T20:25:58.481Z"
 }

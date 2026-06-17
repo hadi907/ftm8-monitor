@@ -1,0 +1,20 @@
+name: 📊 Daily Report - هادي
+
+on:
+  schedule:
+    # 11م الكويت = 20:00 UTC — كل يوم
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+
+jobs:
+  send-daily-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Send Daily Report 📊
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        run: python daily_report.py

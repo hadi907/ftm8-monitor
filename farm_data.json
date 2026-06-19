@@ -302,7 +302,7 @@
       "cost": 0,
       "price": 1.5,
       "qty": 58,
-      "remaining": 37,
+      "remaining": 34,
       "minStock": 5,
       "date": "2026-04-12",
       "color": "اخضر",
@@ -1503,6 +1503,23 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mql1ujrxnpw",
+      "img": ""
+    },
+    {
+      "id": "mql1wwl1w6d",
+      "invNum": "INV-073",
+      "date": "2026-06-18",
+      "client": "ومض",
+      "invItemId": "mnw8a6vw3lw",
+      "product": "ودليه",
+      "category": "داخلي",
+      "qty": 3,
+      "price": 1.5,
+      "discount": 1.5,
+      "total": 3,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mql1wwl7nu4",
       "img": ""
     }
   ],
@@ -3162,6 +3179,19 @@
       "month": "يونيو ٢٠٢٦",
       "notes": "مبيعة: فل - ومض",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mql1wwl7nu4",
+      "date": "2026-06-18",
+      "type": "وارد",
+      "amount": 3,
+      "paid": 3,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-073",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "مبيعة: ودليه - ومض",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -3321,5 +3351,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-06-19T14:54:07.597Z"
+  "date": "2026-06-19T14:55:57.468Z"
 }

@@ -46,7 +46,7 @@
       "cost": 0,
       "price": 1,
       "qty": 500,
-      "remaining": 250,
+      "remaining": 249,
       "minStock": 5,
       "date": "2026-03-27",
       "color": "ابيض",
@@ -1486,6 +1486,23 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mqiiuuojgbh",
+      "img": ""
+    },
+    {
+      "id": "mql1ujrn55q",
+      "invNum": "INV-072",
+      "date": "2026-06-18",
+      "client": "ومض",
+      "invItemId": "mn8jz6fmds2",
+      "product": "فل",
+      "category": "خارجي",
+      "qty": 1,
+      "price": 1,
+      "discount": 0.25,
+      "total": 0.75,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mql1ujrxnpw",
       "img": ""
     }
   ],
@@ -3132,6 +3149,19 @@
       "month": "يونيو ٢٠٢٦",
       "notes": "مبيعة: دراسينا اسود - ومض",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mql1ujrxnpw",
+      "date": "2026-06-18",
+      "type": "وارد",
+      "amount": 0.75,
+      "paid": 0.75,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-072",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "مبيعة: فل - ومض",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -3291,5 +3321,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-06-17T20:26:56.632Z"
+  "date": "2026-06-19T14:54:07.597Z"
 }

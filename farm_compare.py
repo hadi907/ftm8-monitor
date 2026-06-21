@@ -58,7 +58,8 @@ def load_app():
     try:
         res = requests.get(GITHUB_RAW, timeout=15)
         data = res.json()
-        sales = data.get('SALES', [])
+        # ── إصلاح: يدعم المفاتيحين uppercase (SALES) و lowercase (ps3_sales) ──
+        sales = data.get('SALES', data.get('ps3_sales', []))
         print(f"✅ farm_data.json — {len(sales)} مبيعة")
         return sales
     except Exception as e:

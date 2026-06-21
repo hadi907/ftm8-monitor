@@ -44,12 +44,29 @@ jobs:
 
           if res.status_code == 200:
               data = res.json().get('record', {})
-              sales = data.get('SALES', [])
+
+              # ── تحويل المفاتيح: ps3_* → uppercase ──
+              # التطبيق يحفظ بصيغة ps3_sales لكن farm_compare.py يقرأ SALES
+              KEY_MAP = {
+                  'ps3_sales':    'SALES',
+                  'ps3_inv':      'INV',
+                  'ps3_exp':      'EXP',
+                  'ps3_cash':     'CASH',
+                  'ps3_cust':     'CUST',
+                  'ps3_waste':    'WASTE',
+                  'ps3_debts':    'DEBTS',
+                  'ps3_settings': 'SETTINGS',
+              }
+              output = {}
+              for k, v in data.items():
+                  output[KEY_MAP.get(k, k)] = v
+
+              sales = output.get('SALES', [])
               print(f"✅ تم جلب {len(sales)} مبيعة")
 
               with open('farm_data.json', 'w', encoding='utf-8') as f:
-                  json.dump(data, f, ensure_ascii=False, indent=2)
-              print("✅ تم حفظ farm_data.json")
+                  json.dump(output, f, ensure_ascii=False, indent=2)
+              print("✅ تم حفظ farm_data.json بمفاتيح صحيحة (SALES, INV, ...)")
           else:
               print(f"⚠️ JSONBin غير متاح: {res.text[:100]}")
               print("سيتم الاحتفاظ بالملف القديم")

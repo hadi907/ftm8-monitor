@@ -38,6 +38,19 @@ def fmt(v):
     except:
         return "0.000"
 
+def fetch_jsonbin():
+    """يجلب البيانات من JSONBin مباشرة"""
+    try:
+        req = urllib.request.Request(
+            JSONBIN_URL,
+            headers={"X-Master-Key": JSONBIN_KEY, "X-Bin-Meta": "false"}
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read().decode())
+    except Exception as e:
+        print(f"⚠️ JSONBin فشل: {e}")
+        return None
+
 # ══ جلب البيانات ══
 raw = None
 
@@ -51,19 +64,12 @@ try:
 except Exception as e:
     print(f"⚠️ farm_data.json فشل: {e}")
 
-# ثانياً: JSONBin كاحتياط
+# ثانياً: JSONBin كاحتياط كامل
 if raw is None and JSONBIN_KEY:
     print("📡 محاولة JSONBin...")
-    try:
-        req = urllib.request.Request(
-            JSONBIN_URL,
-            headers={"X-Master-Key": JSONBIN_KEY, "X-Bin-Meta": "false"}
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            raw = json.loads(resp.read().decode())
+    raw = fetch_jsonbin()
+    if raw:
         print("✅ تم جلب البيانات من JSONBin")
-    except Exception as e:
-        print(f"❌ JSONBin فشل: {e}")
 
 if raw is None:
     print("❌ فشل جلب البيانات من كل المصادر")
@@ -71,8 +77,18 @@ if raw is None:
 
 # ══ استخراج البيانات ══
 sales   = raw.get("SALES", raw.get("ps3_sales", []))
-exps    = raw.get("EXP", raw.get("ps3_exp", []))
-cash    = raw.get("CASH", raw.get("ps3_cash", []))
+exps    = raw.get("EXP",   raw.get("ps3_exp",   []))
+cash    = raw.get("CASH",  raw.get("ps3_cash",   []))
+
+print(f"📊 مبيعات: {len(sales)} | مصروفات: {len(exps)} | كاش: {len(cash)}")
+
+# ── إذا EXP فارغ في farm_data.json، اجلبه مباشرة من JSONBin ──
+if not exps and JSONBIN_KEY:
+    print("⚠️ EXP فارغ — جلب مباشر من JSONBin...")
+    jb = fetch_jsonbin()
+    if jb:
+        exps = jb.get("ps3_exp", jb.get("EXP", []))
+        print(f"✅ تم جلب {len(exps)} مصروف من JSONBin مباشرة")
 
 print(f"✅ مبيعات: {len(sales)} | مصروفات: {len(exps)} | كاش: {len(cash)}")
 
@@ -247,7 +263,7 @@ if month_keys:
         bg='#f8fffe' if i%2==0 else '#fff'
         html+=f'<tr style="background:{bg}"><td style="font-weight:700;color:#37474f">{month_label(m)}</td><td style="text-align:center;color:#1b5e20;font-weight:700;direction:ltr">{fmt(d["income"])}</td><td style="text-align:center;color:#b71c1c;font-weight:700;direction:ltr">{fmt(d["exp"]) if d["exp"]>0 else "—"}</td><td style="text-align:center;font-weight:900;color:{nc};direction:ltr">{ns}</td></tr>'
     html+=f'</tbody><tfoot><tr style="background:#263238;color:#fff;font-weight:900"><td>الإجمالي</td><td style="text-align:center;color:#b9f6ca;direction:ltr">{fmt(g_inc)}</td><td style="text-align:center;color:#ff8a80;direction:ltr">{fmt(g_exp) if g_exp>0 else "—"}</td><td style="text-align:center;color:{gnc};direction:ltr">{gns}</td></tr></tfoot></table></div>'
-    
+
     ts=0
     html+='<div class="box"><div class="stitle" style="background:linear-gradient(135deg,#1565c0,#1976d2)">💰 فائض الأشهر</div><table><thead><tr style="background:#1565c0;color:#fff"><th>الشهر</th><th style="color:#b9f6ca">إيراد / مصروف</th><th>الفائض</th></tr></thead><tbody>'
     for i,m in enumerate(month_keys):

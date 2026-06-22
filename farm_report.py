@@ -14,7 +14,7 @@ import urllib.request, urllib.error
 FARM_DATA_URL = "https://raw.githubusercontent.com/hadi907/ftm8-monitor/main/farm_data.json"
 JSONBIN_URL   = "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
 JSONBIN_KEY   = os.environ.get("JSONBIN_API_KEY", "")
-EMAIL_FROM    = os.environ.get("EMAIL_FROM", "hishak8@yahoo.com")
+EMAIL_FROM    = os.environ.get("EMAIL_FROM", "hishak888@gmail.com")
 EMAIL_PASS    = os.environ.get("EMAIL_PASS", "")
 EMAIL_TO      = "hadi@ftm8.com"
 SMTP_HOST     = "smtp.gmail.com"

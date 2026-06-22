@@ -450,35 +450,12 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
   </div>
   <div class="tcard">
     <div class="tcard-head"><h3>سجل المبيعات</h3><div id="sale-head-sum" style="font-size:0.75rem;opacity:.85"></div></div>
-    <div class="toolbar" style="flex-wrap:wrap;gap:6px">
-      <div class="searchbox" style="min-width:160px"><input id="sale-s" oninput="rSales()" placeholder="🔍 بحث سريع..."></div>
-      <select id="sale-month" onchange="rSales()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.77rem"><option value="">📅 كل الأشهر</option></select>
-      <label style="font-size:0.77rem;color:var(--txt2);font-weight:600;display:flex;align-items:center;gap:4px">من: <input type="date" id="sale-date-from" onchange="rSales()" style="padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.77rem"></label>
+    <div class="toolbar">
+      <div class="searchbox"><input id="sale-s" oninput="rSales()" placeholder="بحث..."></div>
+      <select id="sale-month" onchange="rSales()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.77rem"><option value="">كل الأشهر</option></select>
+      <label style="font-size:0.77rem;color:var(--txt2);font-weight:600;display:flex;align-items:center;gap:4px">📅 من: <input type="date" id="sale-date-from" onchange="rSales()" style="padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.77rem"></label>
       <label style="font-size:0.77rem;color:var(--txt2);font-weight:600;display:flex;align-items:center;gap:4px">إلى: <input type="date" id="sale-date-to" onchange="rSales()" style="padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.77rem"></label>
-    </div>
-    <div class="toolbar" style="flex-wrap:wrap;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2)">
-      <label style="font-size:0.77rem;color:var(--txt2);font-weight:600;display:flex;align-items:center;gap:5px">
-        👤 العميل:
-        <select id="sale-cust-filter" onchange="rSales()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.77rem;min-width:140px">
-          <option value="">كل العملاء</option>
-        </select>
-      </label>
-      <label style="font-size:0.77rem;color:var(--txt2);font-weight:600;display:flex;align-items:center;gap:5px">
-        📝 الوصف / المنتج:
-        <input type="text" id="sale-desc-filter" oninput="rSales()" placeholder="اكتب اسم المنتج أو الوصف..." style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.77rem;min-width:180px">
-      </label>
-      <label style="font-size:0.77rem;color:var(--txt2);font-weight:600;display:flex;align-items:center;gap:5px">
-        🏷️ النوع:
-        <select id="sale-type-filter" onchange="rSales()" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:0.77rem">
-          <option value="">كل الأنواع</option>
-          <option value="داخلي">🏠 داخلي</option>
-          <option value="خارجي">🌳 خارجي</option>
-          <option value="نقد">💵 نقد</option>
-          <option value="بطاقة">💳 بطاقة</option>
-        </select>
-      </label>
-      <button class="btn btn-ghost btn-sm" onclick="resetSaleFilters()" style="font-size:0.77rem">🔄 إعادة ضبط الفلاتر</button>
-      <span id="sale-filter-badge" style="display:none;background:var(--teal);color:#fff;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;align-self:center"></span>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('sale-date-from').value='';document.getElementById('sale-date-to').value='';rSales()">✕ إلغاء</button>
     </div>
     <div class="filter-row">
       <button class="chip active" id="sf-all" onclick="setSF('')">الكل</button>
@@ -1415,6 +1392,8 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
         <button class="btn btn-ghost btn-sm" onclick="fixInvNums(true)" style="color:var(--purple2);border-color:var(--purple2)">🔢 إصلاح أرقام الفواتير</button>
         <button class="btn btn-ghost btn-sm" onclick="diagSalesCashGap()" style="color:var(--blue2);border-color:var(--blue2)">🔍 تشخيص فارق المبيعات/الكاش</button>
         <button class="btn btn-ghost btn-sm" onclick="fixMay2026Errors()" style="color:var(--red);border-color:var(--red2);font-weight:800">✅ تصحيح أخطاء مايو 2026 (XLSX)</button>
+        <button class="btn btn-ghost btn-sm" onclick="openXlsxCompare()" style="color:var(--orange);border-color:var(--orange2);font-weight:800">📊 مقارنة XLSX مع التطبيق</button>
+        <input type="file" id="compare-xlsx-input" accept=".xlsx,.xls" style="display:none" onchange="runXlsxCompare(this)">
       </div>
       <div id="fix-status" style="font-size:0.77rem;margin-top:6px;font-weight:700;min-height:18px"></div>
     </div
@@ -2774,61 +2753,19 @@ function delInv(id){
 
 // ══ RENDER: SALES ══
 function setSF(f){sfFilter=f;document.querySelectorAll('#page-sales .filter-row .chip').forEach(c=>c.classList.remove('active'));if(!f)document.getElementById('sf-all').classList.add('active');rSales();}
-function resetSaleFilters(){
-  document.getElementById('sale-s').value='';
-  document.getElementById('sale-month').value='';
-  var df=document.getElementById('sale-date-from');if(df)df.value='';
-  var dt=document.getElementById('sale-date-to');if(dt)dt.value='';
-  var cf=document.getElementById('sale-cust-filter');if(cf)cf.value='';
-  var desc=document.getElementById('sale-desc-filter');if(desc)desc.value='';
-  var tf=document.getElementById('sale-type-filter');if(tf)tf.value='';
-  sfFilter='';
-  document.querySelectorAll('#page-sales .filter-row .chip').forEach(c=>c.classList.remove('active'));
-  document.getElementById('sf-all').classList.add('active');
-  rSales();
-}
 function rSales(){
   const s=document.getElementById('sale-s').value.toLowerCase();
   const mo=document.getElementById('sale-month').value;
   const dfrom=(document.getElementById('sale-date-from')||{}).value||'';
   const dto=(document.getElementById('sale-date-to')||{}).value||'';
-  const custF=(document.getElementById('sale-cust-filter')||{}).value||'';
-  const descF=((document.getElementById('sale-desc-filter')||{}).value||'').toLowerCase();
-  const typeF=(document.getElementById('sale-type-filter')||{}).value||'';
-
-  // تحديث قائمة العملاء
-  var custSel=document.getElementById('sale-cust-filter');
-  if(custSel){
-    var curCust=custSel.value;
-    var allClients=[...new Set(SALES.map(x=>x.client||'').filter(Boolean))].sort();
-    custSel.innerHTML='<option value="">👤 كل العملاء</option>'+allClients.map(c=>'<option value="'+c+'"'+(c===curCust?' selected':'')+'>'+c+'</option>').join('');
-  }
-
   let data=SALES.filter(p=>{
-    // فلتر النوع (chips القديمة + select الجديد)
-    var typeFilter=typeF||sfFilter;
-    if(typeFilter&&p.category!==typeFilter&&p.payment!==typeFilter)return false;
-    // البحث السريع (يبحث في المنتج والعميل)
+    if(sfFilter&&p.category!==sfFilter&&p.payment!==sfFilter)return false;
     if(s&&!p.product.toLowerCase().includes(s)&&!(p.client||'').toLowerCase().includes(s))return false;
-    // فلتر الوصف / المنتج
-    if(descF&&!p.product.toLowerCase().includes(descF)&&!(p.notes||'').toLowerCase().includes(descF))return false;
-    // فلتر العميل
-    if(custF&&(p.client||'')!==custF)return false;
-    // فلتر الشهر
     if(mo&&!(p.date||'').startsWith(mo))return false;
-    // فلتر الفترة
     if(dfrom&&(p.date||'')<dfrom)return false;
     if(dto&&(p.date||'')>dto)return false;
     return true;
   }).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-
-  // شارة عدد الفلاتر النشطة
-  var activeFilters=[s,mo,dfrom,dto,custF,descF,typeF||sfFilter].filter(Boolean).length;
-  var badge=document.getElementById('sale-filter-badge');
-  if(badge){
-    if(activeFilters>0){badge.style.display='inline-block';badge.textContent='🔍 '+activeFilters+' فلتر نشط';}
-    else{badge.style.display='none';}
-  }
   const months=[...new Set(SALES.map(s=>s.date.slice(0,7)))].sort().reverse();
   const sel=document.getElementById('sale-month');const cur=sel.value;
   sel.innerHTML='<option value="">كل الأشهر</option>'+months.map(m=>'<option value="'+m+'" '+(m===cur?'selected':'')+'>'+m+'</option>').join('');
@@ -4058,54 +3995,28 @@ function exportPDF(type){
   }
 
   else if(type==='sales'){
-    // ── تطبيق نفس فلاتر الشاشة الحالية ──
-    var _s=(document.getElementById('sale-s')||{}).value||'';_s=_s.toLowerCase();
-    var _mo=(document.getElementById('sale-month')||{}).value||'';
-    var _dfrom=(document.getElementById('sale-date-from')||{}).value||'';
-    var _dto=(document.getElementById('sale-date-to')||{}).value||'';
-    var _custF=(document.getElementById('sale-cust-filter')||{}).value||'';
-    var _descF=((document.getElementById('sale-desc-filter')||{}).value||'').toLowerCase();
-    var _typeF=(document.getElementById('sale-type-filter')||{}).value||'';
-    var _typeFilter=_typeF||sfFilter;
-    var filteredSales=SALES.filter(function(p){
-      if(_typeFilter&&p.category!==_typeFilter&&p.payment!==_typeFilter)return false;
-      if(_s&&!p.product.toLowerCase().includes(_s)&&!(p.client||'').toLowerCase().includes(_s))return false;
-      if(_descF&&!p.product.toLowerCase().includes(_descF)&&!(p.notes||'').toLowerCase().includes(_descF))return false;
-      if(_custF&&(p.client||'')!==_custF)return false;
-      if(_mo&&!(p.date||'').startsWith(_mo))return false;
-      if(_dfrom&&(p.date||'')<_dfrom)return false;
-      if(_dto&&(p.date||'')>_dto)return false;
-      return true;
-    }).sort(function(a,b){return a.date.localeCompare(b.date);});
-    var filterDesc=[];
-    if(_custF)filterDesc.push('👤 العميل: '+_custF);
-    if(_descF)filterDesc.push('📝 الوصف: '+_descF);
-    if(_typeFilter)filterDesc.push('🏷️ النوع: '+_typeFilter);
-    if(_mo)filterDesc.push('📅 الشهر: '+_mo);
-    if(_dfrom||_dto)filterDesc.push('📆 الفترة: '+(_dfrom||'—')+' ← '+(_dto||'—'));
-    var filterLine=filterDesc.length?filterDesc.join(' &nbsp;|&nbsp; '):'كل السجلات (بدون فلتر)';
-    var tS=filteredSales.reduce(function(s,p){return s+p.total;},0);
-    var disc=filteredSales.reduce(function(s,p){return s+(p.discount||0);},0);
-    var salesCost=filteredSales.reduce(function(s,sale){var inv=sale.invItemId?INV.find(function(x){return x.id===sale.invItemId;}):null;return s+(inv?inv.cost*sale.qty:0);},0);
+    var tS=SALES.reduce(function(s,p){return s+p.total;},0);
+    var disc=SALES.reduce(function(s,p){return s+(p.discount||0);},0);
+    var salesCost=SALES.reduce(function(s,sale){var inv=sale.invItemId?INV.find(function(x){return x.id===sale.invItemId;}):null;return s+(inv?inv.cost*sale.qty:0);},0);
     var salesNet=tS-salesCost-disc;
-    var srows=filteredSales.map(function(s,i){
-      return '<tr><td>'+(i+1)+'</td><td>'+(s.invNum||'-')+'</td><td>'+s.date+'</td><td>'+(s.client||'-')+'</td><td><strong>'+s.product+'</strong></td><td>'+(s.category||'-')+'</td><td>'+s.qty+'</td><td>'+s.price.toFixed(3)+'</td><td>'+(s.discount?s.discount.toFixed(3):'-')+'</td><td><strong class=\"green\">'+s.total.toFixed(3)+'</strong></td><td>'+(s.location||'-')+'</td><td>'+(s.payment||'-')+'</td></tr>';
+    var srows=SALES.slice().sort(function(a,b){return a.date.localeCompare(b.date);}).map(function(s,i){
+      return '<tr><td>'+(i+1)+'</td><td>'+(s.invNum||'-')+'</td><td>'+s.date+'</td><td>'+(s.client||'-')+'</td><td><strong>'+s.product+'</strong></td><td>'+(s.category||'-')+'</td><td>'+s.qty+'</td><td>'+s.price.toFixed(3)+'</td><td>'+(s.discount?s.discount.toFixed(3):'-')+'</td><td><strong class="green">'+s.total.toFixed(3)+'</strong></td><td>'+(s.location||'-')+'</td><td>'+(s.payment||'-')+'</td></tr>';
     }).join('');
-    html='<!DOCTYPE html><html lang=\"ar\" dir=\"rtl\"><head><meta charset=\"UTF-8\"><title>سجل المبيعات</title>'+baseStyle+'</head><body>'
-      +'<div class=\"header\"><h1>مزرعة هادي اسحاق</h1><h2>SALES REPORT — مزرعة هادي اسحاق</h2></div>'
-      +'<div class=\"subheader\"><span>التاريخ: '+today+'</span><span>'+filteredSales.length+' عملية'+(filteredSales.length<SALES.length?' (من إجمالي '+SALES.length+')':'')+'</span><span>DATE: '+todayEn+'</span></div>'
-      +'<div style=\"background:#fff8e1;border-right:4px solid #f9a825;padding:7px 14px;font-size:8.5pt;color:#5d4037;margin:4px 0\"><strong>🔍 الفلاتر المطبقة:</strong> '+filterLine+'</div>'
-      +'<div class=\"kpi-row\" style=\"grid-template-columns:repeat(4,1fr)\">'
-      +'<div class=\"kpi\" style=\"background:#1b5e20\"><div class=\"val\">'+tS.toFixed(3)+'</div><div class=\"lbl\">اجمالي المبيعات (دك)</div></div>'
-      +'<div class=\"kpi\" style=\"background:#b71c1c\"><div class=\"val\">'+salesCost.toFixed(3)+'</div><div class=\"lbl\">تكلفة البضاعة (دك)</div></div>'
-      +'<div class=\"kpi\" style=\"background:'+(salesNet>=0?'#00695c':'#b71c1c')+'\"><div class=\"val\">'+salesNet.toFixed(3)+'</div><div class=\"lbl\">صافي ربح المبيعات (دك)</div></div>'
-      +'<div class=\"kpi\" style=\"background:#e65100\"><div class=\"val\">'+disc.toFixed(3)+'</div><div class=\"lbl\">الخصومات (دك)</div></div>'
+    html='<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>سجل المبيعات</title>'+baseStyle+'</head><body>'
+      +'<div class="header"><h1>مزرعة هادي اسحاق</h1><h2>SALES REPORT — مزرعة هادي اسحاق</h2></div>'
+      +'<div class="subheader"><span>التاريخ: '+today+'</span><span>'+SALES.length+' عملية</span><span>DATE: '+todayEn+'</span></div>'
+      +'<div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">'
+      +'<div class="kpi" style="background:#1b5e20"><div class="val">'+tS.toFixed(3)+'</div><div class="lbl">اجمالي المبيعات (دك)</div></div>'
+      +'<div class="kpi" style="background:#b71c1c"><div class="val">'+salesCost.toFixed(3)+'</div><div class="lbl">تكلفة البضاعة (دك)</div></div>'
+      +'<div class="kpi" style="background:'+(salesNet>=0?'#00695c':'#b71c1c')+'"><div class="val">'+salesNet.toFixed(3)+'</div><div class="lbl">صافي ربح المبيعات (دك)</div></div>'
+      +'<div class="kpi" style="background:#e65100"><div class="val">'+disc.toFixed(3)+'</div><div class="lbl">الخصومات (دك)</div></div>'
       +'</div>'
       +'<table><thead><tr><th>#</th><th>رقم الفاتورة</th><th>التاريخ</th><th>العميل</th><th>المنتج</th><th>الفئة</th><th>الكمية</th><th>السعر</th><th>الخصم</th><th>الاجمالي (دك)</th><th>مكان البيع</th><th>طريقة الدفع</th></tr></thead>'
       +'<tbody>'+srows+'</tbody>'
-      +'<tfoot><tr><td colspan=\"9\">TOTAL SALES</td><td>'+tS.toFixed(3)+'</td><td colspan=\"2\"></td></tr></tfoot>'
-      +'</table><div class=\"footer\">مزرعة هادي اسحاق - '+today+'</div></body></html>';
+      +'<tfoot><tr><td colspan="9">TOTAL SALES</td><td>'+tS.toFixed(3)+'</td><td colspan="2"></td></tr></tfoot>'
+      +'</table><div class="footer">مزرعة هادي اسحاق - '+today+'</div></body></html>';
   }
+
   else if(type==='statement'){
     var tS2=SALES.reduce(function(s,p){return s+p.total;},0);
     var tE2=EXP.reduce(function(s,p){return s+p.amount;},0);
@@ -6171,7 +6082,13 @@ function _getAllData(){
     delete c.img; delete c.image; delete c.photo; delete c.pic;
     return c;
   });
-  return {ps3_sales:recentSales, ps3_inv:invNoImg, v:4, ts:new Date().toISOString()};
+  // آخر 50 مصروف بدون صور
+  var recentExp = (EXP||[]).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');}).slice(0,50).map(function(e){
+    var c = Object.assign({},e);
+    delete c.img; delete c.image; delete c.photo; delete c.pic;
+    return c;
+  });
+  return {ps3_sales:recentSales, ps3_inv:invNoImg, ps3_exp:recentExp, v:4, ts:new Date().toISOString()};
 }
 
 async function createNewBin(){
@@ -6334,7 +6251,9 @@ function startAutoCloudSave(){
 }
 
 // ══ ADMIN REPORT ══
-function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb=getWalletBalance();_aw.textContent=_awb.toFixed(3)+' دك';_aw.style.color=_awb<0?'#ff8a80':'#b9f6ca';}
+var _rAdminBusy=false;
+function rAdmin(){if(_rAdminBusy)return;_rAdminBusy=true;try{_rAdminImpl();}finally{_rAdminBusy=false;}}
+function _rAdminImpl(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb=getWalletBalance();_aw.textContent=_awb.toFixed(3)+' دك';_aw.style.color=_awb<0?'#ff8a80':'#b9f6ca';}
   var mf=document.getElementById('adm-month');
   var selMonth=mf?mf.value:'';
   // Build all months from data
@@ -8136,6 +8055,130 @@ function init(){
 }
 init();
 
+// ══ XLSX COMPARE ══
+function openXlsxCompare(){
+  var inp=document.getElementById('compare-xlsx-input');
+  inp.value='';
+  inp.click();
+}
+function runXlsxCompare(input){
+  var file=input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var wb=XLSX.read(ev.target.result,{type:'binary'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false});
+      var hdrIdx=-1,colInv=-1,colDate=-1,colProd=-1,colClient=-1,colTotal=-1;
+      for(var ri=0;ri<Math.min(rows.length,5);ri++){
+        var r=rows[ri];
+        for(var ci=0;ci<r.length;ci++){
+          var v=String(r[ci]||'').trim();
+          if(v==='رقم الفاتورة'||v==='الفاتورة')colInv=ci;
+          if(v==='التاريخ')colDate=ci;
+          if(v==='المنتج'||v==='الوصف'||v==='البند')colProd=ci;
+          if(v==='العميل')colClient=ci;
+          if(v==='الإجمالي'||v==='الاجمالي'||v==='الإجمالي (دك)'||v==='الاجمالي (دك)')colTotal=ci;
+        }
+        if(colInv>=0&&colTotal>=0){hdrIdx=ri;break;}
+      }
+      if(hdrIdx<0||colInv<0){colInv=1;colDate=2;colClient=3;colProd=4;colTotal=9;hdrIdx=0;}
+      var xlsxRows=[];
+      var xlsxTotal=0;
+      for(var i=hdrIdx+1;i<rows.length;i++){
+        var r2=rows[i];
+        if(!r2||(!r2[colInv]&&!r2[colTotal]))continue;
+        var inv=String(r2[colInv]||'').trim();
+        var tot=parseFloat(String(r2[colTotal]||'0').replace(/,/g,''))||0;
+        if(!inv&&tot===0)continue;
+        xlsxRows.push({invNum:inv,date:r2[colDate]||'',client:r2[colClient]||'',product:r2[colProd]||'',total:tot});
+        xlsxTotal+=tot;
+      }
+      function normInv(s){return String(s||'').trim().replace(/^(INV|Inv|inv)-?0*/i,'INV-').replace(/^INV-$/,'');}
+      var appMap={};
+      SALES.forEach(function(s){
+        var k=normInv(s.invNum);
+        if(!appMap[k])appMap[k]=[];
+        appMap[k].push(s);
+      });
+      var appTotalAll=SALES.reduce(function(a,s){return a+(s.total||0);},0);
+      var diffs=[];
+      var xlsxInvSet=new Set();
+      xlsxRows.forEach(function(xr){
+        var k=normInv(xr.invNum);
+        xlsxInvSet.add(k);
+        var appSales=appMap[k]||[];
+        var appAmt=appSales.reduce(function(a,s){return a+(s.total||0);},0);
+        var diff=xr.total-appAmt;
+        if(Math.abs(diff)>0.001||!appSales.length){
+          diffs.push({date:xr.date,invNum:xr.invNum,product:xr.product,client:xr.client,appAmt:appAmt,xlsxAmt:xr.total,diff:diff,type:!appSales.length?'في XLSX فقط':'فارق'});
+        }
+      });
+      SALES.forEach(function(s){
+        var k=normInv(s.invNum);
+        if(!xlsxInvSet.has(k)&&(s.total||0)>0){
+          diffs.push({date:s.date,invNum:s.invNum,product:s.product||'',client:s.client||'',appAmt:s.total,xlsxAmt:0,diff:-(s.total||0),type:'في التطبيق فقط'});
+        }
+      });
+      diffs.sort(function(a,b){return a.date>b.date?1:a.date<b.date?-1:0;});
+      var totalDiff=xlsxTotal-appTotalAll;
+      var today=new Date().toLocaleDateString('ar-KW',{year:'numeric',month:'long',day:'numeric'});
+      var html='<div style="padding:16px;direction:rtl;font-family:\'Tajawal\',sans-serif">'
+        +'<div style="background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;padding:14px 20px;border-radius:10px;text-align:center;margin-bottom:16px">'
+        +'<h1 style="font-size:1.3rem;font-weight:900;margin-bottom:4px">🌿 مزرعة هادي اسحاق</h1>'
+        +'<h2 style="font-size:0.9rem;font-weight:400;opacity:.85">تقرير المقارنة — XLSX مقابل التطبيق</h2>'
+        +'<p style="font-size:0.72rem;opacity:.7;margin-top:4px">'+today+' — '+xlsxRows.length+' صف في XLSX / '+SALES.length+' مبيعة في التطبيق</p>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">'
+        +'<div style="background:#fff3e0;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.68rem;color:#e65100;font-weight:700">الفوارق</div><strong style="font-size:1.5rem;color:#e65100">'+diffs.length+'</strong></div>'
+        +'<div style="background:#fff3e0;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.68rem;color:#e65100;font-weight:700">إجمالي الفارق</div><strong style="font-size:1rem;color:'+(totalDiff<0?'#c62828':'#e65100')+';direction:ltr">'+totalDiff.toFixed(3)+' دك</strong></div>'
+        +'<div style="background:#e8f5e9;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.68rem;color:#1b5e20;font-weight:700">مبيعات XLSX</div><strong style="font-size:1rem;color:#1b5e20;direction:ltr">'+xlsxTotal.toFixed(3)+' دك</strong></div>'
+        +'<div style="background:#e3f2fd;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.68rem;color:#1565c0;font-weight:700">مبيعات التطبيق</div><strong style="font-size:1rem;color:#1565c0;direction:ltr">'+appTotalAll.toFixed(3)+' دك</strong></div>'
+        +'</div>';
+      if(!diffs.length){
+        html+='<div style="background:#e8f5e9;border-radius:10px;padding:24px;text-align:center;font-size:1.1rem;color:#1b5e20;font-weight:800">✅ لا توجد فوارق — البيانات متطابقة تماماً</div>';
+      }else{
+        html+='<h3 style="font-size:0.9rem;font-weight:800;color:#c62828;margin-bottom:8px">📋 تفاصيل الفوارق ('+diffs.length+')</h3>'
+          +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.8rem">'
+          +'<thead><tr style="background:#1b5e20;color:#fff">'
+          +'<th style="padding:8px;text-align:right">التاريخ</th><th style="padding:8px;text-align:right">الفاتورة</th>'
+          +'<th style="padding:8px;text-align:right">الوصف</th><th style="padding:8px;text-align:center">النوع</th>'
+          +'<th style="padding:8px;text-align:center;direction:ltr">التطبيق</th><th style="padding:8px;text-align:center;direction:ltr">XLSX</th>'
+          +'<th style="padding:8px;text-align:center;direction:ltr">الفارق</th></tr></thead><tbody>';
+        diffs.forEach(function(d,i){
+          var typeColor=d.type==='في XLSX فقط'?'#e65100':(d.type==='في التطبيق فقط'?'#6a1b9a':'#f57f17');
+          html+='<tr style="background:'+(i%2?'#fafafa':'#fff')+';border-bottom:1px solid #eee">'
+            +'<td style="padding:7px 8px">'+d.date+'</td>'
+            +'<td style="padding:7px 8px;font-weight:700">'+d.invNum+'</td>'
+            +'<td style="padding:7px 8px">'+d.product+(d.client?' — '+d.client:'')+'</td>'
+            +'<td style="padding:7px 8px;text-align:center"><span style="background:'+typeColor+';color:#fff;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;white-space:nowrap">'+d.type+'</span></td>'
+            +'<td style="padding:7px 8px;text-align:center;direction:ltr;color:'+(d.appAmt>0?'#1b5e20':'#aaa')+';font-weight:700">'+d.appAmt.toFixed(3)+'</td>'
+            +'<td style="padding:7px 8px;text-align:center;direction:ltr;color:'+(d.xlsxAmt>0?'#1b5e20':'#aaa')+';font-weight:700">'+d.xlsxAmt.toFixed(3)+'</td>'
+            +'<td style="padding:7px 8px;text-align:center;direction:ltr;color:'+(d.diff<0?'#c62828':'#e65100')+';font-weight:800">'+d.diff.toFixed(3)+'</td>'
+            +'</tr>';
+        });
+        html+='</tbody><tfoot><tr style="background:#1b5e20;color:#fff;font-weight:800">'
+          +'<td colspan="4" style="padding:8px;text-align:center">الإجمالي</td>'
+          +'<td style="padding:8px;text-align:center;direction:ltr">'+appTotalAll.toFixed(3)+'</td>'
+          +'<td style="padding:8px;text-align:center;direction:ltr">'+xlsxTotal.toFixed(3)+'</td>'
+          +'<td style="padding:8px;text-align:center;direction:ltr">'+totalDiff.toFixed(3)+'</td>'
+          +'</tr></tfoot></table></div>';
+      }
+      html+='<div class="no-print" style="text-align:center;margin-top:16px"><button onclick="window.print()" style="padding:10px 28px;background:#1b5e20;color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:Tajawal,sans-serif;font-weight:700;font-size:0.9rem">🖨️ طباعة / PDF</button></div></div>';
+      var win=window.open('','_blank','width=1050,height=750');
+      if(win){
+        win.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>⚠️ مزرعة هادي اسحاق — تقرير المقارنة</title>'
+          +'<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">'
+          +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Tajawal,sans-serif;background:#f5f5f5;padding:16px;direction:rtl}@media print{body{background:#fff;padding:0}.no-print{display:none}}</style>'
+          +'</head><body>'+html+'</body></html>');
+        win.document.close();win.focus();
+      }else{alert('⚠️ فعّل النوافذ المنبثقة في المتصفح');}
+    }catch(err){alert('❌ خطأ في قراءة الملف: '+err.message);}
+  };
+  reader.readAsBinaryString(file);
+  input.value='';
+}
 // ══ IMPORT JSON FILE ══
 function importJSONFile(input){
   var file = input.files[0];

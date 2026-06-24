@@ -6226,14 +6226,14 @@ async function cloudLoad(){
     if(!rec.v){throw new Error('بيانات غير صالحة');}
     var confirmMsg='هل تستبدل البيانات الحالية ببيانات السحابة؟ (تاريخ: '+(rec.ts?new Date(rec.ts).toLocaleString('ar'):'-')+')';
     if(!confirm(confirmMsg)) return;
-    if(rec.INV) localStorage.setItem(K.inv,JSON.stringify(rec.INV));
-    if(rec.SALES) localStorage.setItem(K.sales,JSON.stringify(rec.SALES));
-    if(rec.EXP) localStorage.setItem(K.exp,JSON.stringify(rec.EXP));
-    if(rec.CASH) localStorage.setItem(K.cash,JSON.stringify(rec.CASH));
-    if(rec.CUST) localStorage.setItem(K.cust,JSON.stringify(rec.CUST));
-    if(rec.WASTE) localStorage.setItem(K.waste,JSON.stringify(rec.WASTE));
-    if(rec.DEBTS) localStorage.setItem(K.debts,JSON.stringify(rec.DEBTS));
-    if(rec.SETTINGS) localStorage.setItem(K.settings,JSON.stringify(rec.SETTINGS));
+    var _inv=rec.ps3_inv||rec.INV; if(_inv) localStorage.setItem(K.inv,JSON.stringify(_inv));
+    var _sales=rec.ps3_sales||rec.SALES; if(_sales) localStorage.setItem(K.sales,JSON.stringify(_sales));
+    var _exp=rec.ps3_exp||rec.EXP; if(_exp) localStorage.setItem(K.exp,JSON.stringify(_exp));
+    var _cash=rec.ps3_cash||rec.CASH; if(_cash) localStorage.setItem(K.cash,JSON.stringify(_cash));
+    var _cust=rec.ps3_cust||rec.CUST; if(_cust) localStorage.setItem(K.cust,JSON.stringify(_cust));
+    var _waste=rec.ps3_waste||rec.WASTE; if(_waste) localStorage.setItem(K.waste,JSON.stringify(_waste));
+    var _debts=rec.ps3_debts||rec.DEBTS; if(_debts) localStorage.setItem(K.debts,JSON.stringify(_debts));
+    var _sett=rec.ps3_settings||rec.SETTINGS; if(_sett) localStorage.setItem(K.settings,JSON.stringify(_sett));
     alert('✅ تم الاستعادة! جاري إعادة تحميل الصفحة...');
     location.reload();
   }catch(e){

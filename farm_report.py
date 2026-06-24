@@ -12,7 +12,7 @@ import urllib.request, urllib.error
 
 # ══ إعدادات ══
 FARM_DATA_URL = "https://raw.githubusercontent.com/hadi907/ftm8-monitor/main/farm_data.json"
-JSONBIN_URL   = "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
+JSONBIN_URL   = os.environ.get("JSONBIN_BIN_URL", "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed")
 JSONBIN_KEY   = os.environ.get("JSONBIN_API_KEY", "")
 EMAIL_FROM    = os.environ.get("EMAIL_FROM", "hishak888@gmail.com")
 EMAIL_PASS    = os.environ.get("EMAIL_PASS", "")
@@ -41,12 +41,14 @@ def fmt(v):
 def fetch_jsonbin():
     """يجلب البيانات من JSONBin مباشرة"""
     try:
+        url = JSONBIN_URL.rstrip('/') + '/latest'
         req = urllib.request.Request(
-            JSONBIN_URL,
-            headers={"X-Master-Key": JSONBIN_KEY, "X-Bin-Meta": "false"}
+            url,
+            headers={"X-Master-Key": JSONBIN_KEY}
         )
         with urllib.request.urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read().decode())
+            data = json.loads(resp.read().decode())
+            return data.get('record', data)
     except Exception as e:
         print(f"⚠️ JSONBin فشل: {e}")
         return None

@@ -17,4 +17,7 @@ jobs:
       - name: Send Daily Report 📊
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: hadi@ftm8.com
         run: python daily_report.py

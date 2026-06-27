@@ -1,3 +1,4 @@
+
 import os
 import requests
 import urllib.parse
@@ -33,7 +34,7 @@ NEWS_SOURCES = [
     {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                                  "cat": "world",   "lang": "ar"},
     {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                                    "cat": "world",   "lang": "ar"},
     {"name": "RT عربي",          "url": "https://arabic.rt.com/rss/",                                                               "cat": "world",   "lang": "ar"},
-    {"name": "Fox News",         "url": "https://feeds.foxnews.com/foxnews/world",                                                  "cat": "world",   "lang": "en"},
+    {"name": "Fox News",         "url": "https://feeds.foxnews.com/foxnews/world",                                                  "cat": "fox",     "lang": "en"},
     # 💰 اقتصاد
     {"name": "اقتصاد الكويت",    "url": "https://news.google.com/rss/search?q=اقتصاد+الكويت&hl=ar&gl=KW&ceid=KW:ar",              "cat": "economy", "lang": "ar"},
     {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                                                       "cat": "economy", "lang": "ar"},
@@ -43,7 +44,6 @@ NEWS_SOURCES = [
 
 # ─── ترجمة عبر Claude API ─────────────────────────────────────
 def translate_titles(titles_en: list[str]) -> list[str]:
-    """يترجم قائمة عناوين إنجليزية إلى العربية دفعة واحدة."""
     if not ANTHROPIC_API_KEY or not titles_en:
         return titles_en
 
@@ -76,14 +76,12 @@ def translate_titles(titles_en: list[str]) -> list[str]:
         for line in text.splitlines():
             line = line.strip()
             if line and line[0].isdigit():
-                # أزل الرقم والنقطة من البداية
                 parts = line.split(".", 1)
                 if len(parts) == 2:
                     translated.append(parts[1].strip())
                 else:
                     translated.append(line)
 
-        # إذا الترجمة ناقصة نرجع الأصلية
         if len(translated) == len(titles_en):
             return translated
         return titles_en
@@ -160,7 +158,7 @@ def get_news():
     seen = set()
     sections = []
 
-    # 🇰🇼 أخبار الكويت — 15 خبر من كل المصادر الكويتية
+    # 🇰🇼 أخبار الكويت — 15 خبر
     kw_items = []
     for src in [s for s in NEWS_SOURCES if s["cat"] == "kw"]:
         for name, title, lang in fetch_titles(src, 5):
@@ -180,12 +178,13 @@ def get_news():
     # باقي الفئات — 2 خبر لكل فئة
     categories = [
         ("world",   "🌍 *عالمية*"),
+        ("fox",     "🦊 *Fox News*"),
         ("economy", "💰 *اقتصاد*"),
         ("tech",    "💻 *تقنية*"),
     ]
     for cat, label in categories:
         items = []
-        en_indices = []  # مواضع العناوين الإنجليزية للترجمة
+        en_indices = []
 
         for src in [s for s in NEWS_SOURCES if s["cat"] == cat]:
             for name, title, lang in fetch_titles(src, 3):
@@ -200,7 +199,6 @@ def get_news():
             if len(items) >= 2:
                 break
 
-        # ترجم العناوين الإنجليزية دفعة واحدة
         if en_indices:
             en_titles = [items[i][1] for i in en_indices]
             translated = translate_titles(en_titles)

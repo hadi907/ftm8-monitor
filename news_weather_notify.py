@@ -3,11 +3,13 @@ import requests
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
+import json
 
 # ─── الإعدادات ────────────────────────────────────────────────
-OWM_API_KEY      = os.environ.get("OWM_API_KEY", "").strip()
-TELEGRAM_TOKEN   = os.environ.get("NEWS_TELEGRAM_TOKEN", "").strip()
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+OWM_API_KEY       = os.environ.get("OWM_API_KEY", "").strip()
+TELEGRAM_TOKEN    = os.environ.get("NEWS_TELEGRAM_TOKEN", "").strip()
+TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 
 CITIES = [
     {"name": "الأحمدي", "q_owm": "Al Ahmadi,KW",  "q_wttr": "Al-Ahmadi"},
@@ -17,26 +19,78 @@ CITIES = [
 # المصادر مع تصنيفها
 NEWS_SOURCES = [
     # 🇰🇼 أخبار الكويت — استعلامات متعددة
-    {"name": "أخبار الكويت",     "url": "https://news.google.com/rss/search?q=الكويت&hl=ar&gl=KW&ceid=KW:ar",                      "cat": "kw"},
-    {"name": "حكومة الكويت",     "url": "https://news.google.com/rss/search?q=مجلس+الوزراء+الكويت&hl=ar&gl=KW&ceid=KW:ar",         "cat": "kw"},
-    {"name": "أمن الكويت",       "url": "https://news.google.com/rss/search?q=الداخلية+الكويت+الجيش&hl=ar&gl=KW&ceid=KW:ar",       "cat": "kw"},
-    {"name": "مجلس الأمة",       "url": "https://news.google.com/rss/search?q=مجلس+الأمة+الكويت&hl=ar&gl=KW&ceid=KW:ar",           "cat": "kw"},
-    {"name": "الكويت اليوم",     "url": "https://news.google.com/rss/search?q=الكويت+اليوم&hl=ar&gl=KW&ceid=KW:ar",                "cat": "kw"},
-    {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",                                           "cat": "kw"},
-    {"name": "القبس",            "url": "https://www.alqabas.com/feed/",                                                            "cat": "kw"},
-    {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss/",                                                           "cat": "kw"},
-    {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                                                           "cat": "kw"},
-    {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                                                         "cat": "kw"},
+    {"name": "أخبار الكويت",     "url": "https://news.google.com/rss/search?q=الكويت&hl=ar&gl=KW&ceid=KW:ar",                      "cat": "kw",      "lang": "ar"},
+    {"name": "حكومة الكويت",     "url": "https://news.google.com/rss/search?q=مجلس+الوزراء+الكويت&hl=ar&gl=KW&ceid=KW:ar",         "cat": "kw",      "lang": "ar"},
+    {"name": "أمن الكويت",       "url": "https://news.google.com/rss/search?q=الداخلية+الكويت+الجيش&hl=ar&gl=KW&ceid=KW:ar",       "cat": "kw",      "lang": "ar"},
+    {"name": "مجلس الأمة",       "url": "https://news.google.com/rss/search?q=مجلس+الأمة+الكويت&hl=ar&gl=KW&ceid=KW:ar",           "cat": "kw",      "lang": "ar"},
+    {"name": "الكويت اليوم",     "url": "https://news.google.com/rss/search?q=الكويت+اليوم&hl=ar&gl=KW&ceid=KW:ar",                "cat": "kw",      "lang": "ar"},
+    {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",                                           "cat": "kw",      "lang": "ar"},
+    {"name": "القبس",            "url": "https://www.alqabas.com/feed/",                                                            "cat": "kw",      "lang": "ar"},
+    {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss/",                                                           "cat": "kw",      "lang": "ar"},
+    {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                                                           "cat": "kw",      "lang": "ar"},
+    {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                                                         "cat": "kw",      "lang": "ar"},
     # 🌍 عالمية
-    {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                                  "cat": "world"},
-    {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                                    "cat": "world"},
-    {"name": "RT عربي",          "url": "https://arabic.rt.com/rss/",                                                               "cat": "world"},
+    {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                                  "cat": "world",   "lang": "ar"},
+    {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                                    "cat": "world",   "lang": "ar"},
+    {"name": "RT عربي",          "url": "https://arabic.rt.com/rss/",                                                               "cat": "world",   "lang": "ar"},
+    {"name": "Fox News",         "url": "https://feeds.foxnews.com/foxnews/world",                                                  "cat": "world",   "lang": "en"},
     # 💰 اقتصاد
-    {"name": "اقتصاد الكويت",    "url": "https://news.google.com/rss/search?q=اقتصاد+الكويت&hl=ar&gl=KW&ceid=KW:ar",              "cat": "economy"},
-    {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                                                       "cat": "economy"},
+    {"name": "اقتصاد الكويت",    "url": "https://news.google.com/rss/search?q=اقتصاد+الكويت&hl=ar&gl=KW&ceid=KW:ar",              "cat": "economy", "lang": "ar"},
+    {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                                                       "cat": "economy", "lang": "ar"},
     # 💻 تقنية
-    {"name": "تقنية",            "url": "https://news.google.com/rss/search?q=تقنية+ذكاء+اصطناعي&hl=ar&gl=KW&ceid=KW:ar",         "cat": "tech"},
+    {"name": "تقنية",            "url": "https://news.google.com/rss/search?q=تقنية+ذكاء+اصطناعي&hl=ar&gl=KW&ceid=KW:ar",         "cat": "tech",    "lang": "ar"},
 ]
+
+# ─── ترجمة عبر Claude API ─────────────────────────────────────
+def translate_titles(titles_en: list[str]) -> list[str]:
+    """يترجم قائمة عناوين إنجليزية إلى العربية دفعة واحدة."""
+    if not ANTHROPIC_API_KEY or not titles_en:
+        return titles_en
+
+    numbered = "\n".join(f"{i+1}. {t}" for i, t in enumerate(titles_en))
+    prompt = (
+        "ترجم العناوين الإخبارية التالية من الإنجليزية إلى العربية الفصحى بشكل مختصر وواضح.\n"
+        "أعد فقط الأرقام والعناوين المترجمة بنفس الترتيب، بدون أي كلام إضافي.\n\n"
+        f"{numbered}"
+    )
+
+    try:
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 1024,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+            timeout=20,
+        )
+        r.raise_for_status()
+        text = r.json()["content"][0]["text"].strip()
+
+        translated = []
+        for line in text.splitlines():
+            line = line.strip()
+            if line and line[0].isdigit():
+                # أزل الرقم والنقطة من البداية
+                parts = line.split(".", 1)
+                if len(parts) == 2:
+                    translated.append(parts[1].strip())
+                else:
+                    translated.append(line)
+
+        # إذا الترجمة ناقصة نرجع الأصلية
+        if len(translated) == len(titles_en):
+            return translated
+        return titles_en
+
+    except Exception as e:
+        print(f"⚠️ خطأ في الترجمة: {e}")
+        return titles_en
 
 # ─── جلب الطقس ───────────────────────────────────────────────
 def get_weather_owm(city):
@@ -95,7 +149,7 @@ def fetch_titles(src, limit):
         for item in root.findall(".//item")[:limit*2]:
             t = item.findtext("title","").strip()
             if t:
-                titles.append((src["name"], t))
+                titles.append((src["name"], t, src.get("lang", "ar")))
             if len(titles) >= limit:
                 break
     except Exception:
@@ -109,7 +163,7 @@ def get_news():
     # 🇰🇼 أخبار الكويت — 15 خبر من كل المصادر الكويتية
     kw_items = []
     for src in [s for s in NEWS_SOURCES if s["cat"] == "kw"]:
-        for name, title in fetch_titles(src, 5):
+        for name, title, lang in fetch_titles(src, 5):
             key = title[:30]
             if key not in seen:
                 seen.add(key)
@@ -131,16 +185,30 @@ def get_news():
     ]
     for cat, label in categories:
         items = []
+        en_indices = []  # مواضع العناوين الإنجليزية للترجمة
+
         for src in [s for s in NEWS_SOURCES if s["cat"] == cat]:
-            for name, title in fetch_titles(src, 3):
+            for name, title, lang in fetch_titles(src, 3):
                 key = title[:30]
                 if key not in seen:
                     seen.add(key)
+                    if lang == "en":
+                        en_indices.append(len(items))
                     items.append((name, title))
                 if len(items) >= 2:
                     break
             if len(items) >= 2:
                 break
+
+        # ترجم العناوين الإنجليزية دفعة واحدة
+        if en_indices:
+            en_titles = [items[i][1] for i in en_indices]
+            translated = translate_titles(en_titles)
+            items = list(items)
+            for idx, new_title in zip(en_indices, translated):
+                name = items[idx][0]
+                items[idx] = (name, new_title)
+
         if items:
             lines = [f"\n{label}"]
             for i, (src, title) in enumerate(items[:2], 1):

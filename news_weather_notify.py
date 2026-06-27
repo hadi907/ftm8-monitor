@@ -1,4 +1,3 @@
-
 import os
 import requests
 import urllib.parse
@@ -45,6 +44,7 @@ NEWS_SOURCES = [
 # ─── ترجمة عبر Claude API ─────────────────────────────────────
 def translate_titles(titles_en: list[str]) -> list[str]:
     if not ANTHROPIC_API_KEY or not titles_en:
+        print(f"⚠️ ANTHROPIC_API_KEY موجود: {bool(ANTHROPIC_API_KEY)}")
         return titles_en
 
     numbered = "\n".join(f"{i+1}. {t}" for i, t in enumerate(titles_en))
@@ -55,6 +55,7 @@ def translate_titles(titles_en: list[str]) -> list[str]:
     )
 
     try:
+        print(f"🔄 جاري الترجمة... عدد العناوين: {len(titles_en)}")
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
             headers={
@@ -71,6 +72,7 @@ def translate_titles(titles_en: list[str]) -> list[str]:
         )
         r.raise_for_status()
         text = r.json()["content"][0]["text"].strip()
+        print(f"✅ رد الترجمة: {text[:200]}")
 
         translated = []
         for line in text.splitlines():
@@ -84,10 +86,13 @@ def translate_titles(titles_en: list[str]) -> list[str]:
 
         if len(translated) == len(titles_en):
             return translated
+        print(f"⚠️ عدد المترجمة {len(translated)} لا يطابق الأصلية {len(titles_en)}")
         return titles_en
 
     except Exception as e:
         print(f"⚠️ خطأ في الترجمة: {e}")
+        print(f"⚠️ ANTHROPIC_API_KEY موجود: {bool(ANTHROPIC_API_KEY)}")
+        print(f"⚠️ أول 10 أحرف: {ANTHROPIC_API_KEY[:10] if ANTHROPIC_API_KEY else 'فارغ'}")
         return titles_en
 
 # ─── جلب الطقس ───────────────────────────────────────────────

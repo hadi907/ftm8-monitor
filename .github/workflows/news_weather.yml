@@ -21,4 +21,5 @@ jobs:
           OWM_API_KEY:          ${{ secrets.OWM_API_KEY }}
           NEWS_TELEGRAM_TOKEN:  ${{ secrets.NEWS_TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:     ${{ secrets.TELEGRAM_CHAT_ID }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
         run: python news_weather_notify.py

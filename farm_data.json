@@ -122,7 +122,7 @@
       "cost": 0,
       "price": 5,
       "qty": 50,
-      "remaining": 40,
+      "remaining": 34,
       "minStock": 5,
       "date": "2026-04-05",
       "color": "",
@@ -1562,6 +1562,23 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mqw6d07iax8",
+      "img": ""
+    },
+    {
+      "id": "mqw6hq3gz40",
+      "invNum": "INV-075",
+      "date": "2026-06-26",
+      "client": "ومض",
+      "invItemId": "mnm5ne70chw",
+      "product": "شوكوليرا",
+      "category": "داخلي",
+      "qty": 6,
+      "price": 5,
+      "discount": 21,
+      "total": 9,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mqw6hq3o2x9",
       "img": ""
     }
   ],
@@ -3323,6 +3340,19 @@
       "month": "يونيو ٢٠٢٦",
       "notes": "مبيعة: ربل - ومض",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mqw6hq3o2x9",
+      "date": "2026-06-26",
+      "type": "وارد",
+      "amount": 9,
+      "paid": 9,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-075",
+      "month": "يونيو ٢٠٢٦",
+      "notes": "مبيعة: شوكوليرا - ومض",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -3482,5 +3512,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-06-27T09:45:55.109Z"
+  "date": "2026-06-27T09:49:35.247Z"
 }

@@ -27,8 +27,8 @@ NEWS_SOURCES = [
     {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                                                           "cat": "kw",      "lang": "ar"},
     {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                                                         "cat": "kw",      "lang": "ar"},
     # 🇰🇼 أخبار الكويت — إنجليزي (تُترجم)
-    {"name": "Kuwait Times",     "url": "https://www.kuwaittimes.com/feed/",                                                        "cat": "kw_en",   "lang": "en"},
-    {"name": "Arab Times",       "url": "https://www.arabtimesonline.com/feed/",                                                    "cat": "kw_en",   "lang": "en"},
+    {"name": "KUNA English",     "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=en",                                          "cat": "kw_en",   "lang": "en"},
+    {"name": "Kuwait Google",    "url": "https://news.google.com/rss/search?q=kuwait+news&hl=en-KW&gl=KW&ceid=KW:en",              "cat": "kw_en",   "lang": "en"},
     # 🌍 عالمية
     {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                                  "cat": "world",   "lang": "ar"},
     {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                                    "cat": "world",   "lang": "ar"},

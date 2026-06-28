@@ -3,13 +3,11 @@ import requests
 import urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
-import json
 
 # ─── الإعدادات ────────────────────────────────────────────────
 OWM_API_KEY       = os.environ.get("OWM_API_KEY", "").strip()
 TELEGRAM_TOKEN    = os.environ.get("NEWS_TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 
 CITIES = [
     {"name": "الأحمدي", "q_owm": "Al Ahmadi,KW",  "q_wttr": "Al-Ahmadi"},
@@ -41,59 +39,27 @@ NEWS_SOURCES = [
     {"name": "تقنية",            "url": "https://news.google.com/rss/search?q=تقنية+ذكاء+اصطناعي&hl=ar&gl=KW&ceid=KW:ar",         "cat": "tech",    "lang": "ar"},
 ]
 
-# ─── ترجمة عبر Claude API ─────────────────────────────────────
+# ─── ترجمة مجانية عبر Google Translate ───────────────────────
 def translate_titles(titles_en: list[str]) -> list[str]:
-    if not ANTHROPIC_API_KEY or not titles_en:
-        print(f"⚠️ ANTHROPIC_API_KEY موجود: {bool(ANTHROPIC_API_KEY)}")
+    if not titles_en:
         return titles_en
 
-    numbered = "\n".join(f"{i+1}. {t}" for i, t in enumerate(titles_en))
-    prompt = (
-        "ترجم العناوين الإخبارية التالية من الإنجليزية إلى العربية الفصحى بشكل مختصر وواضح.\n"
-        "أعد فقط الأرقام والعناوين المترجمة بنفس الترتيب، بدون أي كلام إضافي.\n\n"
-        f"{numbered}"
-    )
+    translated = []
+    for title in titles_en:
+        try:
+            url = (f"https://translate.googleapis.com/translate_a/single"
+                   f"?client=gtx&sl=en&tl=ar&dt=t&q={urllib.parse.quote(title)}")
+            r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+            r.raise_for_status()
+            result = r.json()
+            translated_text = result[0][0][0]
+            translated.append(translated_text)
+            print(f"✅ ترجمة: {title[:40]} ← {translated_text[:40]}")
+        except Exception as e:
+            print(f"⚠️ خطأ في الترجمة: {e}")
+            translated.append(title)
 
-    try:
-        print(f"🔄 جاري الترجمة... عدد العناوين: {len(titles_en)}")
-        r = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={
-                "x-api-key": ANTHROPIC_API_KEY,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-            json={
-                "model": "claude-haiku-4-5-20251001",
-                "max_tokens": 1024,
-                "messages": [{"role": "user", "content": prompt}],
-            },
-            timeout=20,
-        )
-        r.raise_for_status()
-        text = r.json()["content"][0]["text"].strip()
-        print(f"✅ رد الترجمة: {text[:200]}")
-
-        translated = []
-        for line in text.splitlines():
-            line = line.strip()
-            if line and line[0].isdigit():
-                parts = line.split(".", 1)
-                if len(parts) == 2:
-                    translated.append(parts[1].strip())
-                else:
-                    translated.append(line)
-
-        if len(translated) == len(titles_en):
-            return translated
-        print(f"⚠️ عدد المترجمة {len(translated)} لا يطابق الأصلية {len(titles_en)}")
-        return titles_en
-
-    except Exception as e:
-        print(f"⚠️ خطأ في الترجمة: {e}")
-        print(f"⚠️ ANTHROPIC_API_KEY موجود: {bool(ANTHROPIC_API_KEY)}")
-        print(f"⚠️ أول 10 أحرف: {ANTHROPIC_API_KEY[:10] if ANTHROPIC_API_KEY else 'فارغ'}")
-        return titles_en
+    return translated
 
 # ─── جلب الطقس ───────────────────────────────────────────────
 def get_weather_owm(city):

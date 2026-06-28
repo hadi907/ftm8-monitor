@@ -14,9 +14,8 @@ CITIES = [
     {"name": "الوفرة",  "q_owm": "Al Wafra,KW",   "q_wttr": "Al-Wafra"},
 ]
 
-# المصادر مع تصنيفها
 NEWS_SOURCES = [
-    # 🇰🇼 أخبار الكويت — استعلامات متعددة
+    # 🇰🇼 أخبار الكويت — عربي
     {"name": "أخبار الكويت",     "url": "https://news.google.com/rss/search?q=الكويت&hl=ar&gl=KW&ceid=KW:ar",                      "cat": "kw",      "lang": "ar"},
     {"name": "حكومة الكويت",     "url": "https://news.google.com/rss/search?q=مجلس+الوزراء+الكويت&hl=ar&gl=KW&ceid=KW:ar",         "cat": "kw",      "lang": "ar"},
     {"name": "أمن الكويت",       "url": "https://news.google.com/rss/search?q=الداخلية+الكويت+الجيش&hl=ar&gl=KW&ceid=KW:ar",       "cat": "kw",      "lang": "ar"},
@@ -27,6 +26,9 @@ NEWS_SOURCES = [
     {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss/",                                                           "cat": "kw",      "lang": "ar"},
     {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                                                           "cat": "kw",      "lang": "ar"},
     {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                                                         "cat": "kw",      "lang": "ar"},
+    # 🇰🇼 أخبار الكويت — إنجليزي (تُترجم)
+    {"name": "Kuwait Times",     "url": "https://www.kuwaittimes.com/feed/",                                                        "cat": "kw_en",   "lang": "en"},
+    {"name": "Arab Times",       "url": "https://www.arabtimesonline.com/feed/",                                                    "cat": "kw_en",   "lang": "en"},
     # 🌍 عالمية
     {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                                  "cat": "world",   "lang": "ar"},
     {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                                    "cat": "world",   "lang": "ar"},
@@ -129,7 +131,7 @@ def get_news():
     seen = set()
     sections = []
 
-    # 🇰🇼 أخبار الكويت — 15 خبر
+    # 🇰🇼 أخبار الكويت — عربي (15 خبر)
     kw_items = []
     for src in [s for s in NEWS_SOURCES if s["cat"] == "kw"]:
         for name, title, lang in fetch_titles(src, 5):
@@ -143,6 +145,34 @@ def get_news():
     if kw_items:
         lines = ["\n🇰🇼 *أخبار الكويت*"]
         for i, (src, title) in enumerate(kw_items[:15], 1):
+            lines.append(f"{i}. {title} _{src}_")
+        sections.append("\n".join(lines))
+
+    # 🇰🇼 أخبار الكويت — إنجليزي مترجم (3 أخبار)
+    kw_en_items = []
+    kw_en_indices = []
+    for src in [s for s in NEWS_SOURCES if s["cat"] == "kw_en"]:
+        for name, title, lang in fetch_titles(src, 5):
+            key = title[:30]
+            if key not in seen:
+                seen.add(key)
+                kw_en_indices.append(len(kw_en_items))
+                kw_en_items.append((name, title))
+            if len(kw_en_items) >= 3:
+                break
+        if len(kw_en_items) >= 3:
+            break
+
+    if kw_en_items:
+        en_titles = [kw_en_items[i][1] for i in kw_en_indices]
+        translated = translate_titles(en_titles)
+        kw_en_items = list(kw_en_items)
+        for idx, new_title in zip(kw_en_indices, translated):
+            name = kw_en_items[idx][0]
+            kw_en_items[idx] = (name, new_title)
+
+        lines = ["\n🇰🇼 *الكويت — صحافة إنجليزية*"]
+        for i, (src, title) in enumerate(kw_en_items[:3], 1):
             lines.append(f"{i}. {title} _{src}_")
         sections.append("\n".join(lines))
 

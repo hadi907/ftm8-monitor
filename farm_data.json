@@ -256,23 +256,6 @@
       "img": ""
     },
     {
-      "id": "mqb0ed2wnp8",
-      "invNum": "INV-063",
-      "date": "2026-06-11",
-      "client": "نقدا",
-      "invItemId": "mn8jz6fmds2",
-      "product": "فل",
-      "category": "خارجي",
-      "qty": 20,
-      "price": 1,
-      "discount": 5,
-      "total": 15,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mqb0ed32mp3",
-      "img": ""
-    },
-    {
       "id": "mq6s9ml4go9",
       "invNum": "INV-062",
       "date": "2026-06-09",
@@ -851,6 +834,23 @@
       "payment": "نقد",
       "cashId": "mpyht05c8cl",
       "img": ""
+    },
+    {
+      "id": "mp5vgrvvhwj",
+      "invNum": "INV-017",
+      "date": "2026-05-13",
+      "client": "نقدا",
+      "invItemId": "mn8jz6fmds2",
+      "product": "فل",
+      "category": "خارجي",
+      "qty": 10,
+      "price": 1,
+      "discount": 2.5,
+      "total": 7.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mp5vgrw1a14",
+      "img": ""
     }
   ],
   "INV": [
@@ -898,7 +898,7 @@
       "cost": 0,
       "price": 1,
       "qty": 500,
-      "remaining": 238,
+      "remaining": 258,
       "minStock": 5,
       "date": "2026-03-27",
       "color": "ابيض",
@@ -1330,7 +1330,7 @@
       "sku": "1025",
       "cost": 0,
       "price": 1,
-      "qty": 70,
+      "qty": 80,
       "remaining": 0,
       "minStock": 5,
       "date": "2026-05-09",
@@ -1375,6 +1375,14 @@
         },
         {
           "date": "2026-06-28",
+          "qty": 10,
+          "cost": "0.000",
+          "price": "1.000",
+          "supplier": "",
+          "notes": ""
+        },
+        {
+          "date": "2026-06-29",
           "qty": 10,
           "cost": "0.000",
           "price": "1.000",
@@ -1921,5 +1929,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-06-29T17:37:06.456Z"
+  "ts": "2026-06-29T20:00:21.172Z"
 }

@@ -1412,6 +1412,8 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
         <button class="btn btn-ghost btn-sm" onclick="recoverExpFromCash()" style="color:var(--teal2);border-color:var(--teal3)">🔧 استعادة المصروفات من الكاش</button>
         <button class="btn btn-red btn-sm" onclick="compressAllImages()" style="background:#ff6d00;border:none">🗜️ ضغط الصور وتحرير المساحة</button>
         <button class="btn btn-ghost btn-sm" onclick="fixDuplicateCash()" style="color:var(--red);border-color:#ef9a9a">🔧 إصلاح الكاش المكرر</button>
+        <button class="btn btn-ghost btn-sm" onclick="fixOrphanCashIn()" style="color:#b71c1c;border-color:#ef9a9a;font-weight:800">🧹 حذف قيود وارد بلا مبيعة</button>
+        <button class="btn btn-ghost btn-sm" onclick="listNonAutoFromCashIn()" style="color:#e65100;border-color:#ffcc80;font-weight:800">🔬 تحليل قيود الوارد (كاشف الفارق)</button>
         <button class="btn btn-ghost btn-sm" onclick="fixDeliveryCash()" style="color:var(--teal2);border-color:var(--teal3)">🔧 إزالة قيود التوصيل من الكاش</button>
         <button class="btn btn-ghost btn-sm" onclick="recalcInventory()" style="color:var(--g3);border-color:var(--g5)">🔧 إعادة حساب المخزون</button>
         <button class="btn btn-ghost btn-sm" onclick="fixInvNums(true)" style="color:var(--purple2);border-color:var(--purple2)">🔢 إصلاح أرقام الفواتير</button>
@@ -4663,6 +4665,72 @@ function fixDuplicateCash(){
     if(stEl){stEl.textContent='الكاش نظيف - لا يوجد تكرار';stEl.style.color='var(--g3)';}
   }
 }
+function listNonAutoFromCashIn(){
+  // يعرض كل قيود الوارد التي ليس لها autoFrom='sale' — لكشف مصدر الفارق
+  var saleCashIds=new Set(SALES.map(function(s){return s.cashId;}).filter(Boolean));
+  var items=CASH.filter(function(c){
+    return c.type==='وارد'&&!c.isDelivery&&c.autoFrom!=='sale';
+  });
+  var totalAll=CASH.filter(function(p){return p.type==='وارد'&&!p.isDelivery;}).reduce(function(s,p){return s+p.amount;},0);
+  var totalAutoFrom=CASH.filter(function(p){return p.type==='وارد'&&!p.isDelivery&&p.autoFrom==='sale';}).reduce(function(s,p){return s+p.amount;},0);
+  var totalNonAuto=items.reduce(function(s,x){return s+(x.amount||0);},0);
+  var html='<div style="font-family:Tajawal,sans-serif;direction:rtl;padding:20px;max-width:900px;margin:auto">'
+    +'<h2 style="color:#0d47a1;margin-bottom:16px">🔍 تحليل قيود الوارد في الكاش</h2>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">'
+    +'<div style="background:#e8f5e9;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.75rem;color:#2e7d32">إجمالي الوارد (المحفظة)</div><strong style="color:#1b5e20;direction:ltr">'+totalAll.toFixed(3)+' KD</strong></div>'
+    +'<div style="background:#e3f2fd;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.75rem;color:#1565c0">وارد مع autoFrom=sale</div><strong style="color:#0d47a1;direction:ltr">'+totalAutoFrom.toFixed(3)+' KD</strong></div>'
+    +'<div style="background:#fff3e0;border-radius:8px;padding:12px;text-align:center"><div style="font-size:0.75rem;color:#e65100">وارد بدون autoFrom=sale</div><strong style="color:#bf360c;direction:ltr">'+totalNonAuto.toFixed(3)+' KD</strong></div>'
+    +'</div>'
+    +(items.length?
+      '<h3 style="color:#c62828;margin-bottom:8px">قيود الوارد بدون autoFrom=sale ('+items.length+')</h3>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:16px">'
+      +'<thead><tr style="background:#fff3e0"><th style="padding:7px;text-align:right">التاريخ</th><th style="padding:7px;text-align:right">الوصف/ملاحظات</th><th style="padding:7px;text-align:right">autoFrom</th><th style="padding:7px;text-align:right">saleId</th><th style="padding:7px;text-align:right">في saleCashIds؟</th><th style="padding:7px;text-align:center;direction:ltr">المبلغ</th></tr></thead>'
+      +'<tbody>'+items.map(function(c,i){
+        var linked=saleCashIds.has(c.id);
+        return '<tr style="background:'+(i%2?'#fff':'#fffde7')+';border-bottom:1px solid #eee">'
+          +'<td style="padding:6px 8px">'+c.date+'</td>'
+          +'<td style="padding:6px 8px">'+( c.notes||c.ref||c.desc||'—')+'</td>'
+          +'<td style="padding:6px 8px;color:#888;font-size:0.75rem">'+( c.autoFrom||'—')+'</td>'
+          +'<td style="padding:6px 8px;color:#888;font-size:0.7rem">'+( c.saleId||'—')+'</td>'
+          +'<td style="padding:6px 8px;text-align:center">'+(linked?'✅':'❌')+'</td>'
+          +'<td style="padding:6px 8px;text-align:center;font-weight:700;direction:ltr;color:#c62828">'+((c.amount||0).toFixed(3))+'</td>'
+          +'</tr>';
+      }).join('')
+      +'</tbody><tfoot><tr style="background:#ffccbc"><td colspan="5" style="padding:7px;font-weight:800;text-align:right">الإجمالي</td><td style="padding:7px;text-align:center;font-weight:900;direction:ltr;color:#bf360c">'+totalNonAuto.toFixed(3)+'</td></tr></tfoot>'
+      +'</table>'
+    :'<div style="background:#e8f5e9;border-radius:8px;padding:12px;color:#1b5e20;font-weight:700">✅ كل قيود الوارد لها autoFrom=sale</div>')
+    +'<div style="text-align:center;margin-top:16px"><button onclick="window.print()" style="padding:9px 22px;background:#0d47a1;color:#fff;border:none;border-radius:7px;font-family:Tajawal,sans-serif;font-size:0.85rem;cursor:pointer">🖨️ طباعة</button></div>'
+    +'</div>';
+  var win=window.open('','_blank','width=940,height=700');
+  if(win){win.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تحليل قيود الوارد</title><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Tajawal,sans-serif;direction:rtl;background:#f5f5f5;padding:20px}</style></head><body>'+html+'</body></html>');win.document.close();win.focus();}
+}
+function fixOrphanCashIn(){
+  var stEl=document.getElementById('fix-status');
+  var saleCashIds=new Set(SALES.map(function(s){return s.cashId;}).filter(Boolean));
+  // قيود وارد غير مرتبطة بأي مبيعة
+  var orphans=CASH.filter(function(c){
+    if(c.type!=='وارد') return false;
+    if(c.isDelivery) return false;
+    if(saleCashIds.has(c.id)) return false;
+    return true;
+  });
+  if(!orphans.length){
+    if(stEl){stEl.textContent='✅ المحفظة نظيفة — لا قيود وارد يتيمة';stEl.style.color='var(--g3)';}
+    return;
+  }
+  var total=orphans.reduce(function(s,x){return s+(x.amount||0);},0);
+  var msg='⚠️ سيتم حذف '+orphans.length+' قيد وارد غير مرتبط بأي مبيعة:\n\n';
+  orphans.forEach(function(c){msg+=c.date+' — '+(c.notes||c.ref||'—')+' — '+((c.amount||0).toFixed(3))+' KD\n';});
+  msg+='\nالإجمالي: '+total.toFixed(3)+' KD\nهل أنت متأكد من الحذف؟';
+  if(!confirm(msg)) return;
+  var toRemove=new Set(orphans.map(function(c){return c.id;}));
+  CASH=CASH.filter(function(c){return !toRemove.has(c.id);});
+  sv(K.cash,CASH);
+  var newIn=CASH.filter(function(p){return p.type==='وارد'&&!p.isDelivery;}).reduce(function(s,p){return s+p.amount;},0);
+  var newOut=CASH.filter(function(p){return p.type==='صادر'&&!p.isDelivery;}).reduce(function(s,p){return s+p.amount;},0);
+  rCash();refreshDash();
+  if(stEl){stEl.textContent='✅ حُذف '+orphans.length+' قيد ('+total.toFixed(3)+' KD) — الرصيد الجديد: '+(newIn-newOut).toFixed(3)+' KD';stEl.style.color='var(--g3)';}
+}
 function fixDeliveryCash(){
   var stEl=document.getElementById('fix-status');
   var before=CASH.length;
@@ -6179,12 +6247,14 @@ function _getAllData(){
   });
   // رفع كل المصروفات — حجمها صغير (~6KB) ولا خطر من تجاوز حد JSONBin
   var allExp = (EXP||[]).map(function(e){
-    // إزالة الحقول الكبيرة غير الضرورية إن وُجدت
     var c = Object.assign({},e);
     delete c.img; delete c.image; delete c.photo;
     return c;
   });
-  return {ps3_sales:recentSales, ps3_inv:invNoImg, ps3_exp:allExp, v:4, ts:new Date().toISOString()};
+  // رفع الديون والعملاء (صغيرة الحجم — مهمة للاستعادة)
+  var allDebts = JSON.parse(localStorage.getItem(K.debts)||'[]');
+  var allCust  = (CUST||[]).map(function(c){ var x=Object.assign({},c); delete x.img; return x; });
+  return {ps3_sales:recentSales, ps3_inv:invNoImg, ps3_exp:allExp, ps3_debts:allDebts, ps3_cust:allCust, v:4, ts:new Date().toISOString()};
 }
 
 async function createNewBin(){
@@ -6322,13 +6392,14 @@ async function cloudLoad(){
     if(!rec.v){throw new Error('بيانات غير صالحة');}
     var confirmMsg='هل تستبدل البيانات الحالية ببيانات السحابة؟ (تاريخ: '+(rec.ts?new Date(rec.ts).toLocaleString('ar'):'-')+')';
     if(!confirm(confirmMsg)) return;
-    if(rec.INV) localStorage.setItem(K.inv,JSON.stringify(rec.INV));
-    if(rec.SALES) localStorage.setItem(K.sales,JSON.stringify(rec.SALES));
-    if(rec.EXP) localStorage.setItem(K.exp,JSON.stringify(rec.EXP));
-    if(rec.CASH) localStorage.setItem(K.cash,JSON.stringify(rec.CASH));
-    if(rec.CUST) localStorage.setItem(K.cust,JSON.stringify(rec.CUST));
-    if(rec.WASTE) localStorage.setItem(K.waste,JSON.stringify(rec.WASTE));
-    if(rec.DEBTS) localStorage.setItem(K.debts,JSON.stringify(rec.DEBTS));
+    // يدعم صيغتي المفاتيح: الكبيرة (INV) والصغيرة (ps3_inv)
+    var ri=rec.INV||rec.ps3_inv; if(ri) localStorage.setItem(K.inv,JSON.stringify(ri));
+    var rs=rec.SALES||rec.ps3_sales; if(rs) localStorage.setItem(K.sales,JSON.stringify(rs));
+    var re=rec.EXP||rec.ps3_exp; if(re) localStorage.setItem(K.exp,JSON.stringify(re));
+    var rc2=rec.CASH||rec.ps3_cash; if(rc2) localStorage.setItem(K.cash,JSON.stringify(rc2));
+    var rcu=rec.CUST||rec.ps3_cust; if(rcu) localStorage.setItem(K.cust,JSON.stringify(rcu));
+    var rw=rec.WASTE||rec.ps3_waste; if(rw) localStorage.setItem(K.waste,JSON.stringify(rw));
+    var rd=rec.DEBTS||rec.ps3_debts; if(rd) localStorage.setItem(K.debts,JSON.stringify(rd));
     if(rec.SETTINGS) localStorage.setItem(K.settings,JSON.stringify(rec.SETTINGS));
     alert('✅ تم الاستعادة! جاري إعادة تحميل الصفحة...');
     location.reload();
@@ -6359,6 +6430,7 @@ function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb
   if(mf){
     var cur=mf.value;
     mf.innerHTML='<option value="">كل الفترات</option>'+months.map(function(m){return '<option value="'+m+'"'+(m===cur?' selected':'')+'>'+m+'</option>';}).join('');
+    if(cur)mf.value=cur;
   }
   document.getElementById('adm-title').textContent='التقرير الإداري'+(selMonth?' — '+selMonth:' — كل الفترات');
   // Build combined transaction list from SALES + EXP + manual CASH
@@ -6401,19 +6473,20 @@ function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb
   rows.sort(function(a,b){return a.date.localeCompare(b.date);});
   // Calculate running balance
   var balance=0;
-  var totIncome=0; var totExp=0;
+  var totIncome=0; var totExp=0; var totPartnerExp=0;
   var tb=document.getElementById('adm-tb');
   if(!rows.length){
     tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--txt3)">لا توجد بيانات في هذه الفترة</td></tr>';
     document.getElementById('adm-foot').innerHTML='';
-    buildAdmKpis(0,0,0);
+    buildAdmKpis(0,0,0,0);
     buildAdmMonthlySummary([]);
     buildAdmSurplusSummary([]);
     return;
   }
   tb.innerHTML=rows.map(function(r,i){
-    totIncome+=r.income; totExp+=r.exp;
-    balance+=r.income-r.exp;
+    totIncome+=r.income;
+    if(r.isPartner) totPartnerExp+=r.exp; else totExp+=r.exp;
+    balance+=r.income-(r.isPartner?0:r.exp); // مصاريف الشريك لا تُخصم من الرصيد
     var incStr=r.income>0?'<strong style="color:var(--g2);direction:ltr">'+r.income.toFixed(3)+'</strong>':'<span style="color:#ccc">—</span>';
     var expStr=r.exp>0?'<strong style="color:var(--red);direction:ltr">'+r.exp.toFixed(3)+'</strong>':'<span style="color:#ccc">—</span>';
     var balColor=balance>=0?'var(--g2)':'var(--red)';
@@ -6433,24 +6506,25 @@ function rAdmin(){var _aw=document.getElementById('adm-wallet');if(_aw){var _awb
   var foot=document.getElementById('adm-foot');
   foot.innerHTML='<tr style="background:var(--g1);color:#fff;font-weight:800">'
     +'<td colspan="4" style="padding:9px 12px;text-align:right">الإجمالي الكلي</td>'
-    +'<td style="padding:9px 12px;text-align:center;direction:ltr">'+totExp.toFixed(3)+'</td>'
+    +'<td style="padding:9px 12px;text-align:center;direction:ltr">'+(totExp+totPartnerExp).toFixed(3)+(totPartnerExp>0?' <span style="font-size:8pt;color:#90caf9">👤'+totPartnerExp.toFixed(3)+'</span>':'')+'</td>'
     +'<td style="padding:9px 12px;text-align:center;direction:ltr">'+totIncome.toFixed(3)+'</td>'
     +'<td style="padding:9px 12px;text-align:center;direction:ltr;color:'+(balance>=0?'#b9f6ca':'#ff8a80')+'">'+balance.toFixed(3)+'</td>'
     +'<td></td></tr>';
-  buildAdmKpis(totIncome,totExp,balance);
+  buildAdmKpis(totIncome,totExp,balance,totPartnerExp);
   buildWalletPartnerWidget('adm-wallet-summary');
   buildAdmMonthlySummary(rows);
   buildAdmSurplusSummary(rows);
 }
 
-function buildAdmKpis(inc,exp,bal){
+function buildAdmKpis(inc,exp,bal,partnerExp){
   var el=document.getElementById('adm-kpis');
   if(!el) return;
+  var pe=partnerExp||0;
   el.innerHTML=
     '<div class="kpi g"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(inc)+'</div><div class="kpi-label">💰 إجمالي الإيرادات (د.ك)</div></div>'
-    +'<div class="kpi r"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(exp)+'</div><div class="kpi-label">💸 إجمالي المصروفات (د.ك)</div></div>'
+    +'<div class="kpi r"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(exp)+'</div><div class="kpi-label">👜 مصاريف المحفظة (د.ك)</div></div>'
     +'<div class="kpi '+(bal>=0?'g':'r')+'"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(bal)+'</div><div class="kpi-label">'+(bal>=0?'📈 صافي الربح':'📉 صافي الخسارة')+' (د.ك)</div></div>'
-    +'<div class="kpi b"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(inc-exp)+'</div><div class="kpi-label">💵 الرصيد التشغيلي (د.ك)</div></div>';
+    +(pe>0?'<div class="kpi b"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(pe)+'</div><div class="kpi-label">👤 مصاريف الشريك (لا تُخصم)</div></div>':'<div class="kpi b"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(inc-exp)+'</div><div class="kpi-label">💵 الرصيد التشغيلي (د.ك)</div></div>');
 }
 
 function buildAdmMonthlySummary(rows){
@@ -6461,9 +6535,10 @@ function buildAdmMonthlySummary(rows){
   (rows||[]).forEach(function(r){
     var m=(r.date||'').slice(0,7);
     if(!m) return;
-    if(!months[m]) months[m]={income:0,exp:0};
+    if(!months[m]) months[m]={income:0,exp:0,partnerExp:0};
     months[m].income+=r.income||0;
-    months[m].exp+=r.exp||0;
+    if(r.isPartner) months[m].partnerExp+=r.exp||0;
+    else months[m].exp+=r.exp||0;
   });
   var keys=Object.keys(months).sort();
   if(!keys.length){
@@ -6475,17 +6550,17 @@ function buildAdmMonthlySummary(rows){
   var arM=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
   function mlbl(ym){var p=ym.split('-');return (arM[parseInt(p[1])]||p[1])+' '+p[0];}
   var grandInc=keys.reduce(function(s,k){return s+months[k].income;},0);
-  var grandExp=keys.reduce(function(s,k){return s+months[k].exp;},0);
-  var grandNet=grandInc-grandExp;
+  var grandExp=keys.reduce(function(s,k){return s+months[k].exp+months[k].partnerExp;},0); // للعرض
+  var grandNet=grandInc-keys.reduce(function(s,k){return s+months[k].exp;},0); // بدون الشريك
   var rowsHtml=keys.map(function(m,i){
     var d=months[m];
-    var net=d.income-d.exp;
+    var net=d.income-d.exp; // الصافي بدون مصاريف الشريك
     var nc=net>=0?'var(--g2)':'var(--red)';
     var bg=i%2===0?'#f8fffe':'#fff';
     return '<tr style="background:'+bg+';border-bottom:1px solid var(--border)">'
       +'<td style="padding:5px 6px;font-weight:700;color:#37474f;font-size:0.77rem;white-space:nowrap">'+mlbl(m)+'</td>'
       +'<td style="padding:5px 4px;text-align:center;color:var(--g2);font-weight:700;font-size:0.76rem;direction:ltr">'+d.income.toFixed(3)+'</td>'
-      +'<td style="padding:5px 4px;text-align:center;color:var(--red);font-weight:700;font-size:0.76rem;direction:ltr">'+(d.exp>0?d.exp.toFixed(3):'—')+'</td>'
+      +'<td style="padding:5px 4px;text-align:center;color:var(--red);font-weight:700;font-size:0.76rem;direction:ltr">'+((d.exp+d.partnerExp)>0?(d.exp+d.partnerExp).toFixed(3)+(d.partnerExp>0?' <span style="font-size:0.68rem;color:#1565c0;display:block">👤'+d.partnerExp.toFixed(3)+'</span>':''):'—')+'</td>'
       +'<td style="padding:5px 5px;text-align:center;font-weight:900;font-size:0.76rem;color:'+nc+';direction:ltr;white-space:nowrap">'+(net>=0?'':'-')+Math.abs(net).toFixed(3)+'</td>'
       +'</tr>';
   }).join('');
@@ -6601,7 +6676,8 @@ function exportAdminPDF(){
   allRows.sort(function(a,b){return a.date.localeCompare(b.date);});
   var balance=0;
   var totInc=allRows.reduce(function(s,r){return s+r.income;},0);
-  var totExp=allRows.reduce(function(s,r){return s+r.exp;},0);
+  var totExp=allRows.reduce(function(s,r){return s+r.exp;},0); // كل المصاريف للعرض
+  var totWalletExp=allRows.reduce(function(s,r){return s+(r.isPartner?0:r.exp);},0); // محفظة فقط للرصيد
   var html='<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>التقرير الإداري</title>'
     +'<style>@import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap");'
     +'*{margin:0;padding:0;box-sizing:border-box}body{font-family:"Tajawal",Arial,sans-serif;direction:rtl;background:#fff;font-size:9pt}'
@@ -6618,14 +6694,14 @@ function exportAdminPDF(){
     +'@media print{@page{margin:8mm;size:A4}}'
     +'</style></head><body>'
     +'<div class="header"><h1>مزرعة هادي اسحاق</h1><h2>ADMINISTRATIVE REPORT — التقرير الإداري'+(selMonth?' — '+selMonth:'')+'</h2></div>'
-    +'<div class="sub"><span>التاريخ: '+today+'</span><span>إيرادات: '+totInc.toFixed(3)+' | مصروفات: '+totExp.toFixed(3)+' | الرصيد: '+(totInc-totExp).toFixed(3)+' دك</span></div>'
+    +'<div class="sub"><span>التاريخ: '+today+'</span><span>إيرادات: '+totInc.toFixed(3)+' | 👜 محفظة: '+totWalletExp.toFixed(3)+(totExp-totWalletExp>0?' | 👤 شريك: '+(totExp-totWalletExp).toFixed(3):'')+' | الرصيد: '+(totInc-totWalletExp).toFixed(3)+' دك</span></div>'
     +'<table><thead><tr>'
     +'<th>#</th><th>التاريخ</th><th>المرجع</th><th>التفاصيل</th>'
     +'<th style="color:#ff8a80">مصروفات (دك)</th><th style="color:#b9f6ca">إيراد (دك)</th>'
     +'<th>المتبقي (دك)</th><th>ملاحظات</th>'
     +'</tr></thead><tbody>';
   allRows.forEach(function(r,i){
-    balance+=r.income-r.exp;
+    balance+=r.income-(r.isPartner?0:r.exp); // مصاريف الشريك لا تُخصم من الرصيد
     var bg=r.isPartner?'#e3f2fd':(i%2===0?'#fff':'#f1f8f1');
     var detailColor=r.isPartner?'#1565c0':'inherit';
     html+='<tr style="background:'+bg+'">'
@@ -6641,7 +6717,7 @@ function exportAdminPDF(){
   });
   html+='</tbody><tfoot><tr class="grand">'
     +'<td colspan="4" style="text-align:right">الإجمالي الكلي</td>'
-    +'<td style="text-align:center;direction:ltr">'+totExp.toFixed(3)+'</td>'
+    +'<td style="text-align:center;direction:ltr">'+totExp.toFixed(3)+(totExp-totWalletExp>0?' <span style="font-size:7pt;color:#90caf9">👤'+(totExp-totWalletExp).toFixed(3)+'</span>':'')+'</td>'
     +'<td style="text-align:center;direction:ltr">'+totInc.toFixed(3)+'</td>'
     +'<td style="text-align:center;direction:ltr;color:'+(balance>=0?'#b9f6ca':'#ff8a80')+'">'+balance.toFixed(3)+'</td>'
     +'<td></td></tr></tfoot></table>';
@@ -6655,9 +6731,10 @@ function exportAdminPDF(){
   allRows.forEach(function(r){
     var m=(r.date||'').slice(0,7);
     if(!m) return;
-    if(!monthsData[m]) monthsData[m]={income:0,exp:0};
+    if(!monthsData[m]) monthsData[m]={income:0,exp:0,partnerExp:0};
     monthsData[m].income+=r.income||0;
-    monthsData[m].exp+=r.exp||0;
+    if(r.isPartner) monthsData[m].partnerExp+=r.exp||0;
+    else monthsData[m].exp+=r.exp||0;
   });
   var monthKeys=Object.keys(monthsData).sort();
 
@@ -6666,8 +6743,8 @@ function exportAdminPDF(){
 
     // ── الملخص الشهري ──
     var gInc=monthKeys.reduce(function(s,k){return s+monthsData[k].income;},0);
-    var gExp=monthKeys.reduce(function(s,k){return s+monthsData[k].exp;},0);
-    var gNet=gInc-gExp;
+    var gExp=monthKeys.reduce(function(s,k){return s+monthsData[k].exp+monthsData[k].partnerExp;},0); // للعرض
+    var gNet=gInc-monthKeys.reduce(function(s,k){return s+monthsData[k].exp;},0); // بدون مصاريف الشريك
     html+='<div style="border-radius:8px;overflow:hidden;border:1px solid #ccc">'
       +'<div style="background:linear-gradient(135deg,#37474f,#546e7a);color:#fff;padding:8px 14px;font-weight:700;font-size:9pt">📅 الملخص الشهري</div>'
       +'<table style="width:100%;border-collapse:collapse;font-size:8pt">'
@@ -6679,12 +6756,12 @@ function exportAdminPDF(){
       +'</tr></thead><tbody>';
     monthKeys.forEach(function(m,i){
       var d=monthsData[m];
-      var net=d.income-d.exp;
+      var net=d.income-d.exp; // الصافي بدون مصاريف الشريك
       var bg=i%2===0?'#f8fffe':'#fff';
       html+='<tr style="background:'+bg+';border-bottom:1px solid #e0e0e0">'
         +'<td style="padding:5px 8px;font-weight:700;color:#37474f">'+mlbl2(m)+'</td>'
         +'<td style="padding:5px 6px;text-align:center;color:#1b5e20;font-weight:700;direction:ltr">'+d.income.toFixed(3)+'</td>'
-        +'<td style="padding:5px 6px;text-align:center;color:#b71c1c;font-weight:700;direction:ltr">'+(d.exp>0?d.exp.toFixed(3):'—')+'</td>'
+        +'<td style="padding:5px 6px;text-align:center;color:#b71c1c;font-weight:700;direction:ltr">'+((d.exp+d.partnerExp)>0?(d.exp+d.partnerExp).toFixed(3)+(d.partnerExp>0?' <span style="font-size:6.5pt;color:#1565c0">👤'+d.partnerExp.toFixed(3)+'</span>':''):'—')+'</td>'
         +'<td style="padding:5px 6px;text-align:center;font-weight:900;color:'+(net>=0?'#1b5e20':'#c62828')+';direction:ltr">'+(net>=0?'':'-')+Math.abs(net).toFixed(3)+'</td>'
         +'</tr>';
     });
@@ -6786,6 +6863,7 @@ function rFullReport(){
   if(mf){
     var cur=mf.value;
     mf.innerHTML='<option value="">كل الفترات</option>'+months.map(function(m){return '<option value="'+m+'"'+(m===cur?' selected':'')+'>'+m+'</option>';}).join('');
+    if(cur)mf.value=cur;
   }
   var period=selMonth||'كل الفترات';
   document.getElementById('fr-print-period').textContent=period;
@@ -7313,16 +7391,16 @@ function buildPr2MonthlySummary(rows){
     return (arMonths[mn]||p[1])+' '+p[0];
   }
 
-  // إجماليات كل الأشهر (المصروف = محفظة + شريك)
+  // إجماليات كل الأشهر (المصروف = محفظة + شريك للعرض، الصافي = محفظة فقط)
   var grandCr=keys.reduce(function(s,k){return s+months[k].credit;},0);
   var grandDb=keys.reduce(function(s,k){return s+months[k].debit+months[k].partnerExp;},0);
-  var grandNet=grandCr-grandDb;
+  var grandNet=grandCr-keys.reduce(function(s,k){return s+months[k].debit;},0); // بدون مصاريف الشريك
   if(badge) badge.textContent=(keys.length+' شهر');
 
   var rows_html=keys.map(function(m,i){
     var d=months[m];
-    var totalDebit=d.debit+d.partnerExp; // مجموع المحفظة + الشريك
-    var net=d.credit-totalDebit;
+    var totalDebit=d.debit+d.partnerExp; // مجموع المحفظة + الشريك (للعرض)
+    var net=d.credit-d.debit; // الصافي = إيراد - محفظة فقط (مصاريف الشريك لا تُخصم)
     var netColor=net>=0?'var(--g2)':'var(--red)';
     var bg=i%2===0?'#f8fffe':'#fff';
     // تفاصيل المصروف (tooltip عند وجود مصروف شريك)
@@ -7453,12 +7531,12 @@ function printPartnersReport(){
   var arM=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
   function mlblP(ym){var p=ym.split('-');return (arM[parseInt(p[1])]||p[1])+' '+p[0];}
   var gCr2=mkeys2.reduce(function(s,k){return s+mdata2[k].credit;},0);
-  var gDb2=mkeys2.reduce(function(s,k){return s+mdata2[k].debit+mdata2[k].partnerExp;},0);
-  var gNet2=gCr2-gDb2;
+  var gDb2=mkeys2.reduce(function(s,k){return s+mdata2[k].debit+mdata2[k].partnerExp;},0); // للعرض
+  var gNet2=gCr2-mkeys2.reduce(function(s,k){return s+mdata2[k].debit;},0); // بدون مصاريف الشريك
   var monthlyHtml=mkeys2.map(function(m,i){
     var d=mdata2[m];
-    var tot=d.debit+d.partnerExp;
-    var net=d.credit-tot;
+    var tot=d.debit+d.partnerExp; // للعرض فقط
+    var net=d.credit-d.debit; // الصافي بدون مصاريف الشريك
     var bg=i%2===0?'#f8fffe':'#ffffff';
     var detail='';
     if(d.partnerExp>0&&d.debit>0) detail=' <span style="font-size:7pt;color:#1565c0;display:block">👜'+d.debit.toFixed(3)+' + 👤'+d.partnerExp.toFixed(3)+'</span>';
@@ -7838,19 +7916,31 @@ function rWallet(){
     return true;
   });
   data.sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+  // \u0625\u062c\u0645\u0627\u0644\u064a\u0627\u062a \u0627\u0644\u0641\u062a\u0631\u0629 \u0627\u0644\u0645\u0641\u0644\u062a\u0631\u0629 (\u0623\u0648 \u0627\u0644\u0643\u0644 \u0625\u0646 \u0644\u0645 \u064a\u0648\u062c\u062f \u0641\u0644\u062a\u0631 \u062a\u0627\u0631\u064a\u062e)
+  var hasDateFilter=!!(dfrom||dto);
+  var source=hasDateFilter?data:WALLET;
   var tIn=0,tExp=0,tSettle=0;
-  WALLET.forEach(function(x){
+  source.forEach(function(x){
     if(x.type==='\u0648\u0627\u0631\u062f') tIn+=x.amount;
     else if(x.dest==='partner') tSettle+=x.amount;
     else tExp+=x.amount;
   });
-  var bal=tIn-tExp-tSettle;
+  var periodNet=tIn-tExp-tSettle;
+  var totalBal=getWalletBalance();
   var d=function(id,v){var el=document.getElementById(id);if(el)el.textContent=fmt(v);};
   d('wlt-in',tIn);d('wlt-exp',tExp);d('wlt-settle',tSettle);
   var be=document.getElementById('wlt-bal');
-  if(be){be.textContent=fmt(bal);be.style.color=bal<0?'var(--red)':'var(--g2)';}
+  if(be){
+    if(hasDateFilter){
+      be.textContent=fmt(periodNet)+' / \u0625\u062c\u0645\u0627\u0644\u064a: '+fmt(totalBal);
+      be.style.color=periodNet<0?'var(--red)':'var(--g2)';
+    } else {
+      be.textContent=fmt(totalBal);
+      be.style.color=totalBal<0?'var(--red)':'var(--g2)';
+    }
+  }
   var nb=document.getElementById('nb-wallet');
-  if(nb){nb.style.display=bal>0?'':'none';nb.textContent=bal.toFixed(3);}
+  if(nb){nb.style.display=totalBal>0?'':'none';nb.textContent=totalBal.toFixed(3);}
   var tb=document.getElementById('wlt-tb');if(!tb)return;
   if(!data.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="ei">\U0001f45c</div>\u0644\u0627 \u062a\u0648\u062c\u062f \u0639\u0645\u0644\u064a\u0627\u062a</div></td></tr>';return;}
   tb.innerHTML=data.map(function(x,i){
@@ -8258,14 +8348,15 @@ async function safetyCheckAndRestore(){
       var res = await fetch(binId+'/latest', {headers:{'X-Master-Key':apiKey}});
       var data = await res.json();
       var rec = data.record||data;
-      if(rec && rec.INV && rec.INV.length > 0){
-        if(rec.INV) localStorage.setItem(K.inv, JSON.stringify(rec.INV));
-        if(rec.SALES) localStorage.setItem(K.sales, JSON.stringify(rec.SALES));
-        if(rec.EXP) localStorage.setItem(K.exp, JSON.stringify(rec.EXP));
-        if(rec.CASH) localStorage.setItem(K.cash, JSON.stringify(rec.CASH));
-        if(rec.CUST) localStorage.setItem(K.cust, JSON.stringify(rec.CUST));
-        if(rec.WASTE) localStorage.setItem(K.waste, JSON.stringify(rec.WASTE));
-        if(rec.DEBTS) localStorage.setItem(K.debts, JSON.stringify(rec.DEBTS));
+      var _ri=rec.INV||rec.ps3_inv||[];
+      if(rec && _ri.length > 0){
+        if(_ri.length) localStorage.setItem(K.inv, JSON.stringify(_ri));
+        var _rs=rec.SALES||rec.ps3_sales; if(_rs) localStorage.setItem(K.sales, JSON.stringify(_rs));
+        var _re=rec.EXP||rec.ps3_exp; if(_re) localStorage.setItem(K.exp, JSON.stringify(_re));
+        var _rc=rec.CASH||rec.ps3_cash; if(_rc) localStorage.setItem(K.cash, JSON.stringify(_rc));
+        var _rcu=rec.CUST||rec.ps3_cust; if(_rcu) localStorage.setItem(K.cust, JSON.stringify(_rcu));
+        var _rw=rec.WASTE||rec.ps3_waste; if(_rw) localStorage.setItem(K.waste, JSON.stringify(_rw));
+        var _rd=rec.DEBTS||rec.ps3_debts; if(_rd) localStorage.setItem(K.debts, JSON.stringify(_rd));
         // Reload globals
         INV=ld(K.inv); SALES=ld(K.sales); EXP=ld(K.exp); CASH=ld(K.cash);
         CUST=ld(K.cust); WASTE=ld(K.waste);

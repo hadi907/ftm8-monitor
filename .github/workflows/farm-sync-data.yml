@@ -35,8 +35,8 @@ jobs:
           python3 << 'PYEOF'
           import requests, json, os
 
-          url = os.environ.get('JSONBIN_BIN_URL', '').rstrip('/') + '/latest'
-          key = os.environ.get('JSONBIN_API_KEY', '')
+          url = os.environ.get('JSONBIN_BIN_URL', 'https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed').rstrip('/') + '/latest'
+          key = os.environ.get('JSONBIN_API_KEY', '$2a$10$hymkvXJ9AvDFIag8.j4sf.Qw..HkaR0Qd3KUFYkjkTMOqO6MM68DC')
 
           print(f"🔍 قراءة البيانات من JSONBin...")
           res = requests.get(url, headers={'X-Master-Key': key}, timeout=15)
@@ -68,8 +68,9 @@ jobs:
                   json.dump(output, f, ensure_ascii=False, indent=2)
               print("✅ تم حفظ farm_data.json بمفاتيح صحيحة (SALES, INV, ...)")
           else:
-              print(f"⚠️ JSONBin غير متاح: {res.text[:100]}")
+              print(f"⚠️ JSONBin غير متاح: {res.status_code} — {res.text[:200]}")
               print("سيتم الاحتفاظ بالملف القديم")
+              raise SystemExit(1)
           PYEOF
 
       - name: 💾 Commit farm_data.json

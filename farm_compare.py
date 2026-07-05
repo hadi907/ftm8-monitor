@@ -119,6 +119,12 @@ def compare(app_sales, xlsx_rows):
     app_total   = round(sum(s.get('total', 0) for s in app_sales), 3)
     xlsx_credit = round(sum(r['credit'] for r in xlsx_rows), 3)
 
+    # ── نطاق المزامنة: JSONBin يحتفظ بآخر 50 فاتورة فقط، فأي سطر XLSX أقدم
+    #    من أقدم فاتورة موجودة فعلياً في التطبيق (السحابة) لا يُعتبر "ناقصاً"،
+    #    لأنه ببساطة خارج نطاق ما يُرفع للمقارنة (موجود بالكامل في المتصفح محلياً) ──
+    app_dates = [s.get('date') for s in app_sales if s.get('date')]
+    min_app_date = min(app_dates) if app_dates else None
+
     xlsx_by_ref = {}
     for r in xlsx_rows:
         xlsx_by_ref.setdefault(r['ref_norm'], []).append(r)
@@ -129,6 +135,7 @@ def compare(app_sales, xlsx_rows):
         if ref: app_refs.add(ref)
 
     diffs = []
+    out_of_range = []
     seen  = set()
 
     for s in app_sales:
@@ -154,13 +161,28 @@ def compare(app_sales, xlsx_rows):
             key = f"{ref_norm}|xlsx"
             if key in seen: continue
             seen.add(key)
-            diffs.append({'type':'في XLSX فقط','ref':r['ref'],'desc':r['desc'],'date':r['date'],'app_val':0,'xlsx_val':r['credit'],'diff':-r['credit']})
+            item = {'type':'في XLSX فقط','ref':r['ref'],'desc':r['desc'],'date':r['date'],'app_val':0,'xlsx_val':r['credit'],'diff':-r['credit']}
+            # فاتورة بتاريخ أقدم من (أو يساوي) أقدم فاتورة مزامنة = خارج نطاق JSONBin (50 فقط)
+            # نستخدم "<=" وليس "<" لأن أكثر من فاتورة قد تقع في نفس يوم حدّ القطع (تأكّد فعلياً بفحص المتصفح)
+            if min_app_date and r['date'] and r['date'] <= min_app_date:
+                out_of_range.append(item)
+            else:
+                diffs.append(item)
+
+    # الفارق الإجمالي يُحسب فقط على النطاق المشترك (نفس فترة آخر 50 فاتورة)
+    # حتى لا يظهر فارق وهمي بسبب الفواتير القديمة خارج نطاق المزامنة
+    out_of_range_total_tmp = round(sum(-i['diff'] for i in out_of_range), 3)
+    xlsx_credit_in_range = round(xlsx_credit - out_of_range_total_tmp, 3)
 
     return {
         'app_total':   app_total,
         'xlsx_credit': xlsx_credit,
-        'diff_total':  round(app_total - xlsx_credit, 3),
+        'xlsx_credit_in_range': xlsx_credit_in_range,
+        'diff_total':  round(app_total - xlsx_credit_in_range, 3),
         'diffs':       sorted(diffs, key=lambda x: x['date'], reverse=True),
+        'out_of_range': sorted(out_of_range, key=lambda x: x['date'], reverse=True),
+        'out_of_range_total': round(sum(-i['diff'] for i in out_of_range), 3),
+        'min_app_date': min_app_date,
         'app_count':   len(app_sales),
         'xlsx_count':  len(xlsx_rows)
     }
@@ -189,22 +211,52 @@ def build_html(r):
     else:
         rows_html = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#1b5e20;font-size:16px">✅ لا توجد فوارق</td></tr>'
 
-    return f"""<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+    note_html = ''
+    if r['out_of_range']:
+        note_html = (
+            '<div class="note" style="background:#e3f2fd;border-right:4px solid #1565c0;'
+            'padding:10px 16px;border-radius:6px;font-size:12px;color:#1565c0;margin-top:12px">'
+            '<b>ملاحظة:</b> ' + str(len(r['out_of_range'])) + ' فاتورة قديمة (قبل ' + str(r['min_app_date']) +
+            ') بقيمة ' + f"{r['out_of_range_total']:.3f}" +
+            ' دك موجودة في XLSX وفي التطبيق محلياً، لكنها خارج نطاق آخر 50 فاتورة المرفوعة لـ JSONBin — لا تُعتبر فارقاً.'
+            '</div>'
+        )
+
+    template = """<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
-<style>*{{margin:0;padding:0;box-sizing:border-box}}body{{font-family:Tajawal,Arial;direction:rtl;background:#f5f5f5;padding:20px}}.card{{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #e0e0e0}}.kpis{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}}.kpi{{background:#f8fffe;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0}}.kpi-lbl{{font-size:12px;color:#666;margin-bottom:4px}}.kpi-val{{font-size:20px;font-weight:900;direction:ltr}}table{{width:100%;border-collapse:collapse;font-size:13px}}th{{background:#1b5e20;color:#fff;padding:10px 12px;text-align:right}}tr:nth-child(even){{background:#f9f9f9}}</style></head>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Tajawal,Arial;direction:rtl;background:#f5f5f5;padding:20px}.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #e0e0e0}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.kpi{background:#f8fffe;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0}.kpi-lbl{font-size:12px;color:#666;margin-bottom:4px}.kpi-val{font-size:20px;font-weight:900;direction:ltr}table{width:100%;border-collapse:collapse;font-size:13px}th{background:#1b5e20;color:#fff;padding:10px 12px;text-align:right}tr:nth-child(even){background:#f9f9f9}</style></head>
 <body><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1b5e20;padding-bottom:12px;margin-bottom:16px">
-<div><h1 style="font-size:18px;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</h1><p style="color:#555;font-size:13px">تقرير المقارنة — {TODAY}</p></div>
-<div style="background:{'#fff3e0' if r['diffs'] else '#e8f5e9'};padding:10px 20px;border-radius:8px;text-align:center"><div style="font-size:22px">{icon}</div><div style="font-size:12px;font-weight:700;color:{dc}">{status}</div></div></div>
+<div><h1 style="font-size:18px;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</h1><p style="color:#555;font-size:13px">تقرير المقارنة — __TODAY__</p></div>
+<div style="background:__BGCOL__;padding:10px 20px;border-radius:8px;text-align:center"><div style="font-size:22px">__ICON__</div><div style="font-size:12px;font-weight:700;color:__DC__">__STATUS__</div></div></div>
 <div class="kpis">
-<div class="kpi"><div class="kpi-lbl">مبيعات التطبيق</div><div class="kpi-val" style="color:#1b5e20">{r['app_total']:.3f} دك</div><div style="font-size:11px;color:#999">{r['app_count']} سجل</div></div>
-<div class="kpi"><div class="kpi-lbl">مبيعات XLSX</div><div class="kpi-val" style="color:#1565c0">{r['xlsx_credit']:.3f} دك</div><div style="font-size:11px;color:#999">{r['xlsx_count']} سطر</div></div>
-<div class="kpi"><div class="kpi-lbl">الفارق</div><div class="kpi-val" style="color:{dc}">{r['diff_total']:+.3f} دك</div></div>
-<div class="kpi"><div class="kpi-lbl">الفوارق</div><div class="kpi-val" style="color:{dc}">{len(r['diffs'])}</div></div></div></div>
-<div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:12px">📋 تفاصيل الفوارق</h2>
+<div class="kpi"><div class="kpi-lbl">مبيعات التطبيق (آخر 50)</div><div class="kpi-val" style="color:#1b5e20">__APPTOTAL__ دك</div><div style="font-size:11px;color:#999">__APPCOUNT__ سجل</div></div>
+<div class="kpi"><div class="kpi-lbl">مبيعات XLSX (بنفس النطاق)</div><div class="kpi-val" style="color:#1565c0">__XLSXRANGE__ دك</div><div style="font-size:11px;color:#999">من __MINDATE__</div></div>
+<div class="kpi"><div class="kpi-lbl">الفارق</div><div class="kpi-val" style="color:__DC__">__DIFFTOTAL__ دك</div></div>
+<div class="kpi"><div class="kpi-lbl">الفوارق الحقيقية</div><div class="kpi-val" style="color:__DC__">__DIFFCOUNT__</div></div></div>
+__NOTE__
+</div>
+<div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:12px">📋 تفاصيل الفوارق الحقيقية</h2>
 <table><thead><tr><th>التاريخ</th><th>الفاتورة</th><th>الوصف</th><th style="text-align:center">النوع</th><th style="text-align:center">التطبيق</th><th style="text-align:center">XLSX</th><th style="text-align:center">الفارق</th></tr></thead>
-<tbody>{rows_html}</tbody></table></div>
-<p style="text-align:center;color:#999;font-size:11px;margin-top:12px">GitHub Actions — {TODAY}</p>
+<tbody>__ROWS__</tbody></table></div>
+<p style="text-align:center;color:#999;font-size:11px;margin-top:12px">GitHub Actions — __TODAY__</p>
 </body></html>"""
+
+    html = (template
+        .replace('__TODAY__', TODAY)
+        .replace('__BGCOL__', '#fff3e0' if r['diffs'] else '#e8f5e9')
+        .replace('__ICON__', icon)
+        .replace('__DC__', dc)
+        .replace('__STATUS__', status)
+        .replace('__APPTOTAL__', f"{r['app_total']:.3f}")
+        .replace('__APPCOUNT__', str(r['app_count']))
+        .replace('__XLSXRANGE__', f"{r['xlsx_credit_in_range']:.3f}")
+        .replace('__MINDATE__', str(r['min_app_date'] or '—'))
+        .replace('__DIFFTOTAL__', f"{r['diff_total']:+.3f}")
+        .replace('__DIFFCOUNT__', str(len(r['diffs'])))
+        .replace('__NOTE__', note_html)
+        .replace('__ROWS__', rows_html)
+    )
+    return html
 
 def send_email(html_body, diff_count):
     subject = f"{'⚠️' if diff_count else '✅'} مزرعة هادي اسحاق - مقارنة — {TODAY}"
@@ -231,6 +283,6 @@ if __name__ == '__main__':
     if not app_sales and not xlsx_rows:
         print("❌ لا توجد بيانات"); exit(1)
     result = compare(app_sales, xlsx_rows)
-    print(f"📊 تطبيق={result['app_total']:.3f} | XLSX={result['xlsx_credit']:.3f} | فارق={result['diff_total']:+.3f} | فوارق={len(result['diffs'])}")
+    print(f"📊 تطبيق={result['app_total']:.3f} | XLSX (بالنطاق)={result['xlsx_credit_in_range']:.3f} | فارق={result['diff_total']:+.3f} | فوارق حقيقية={len(result['diffs'])} | خارج النطاق (غير محسوبة كفارق)={len(result['out_of_range'])}")
     html = build_html(result)
     send_email(html, len(result['diffs']))

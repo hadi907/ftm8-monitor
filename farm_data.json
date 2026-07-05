@@ -1,6 +1,40 @@
 {
   "SALES": [
     {
+      "id": "mr82lz4fbs0",
+      "invNum": "INV-084",
+      "date": "2026-07-05",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "معلقات",
+      "category": "داخلي",
+      "qty": 4,
+      "price": 2,
+      "discount": 0,
+      "total": 8,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mr82lz4f554",
+      "img": ""
+    },
+    {
+      "id": "mr82k5z98vq",
+      "invNum": "INV-083",
+      "date": "2026-07-04",
+      "client": "نقدا",
+      "invItemId": "mnw8a6vw3lw",
+      "product": "ودليه",
+      "category": "داخلي",
+      "qty": 13,
+      "price": 1.5,
+      "discount": 6.5,
+      "total": 13,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mr82k5zsg4n",
+      "img": ""
+    },
+    {
       "id": "mr6lhh3xkxg",
       "invNum": "INV-082",
       "date": "2026-07-03",
@@ -815,40 +849,6 @@
       "payment": "نقد",
       "cashId": "mpbm6r93djc",
       "img": ""
-    },
-    {
-      "id": "mpbmg0n9f08",
-      "invNum": "INV-020",
-      "date": "2026-05-16",
-      "client": "",
-      "invItemId": "mnw9nu60hdr",
-      "product": "اولفيرا",
-      "category": "خارجي",
-      "qty": 3,
-      "price": 1.5,
-      "discount": 2.25,
-      "total": 2.25,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mpbmg0nfk4u",
-      "img": ""
-    },
-    {
-      "id": "mpbmknw3lf2",
-      "invNum": "INV-021",
-      "date": "2026-05-16",
-      "client": "نقدا",
-      "invItemId": "mnm6zva0zr0",
-      "product": "دارسينا خضراء",
-      "category": "داخلي",
-      "qty": 1,
-      "price": 4,
-      "discount": 1.5,
-      "total": 2.5,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mpbmknwafjz",
-      "img": ""
     }
   ],
   "INV": [
@@ -1156,7 +1156,7 @@
       "cost": 0,
       "price": 1.5,
       "qty": 58,
-      "remaining": 34,
+      "remaining": 21,
       "minStock": 5,
       "date": "2026-04-12",
       "color": "اخضر",
@@ -1328,15 +1328,15 @@
       "sku": "1025",
       "cost": 0,
       "price": 1,
-      "qty": 180,
-      "remaining": 4,
+      "qty": 190,
+      "remaining": 14,
       "minStock": 5,
       "date": "2026-05-09",
       "color": "احمر",
       "size": "",
       "location": "",
       "supplier": "المزرعه",
-      "lastSupply": "2026-06-30",
+      "lastSupply": "2026-07-05",
       "notes": "",
       "batches": [
         {
@@ -1406,6 +1406,14 @@
         {
           "date": "2026-06-30",
           "qty": 20,
+          "cost": "0.000",
+          "price": "1.000",
+          "supplier": "",
+          "notes": ""
+        },
+        {
+          "date": "2026-07-05",
+          "qty": 10,
           "cost": "0.000",
           "price": "1.000",
           "supplier": "",
@@ -2061,6 +2069,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-04T16:55:31.118Z",
-  "__last_sale_id__": "mpbmknw3lf2"
+  "ts": "2026-07-05T19:02:19.540Z"
 }

@@ -949,16 +949,25 @@
       "sku": "1007",
       "cost": 0.05,
       "price": 0.083,
-      "qty": 10,
-      "remaining": 10,
+      "qty": 20,
+      "remaining": 20,
       "minStock": 5,
       "date": "2026-04-02",
       "color": "ميك الوان",
       "size": "",
       "supplier": "وفره الخير",
-      "lastSupply": "",
+      "lastSupply": "2026-07-05",
       "notes": "12 ورده فقط 1 دك",
-      "batches": []
+      "batches": [
+        {
+          "date": "2026-07-05",
+          "qty": 10,
+          "cost": "0.050",
+          "price": "0.083",
+          "supplier": "",
+          "notes": ""
+        }
+      ]
     },
     {
       "id": "mnm5ne70chw",
@@ -1281,17 +1290,26 @@
       "sku": "XXX-023",
       "cost": 0,
       "price": 181,
-      "qty": 0,
-      "remaining": 0,
+      "qty": 10,
+      "remaining": 10,
       "minStock": 5,
       "date": "2026-05-03",
       "color": "",
       "size": "",
       "location": "محميه 1",
       "supplier": "المزرعه",
-      "lastSupply": "",
+      "lastSupply": "2026-07-05",
       "notes": "",
-      "batches": []
+      "batches": [
+        {
+          "date": "2026-07-05",
+          "qty": 10,
+          "cost": "0.000",
+          "price": "181.000",
+          "supplier": "",
+          "notes": ""
+        }
+      ]
     },
     {
       "id": "moyspgt6atb",
@@ -2069,5 +2087,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-05T19:02:19.540Z"
+  "ts": "2026-07-05T20:53:45.233Z"
 }

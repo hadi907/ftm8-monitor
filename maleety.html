@@ -1006,8 +1006,7 @@ function getNotifs(){
   D.cars.forEach(c=>{const days=du(c.insuranceExpiry);if(days<=60)list.push({name:"تأمين: "+c.carName,type:"سيارة",expiryDate:c.insuranceExpiry,daysLeft:days,icon:"🚗"});});
   D.residencies.forEach(r=>{const days=du(r.expiryDate);if(days<=60)list.push({name:"إقامة: "+r.name,type:"إقامة",expiryDate:r.expiryDate,daysLeft:days,icon:"🪪"});});
   D.contracts.forEach(c=>{const days=du(c.endDate);if(days<=60)list.push({name:"عقد: "+c.contractName,type:"عقد",expiryDate:c.endDate,daysLeft:days,icon:"📜"});});
-  (D.cases||[]).filter(c=>c.caseStatus!=="مغلق").forEach(c=>{
-    if(!c.nextSession)return;
+  (D.cases||[]).filter(c=>c.caseStatus==="مفتوح"&&c.nextSession).forEach(c=>{
     const days=du(c.nextSession);
     if(days<=30)list.push({name:"قضية: "+(c.caseNumber||c.autoNumber||""),type:c.caseType||"قضية",expiryDate:c.nextSession,daysLeft:days,icon:"⚖️"});
   });
@@ -1814,7 +1813,7 @@ function rdDash(){
     ...D.cars.filter(c=>c.insuranceExpiry&&du(c.insuranceExpiry)<=30).map(c=>({name:"تأمين: "+c.carName,icon:"🚗",expiryDate:c.insuranceExpiry})),
     ...D.residencies.filter(r=>r.expiryDate&&du(r.expiryDate)<=60).map(r=>({name:"إقامة: "+r.name,icon:"🪪",expiryDate:r.expiryDate})),
     ...D.contracts.filter(c=>c.endDate&&du(c.endDate)<=30).map(c=>({name:"عقد: "+c.contractName,icon:"📜",expiryDate:c.endDate})),
-    ...(D.cases||[]).filter(c=>c.caseStatus!=="مغلق"&&c.nextSession&&du(c.nextSession)<=30).map(c=>({name:"قضية: "+(c.caseNumber||c.autoNumber||""),icon:"⚖️",expiryDate:c.nextSession}))
+    ...(D.cases||[]).filter(c=>c.caseStatus==="مفتوح"&&c.nextSession&&du(c.nextSession)<=30).map(c=>({name:"قضية: "+(c.caseNumber||c.autoNumber||""),icon:"⚖️",expiryDate:c.nextSession}))
   ].sort((a,b)=>du(a.expiryDate)-du(b.expiryDate));
   const notifs=getNotifs();
   const savingsRate=ti>0?((net/ti)*100).toFixed(1):0;
@@ -2740,7 +2739,7 @@ function rdDocs(){
     ...D.residencies.map(r=>({name:"إقامة: "+r.name,icon:"🪪",expiry:r.expiryDate})),
     ...D.contracts.map(c=>({name:"عقد: "+c.contractName,icon:"📜",expiry:c.endDate})),
     ...D.documents.filter(d=>!d.renewed).map(d=>({name:d.name,icon:TI[d.type]||"📋",expiry:d.expiryDate})),
-    ...(D.cases||[]).filter(c=>c.caseStatus!=="مغلق"&&c.nextSession).map(c=>({name:"قضية: "+(c.caseNumber||c.autoNumber||""),icon:"⚖️",expiry:c.nextSession}))
+    ...(D.cases||[]).filter(c=>c.caseStatus==="مفتوح"&&c.nextSession).map(c=>({name:"قضية: "+(c.caseNumber||c.autoNumber||""),icon:"⚖️",expiry:c.nextSession}))
   ].filter(x=>x.expiry&&du(x.expiry)<=60).sort((a,b)=>du(a.expiry)-du(b.expiry));
 
   const tabs=[
@@ -3318,8 +3317,9 @@ function renderDocsTab(){
 const CASE_TYPES=["مدني","تجاري","جنايات","جنحة"];
 const CASE_PERSONS=["أبوهادي","هادي","أم هادي","أم اسحاق"];
 const CASE_DEGREES=["درجة أولى","استئناف","تمييز"];
+const CASE_AUTHORITIES=["شئون","تجاره","بلديه","أخري"];
 
-let _cfNum="",_cfAuto="",_cfDate="",_cfType="الكل",_cfPerson="الكل",_cfStatus="الكل";
+let _cfNum="",_cfAuto="",_cfDate="",_cfType="الكل",_cfPerson="الكل",_cfStatus="الكل",_cfAuth="الكل";
 
 function renderCasesTab(){
   _cfNum=(document.getElementById("cf_num")||{}).value||_cfNum;
@@ -3331,6 +3331,9 @@ function renderCasesTab(){
 }
 
 function _renderCasesInner(){
+  // حفظ الـ focus والكرسور قبل إعادة الرسم
+  const _focusId=document.activeElement&&document.activeElement.id?document.activeElement.id:null;
+  const _focusSel=_focusId?{start:document.activeElement.selectionStart,end:document.activeElement.selectionEnd}:null;
   const q=docSearchQ.toLowerCase();
   const cases=D.cases||[];
   const allNums=[...new Set(cases.map(c=>c.caseNumber).filter(Boolean))];
@@ -3343,7 +3346,8 @@ function _renderCasesInner(){
     if(_cfDate&&c.date!==_cfDate)return false;
     if(_cfType&&_cfType!=="الكل"&&c.caseType!==_cfType)return false;
     if(_cfPerson&&_cfPerson!=="الكل"&&c.personName!==_cfPerson)return false;
-    if(_cfStatus&&_cfStatus!=="الكل"&&(c.caseStatus||"مفتوح")!==_cfStatus)return false;
+    if(_cfStatus&&_cfStatus!=="الكل"&&(c.caseStatus||"")!==_cfStatus)return false;
+    if(_cfAuth&&_cfAuth!=="الكل"&&(c.authority||"")!==_cfAuth)return false;
     return true;
   });
 
@@ -3384,13 +3388,21 @@ function _renderCasesInner(){
         </select>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end">
       <div>
         <label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">الاسم</label>
         <select id="cf_person" style="width:100%;font-size:12px;background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px;font-family:inherit"
           onchange="_cfPerson=this.value;_renderCasesInner()">
           <option value="الكل" ${_cfPerson==="الكل"?"selected":""}>الكل</option>
           ${CASE_PERSONS.map(p=>`<option value="${p}" ${_cfPerson===p?"selected":""}>${p}</option>`).join("")}
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">الجهة</label>
+        <select id="cf_auth" style="width:100%;font-size:12px;background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px;font-family:inherit"
+          onchange="_cfAuth=this.value;_renderCasesInner()">
+          <option value="الكل" ${_cfAuth==="الكل"?"selected":""}>الكل</option>
+          ${CASE_AUTHORITIES.map(a=>`<option value="${a}" ${_cfAuth===a?"selected":""}>${a}</option>`).join("")}
         </select>
       </div>
       <div>
@@ -3402,23 +3414,17 @@ function _renderCasesInner(){
           <option value="مغلق" ${_cfStatus==="مغلق"?"selected":""}>🔴 مغلق</option>
         </select>
       </div>
-      <button onclick="_cfNum='';_cfAuto='';_cfDate='';_cfType='الكل';_cfPerson='الكل';_cfStatus='الكل';_renderCasesInner()"
-        class="btn-s" style="padding:7px 12px;font-size:11px;white-space:nowrap">↺ مسح</button>
+    </div>
+    <div style="margin-top:6px">
+      <button onclick="_cfNum='';_cfAuto='';_cfDate='';_cfType='الكل';_cfPerson='الكل';_cfStatus='الكل';_cfAuth='الكل';_renderCasesInner()"
+        class="btn-s" style="padding:7px 12px;font-size:11px;white-space:nowrap">↺ مسح الفلاتر</button>
     </div>
   </div>
-  <!-- أزرار الطباعة -->
+  <!-- زر التقرير الموحد -->
   <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-    <button onclick="printCasesReport('all')"
-      style="flex:1;min-width:120px;padding:9px 12px;background:linear-gradient(135deg,rgba(239,68,68,0.8),rgba(185,28,28,0.7));border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">
-      🖨️ طباعة — جميع القضايا
-    </button>
-    <button onclick="printCasesReport('filter')"
-      style="flex:1;min-width:120px;padding:9px 12px;background:linear-gradient(135deg,rgba(99,102,241,0.8),rgba(67,56,202,0.7));border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">
-      🖨️ طباعة — نتائج الفلتر
-    </button>
-    <button onclick="printCasesReportByPerson()"
-      style="flex:1;min-width:120px;padding:9px 12px;background:linear-gradient(135deg,rgba(16,185,129,0.8),rgba(5,150,105,0.7));border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">
-      🖨️ طباعة — قضايا الاسم المحدد
+    <button onclick="showCaseReportMenu()"
+      style="flex:1;padding:10px 16px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(67,56,202,0.75));border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      🖨️ تقرير القضايا
     </button>
   </div>
     ${list.length?list.map(c=>{
@@ -3491,6 +3497,16 @@ function _renderCasesInner(){
       <div style="font-size:12px;margin-top:4px">اضغط "+ إضافة" في الأعلى لإضافة قضية جديدة</div>
     </div>`}
   </div>`;
+  // استعادة الـ focus بعد إعادة الرسم
+  if(_focusId){
+    const el=document.getElementById(_focusId);
+    if(el){
+      el.focus();
+      if(_focusSel&&el.setSelectionRange){
+        try{el.setSelectionRange(_focusSel.start,_focusSel.end);}catch(e){}
+      }
+    }
+  }
 }
 
 function addCaseEntry(caseId){
@@ -3562,6 +3578,10 @@ function addCaseModal(d){
     <input id="cs_police" value="${d?esc(d.policeStation||""):""}" placeholder="رقم أو اسم المخفر"/></div>
     <div><label style="font-size:11px;color:#64748b;margin-bottom:4px;display:block">📍 المكان / المحكمة</label>
     <input id="cs_location" value="${d?esc(d.location||""):""}" placeholder="اسم المحكمة أو الجهة"/></div>
+    <div><label style="font-size:11px;color:#64748b;margin-bottom:4px;display:block">🏢 الجهة</label>
+    <select id="cs_auth" style="background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;width:100%;font-family:inherit">
+      ${CASE_AUTHORITIES.map(a=>`<option value="${a}" ${d&&d.authority===a?"selected":""}>${a}</option>`).join("")}
+    </select></div>
     <div><label style="font-size:11px;color:#64748b;margin-bottom:4px;display:block">🔖 الحالة</label>
     <select id="cs_status" style="background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;width:100%;font-family:inherit">
       <option value="مفتوح" ${(!d||d.caseStatus==="مفتوح"||!d.caseStatus)?"selected":""}>🟢 مفتوح</option>
@@ -3681,6 +3701,7 @@ function readCaseForm(){
     degree:(document.getElementById("cs_degree")||{}).value||"",
     policeStation:(document.getElementById("cs_police")||{}).value||"",
     location:(document.getElementById("cs_location")||{}).value||"",
+    authority:(document.getElementById("cs_auth")||{}).value||"أخري",
     caseStatus:(document.getElementById("cs_status")||{}).value||"مفتوح",
     charge:(document.getElementById("cs_charge")||{}).value||"",
     nextSession:(document.getElementById("cs_session")||{}).value||"",
@@ -3834,51 +3855,86 @@ ${c.notes?`<div class="info-box full" style="margin-bottom:20px"><div class="inf
 // ══════════════════════════════════════════════════════
 
 function showCaseReportMenu(){
-  const persons=[...new Set((D.cases||[]).map(c=>c.personName).filter(Boolean))];
-  const nums=[...new Set((D.cases||[]).map(c=>c.caseNumber).filter(Boolean))];
-  openModal(`<h3 class="modal-title">🖨️ تقرير القضايا — اختر النوع</h3>
+  const persons=[...new Set((D.cases||[]).map(c=>(c.personName||"").trim()).filter(Boolean))];
+  const today=new Date().toISOString().slice(0,10);
+  const yearStart=new Date().getFullYear()+"-01-01";
+  const openCnt=(D.cases||[]).filter(c=>c.caseStatus==="مفتوح").length;
+
+
+  const personOptsFull=`<option value="الكل">— الكل (جميع الأشخاص)</option>${persons.map(p=>`<option value="${esc(p)}" ${(_cfPerson&&_cfPerson!=="الكل"&&_cfPerson===p)?"selected":""}>${esc(p)}</option>`).join("")}`;
+  const personOptsOpen=`<option value="الكل">— الكل (جميع الأشخاص)</option>${persons.map(p=>{
+    const all=(D.cases||[]).filter(x=>x.personName===p);
+    const closed=all.filter(x=>x.caseStatus==="مغلق").length;
+    const open=all.filter(x=>x.caseStatus==="مفتوح").length;
+    return`<option value="${esc(p)}">${esc(p)} — مفتوحة: ${open} / الكل: ${all.length}</option>`;
+  }).join("")}`;
+
+
+  openModal(`<h3 class="modal-title">🖨️ تقرير القضايا</h3>
   <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px">
 
-    <!-- كل القضايا -->
-    <button onclick="closeModal();printCasesReport('all')"
-      style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);border-radius:12px;padding:14px 16px;color:#e2e8f0;cursor:pointer;text-align:right;font-family:inherit">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:24px">⚖️</span>
+    <!-- ── تقرير القضايا المفتوحة ── -->
+    <div style="background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.25);border-radius:12px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:20px">🟢</span>
         <div>
-          <div style="font-weight:700;font-size:14px">جميع القضايا</div>
-          <div style="font-size:11px;color:#64748b;margin-top:2px">تقرير شامل لكل القضايا (${(D.cases||[]).length} قضية)</div>
+          <div style="font-weight:800;font-size:14px;color:#34d399">تقرير القضايا المفتوحة</div>
+          <div style="font-size:11px;color:#64748b;margin-top:1px">${openCnt} قضية مفتوحة حالياً</div>
         </div>
       </div>
-    </button>
+      <label style="font-size:11px;color:#64748b;display:block;margin-bottom:6px">👤 الشخص</label>
+      <select id="rpt_open_person" style="width:100%;background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:9px 12px;font-family:inherit;font-size:13px;margin-bottom:10px">
+        ${personOptsOpen}
+      </select>
+      <button onclick="
+        const p=document.getElementById('rpt_open_person').value;
+        closeModal();
+        printCasesReport('open',p)"
+        style="width:100%;padding:10px;background:linear-gradient(135deg,rgba(16,185,129,0.85),rgba(5,150,105,0.75));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer">
+        🖨️ طباعة القضايا المفتوحة
+      </button>
+    </div>
 
-    <!-- بالفلتر الحالي -->
-    <button onclick="closeModal();printCasesReport('filter')"
-      style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:14px 16px;color:#e2e8f0;cursor:pointer;text-align:right;font-family:inherit">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:24px">🔍</span>
+    <!-- ── تقرير الجلسات القادمة ── -->
+    <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:20px">📅</span>
         <div>
-          <div style="font-weight:700;font-size:14px">القضايا المفلترة حالياً</div>
-          <div style="font-size:11px;color:#64748b;margin-top:2px">طباعة نتائج الفلتر الحالي فقط</div>
+          <div style="font-weight:800;font-size:14px;color:#818cf8">تقرير الجلسات القادمة</div>
+          <div style="font-size:11px;color:#64748b;margin-top:1px">فلتر بالشخص ونطاق التاريخ</div>
         </div>
       </div>
-    </button>
-
-    <!-- باسم شخص -->
-    <div style="background:rgba(167,139,250,0.07);border:1px solid rgba(167,139,250,0.2);border-radius:12px;padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <span style="font-size:24px">👤</span>
+      <label style="font-size:11px;color:#64748b;display:block;margin-bottom:6px">👤 الشخص</label>
+      <select id="rpt_person" style="width:100%;background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:9px 12px;font-family:inherit;font-size:13px;margin-bottom:10px">
+        ${personOptsFull}
+      </select>
+      <label style="font-size:11px;color:#64748b;display:block;margin-bottom:6px">📅 نطاق تاريخ الجلسة القادمة</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div>
-          <div style="font-weight:700;font-size:14px;color:#e2e8f0">قضايا شخص معين</div>
-          <div style="font-size:11px;color:#64748b;margin-top:2px">اختر الاسم لطباعة جميع قضاياه</div>
+          <label style="font-size:10px;color:#475569;display:block;margin-bottom:3px">من</label>
+          <input id="rpt_from" type="date" value="${yearStart}" style="width:100%;background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12px"/>
+        </div>
+        <div>
+          <label style="font-size:10px;color:#475569;display:block;margin-bottom:3px">إلى</label>
+          <input id="rpt_to" type="date" value="${today}" style="width:100%;background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12px"/>
         </div>
       </div>
-      <div style="display:flex;gap:8px">
-        <select id="rpt_person" style="flex:1;background:#1e293b;color:#e2e8f0;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;font-family:inherit;font-size:13px">
-          ${persons.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join("")}
-        </select>
-        <button onclick="const p=document.getElementById('rpt_person').value;closeModal();printCasesReport('person',p)"
-          class="btn-p" style="padding:8px 16px">🖨️ طباعة</button>
+      <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
+        <button onclick="document.getElementById('rpt_from').value=new Date().toISOString().slice(0,10);document.getElementById('rpt_to').value=new Date().toISOString().slice(0,10)" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#a78bfa;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit">اليوم</button>
+        <button onclick="const n=new Date();const s=new Date(n);s.setDate(n.getDate()-6);document.getElementById('rpt_from').value=s.toISOString().slice(0,10);document.getElementById('rpt_to').value=n.toISOString().slice(0,10)" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#a78bfa;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit">الأسبوع</button>
+        <button onclick="const n=new Date();const s=new Date(n.getFullYear(),n.getMonth(),1);document.getElementById('rpt_from').value=s.toISOString().slice(0,10);document.getElementById('rpt_to').value=n.toISOString().slice(0,10)" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#a78bfa;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit">الشهر</button>
+        <button onclick="const n=new Date();const s=new Date(n.getFullYear(),0,1);document.getElementById('rpt_from').value=s.toISOString().slice(0,10);document.getElementById('rpt_to').value=n.toISOString().slice(0,10)" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#a78bfa;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit">السنة</button>
+        <button onclick="document.getElementById('rpt_from').value='';document.getElementById('rpt_to').value=''" style="background:rgba(100,116,139,0.1);border:1px solid rgba(100,116,139,0.2);color:#64748b;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit">الكل</button>
       </div>
+      <button onclick="
+        const p=document.getElementById('rpt_person').value;
+        const f=document.getElementById('rpt_from').value;
+        const t=document.getElementById('rpt_to').value;
+        closeModal();
+        printCasesReport('custom',p,f,t)"
+        style="width:100%;padding:10px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(67,56,202,0.75));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;font-family:inherit;cursor:pointer">
+        🖨️ طباعة تقرير الجلسات
+      </button>
     </div>
 
   </div>
@@ -3910,7 +3966,7 @@ function printCasesReportByPerson(){
   <button class="btn-s" onclick="closeModal()" style="width:100%">إلغاء</button>`,true);
 }
 
-function printCasesReport(mode, personName){
+function printCasesReport(mode, personName, dateFrom, dateTo){
   const cases=D.cases||[];
   let filtered=[], title="", subtitle="";
 
@@ -3936,21 +3992,61 @@ function printCasesReport(mode, personName){
     title="تقرير القضايا المفلترة";
     subtitle=parts.length?"الفلتر: "+parts.join(" | "):"جميع القضايا";
   } else if(mode==="person"){
-    filtered=cases.filter(c=>c.personName===personName);
+    filtered=cases.filter(c=>(c.personName||"").trim()===personName.trim());
     title="قضايا: "+personName;
     subtitle="جميع القضايا المسجلة باسم "+personName;
+  } else if(mode==="open"){
+    // تقرير القضايا المفتوحة — الكل أو شخص محدد
+    filtered=cases.filter(c=>{
+      if(c.caseStatus!=="مفتوح") return false;
+      if(personName&&personName!=="الكل"&&(c.personName||"").trim()!==personName.trim()) return false;
+      return true;
+    });
+    const openLabel=(personName&&personName!=="الكل")?"قضايا مفتوحة — "+personName:"جميع القضايا المفتوحة";
+    title="🟢 "+openLabel;
+    subtitle=`${filtered.length} قضية مفتوحة${(personName&&personName!=="الكل")?" — "+personName:""}`;
+  } else if(mode==="custom"){
+    // فلتر الجلسات القادمة — الشخص + نطاق تاريخ nextSession فقط
+    // نجمع الجلسات من القضية الرئيسية وكل entries
+    const sessionMatches=new Set();
+    cases.forEach(c=>{
+      if(personName&&personName!=="الكل"&&c.personName!==personName) return;
+      // اختبار الجلسة الرئيسية
+      const checkDate=d=>{
+        if(!d) return false;
+        if(dateFrom&&d<dateFrom) return false;
+        if(dateTo&&d>dateTo) return false;
+        return true;
+      };
+      if(checkDate(c.nextSession)) {sessionMatches.add(c.id);return;}
+      // اختبار جلسات entries
+      (c.entries||[]).forEach(e=>{if(checkDate(e.nextSession)) sessionMatches.add(c.id);});
+    });
+    filtered=cases.filter(c=>{
+      if(personName&&personName!=="الكل"&&c.personName!==personName) return false;
+      if(dateFrom||dateTo) return sessionMatches.has(c.id);
+      return true;
+    });
+    const parts=[];
+    if(personName&&personName!=="الكل") parts.push("👤 "+personName);
+    if(dateFrom) parts.push("من: "+dateFrom.split("-").reverse().join("/"));
+    if(dateTo)   parts.push("إلى: "+dateTo.split("-").reverse().join("/"));
+    title=(personName&&personName!=="الكل")?"تقرير قضايا: "+personName:"تقرير القضايا";
+    subtitle=parts.length?parts.join("   •   "):"جميع القضايا والجلسات";
   }
 
-  if(!filtered.length){showToast("⚠️ لا توجد قضايا للطباعة","#f59e0b");return;}
-  const html=_buildCasesPDF(filtered, title, subtitle);
+  if(!filtered.length){showToast("⚠️ لا توجد قضايا تطابق الفلتر المحدد","#f59e0b");return;}
+  const html=_buildCasesPDF(filtered, title, subtitle, dateFrom, dateTo);
   const w=window.open("","_blank","width=1000,height=750");
   if(!w){showToast("❌ يرجى السماح بالنوافذ المنبثقة","#ef4444");return;}
   w.document.write(html);
   w.document.close();
 }
 
-function _buildCasesPDF(cases, title, subtitle){
+function _buildCasesPDF(cases, title, subtitle, dateFrom, dateTo){
   const now=new Date().toLocaleDateString("ar-KW",{year:"numeric",month:"long",day:"numeric"});
+  const fmtD=d=>d?d.split("-").reverse().join("/"):"—";
+  const dateRangeLabel=(dateFrom||dateTo)?`📅 ${fmtD(dateFrom)} — ${fmtD(dateTo)}`:"جميع التواريخ";
   const typeColor={جنايات:"#c0392b",جنحة:"#d35400",تجاري:"#1a56a0",مدني:"#5b21b6"};
   const typeBg={جنايات:"#fef2f2",جنحة:"#fff7ed",تجاري:"#eff6ff",مدني:"#f5f3ff"};
 
@@ -3985,8 +4081,8 @@ function _buildCasesPDF(cases, title, subtitle){
               <div class="head-row">
                 <div class="head-left">
                   <span class="type-pill" style="background:${tbg};color:${tc}">${c.caseType||"—"}</span>
-                  <span class="num-main">${c.caseNumber||c.autoNumber||"بدون رقم"}</span>
-                  ${c.caseNumber&&c.autoNumber?`<span class="num-auto">آلي: ${c.autoNumber}</span>`:""}
+                  <span class="num-auto">${c.autoNumber||c.caseNumber||"بدون رقم"}</span>
+                  ${c.caseNumber&&c.autoNumber?`<span class="num-main"> | ${c.caseNumber}</span>`:""}
                 </div>
                 <div class="head-right">
                   <span class="person-badge">${c.personName||"—"}</span>
@@ -4059,8 +4155,8 @@ body{font-family:'Cairo',sans-serif;background:#f8fafc;color:#1e293b;font-size:1
 .head-left{display:flex;align-items:center;gap:8px}
 .head-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .type-pill{font-size:11px;font-weight:900;padding:3px 10px;border-radius:20px;white-space:nowrap}
-.num-main{font-size:15px;font-weight:900;font-family:monospace}
-.num-auto{font-size:9px;opacity:0.75;font-family:monospace}
+.num-main{font-size:10px;opacity:0.7;font-family:monospace}
+.num-auto{font-size:15px;font-weight:900;font-family:monospace}
 .person-badge{background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:5px;font-weight:700;font-size:11px}
 .date-txt{font-size:10px;opacity:0.8}
 .sess-badge{background:rgba(251,191,36,0.25);color:#fde68a;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:600}
@@ -4099,6 +4195,7 @@ body{font-family:'Cairo',sans-serif;background:#f8fafc;color:#1e293b;font-size:1
   <div>
     <div class="rpt-title">⚖️ ${title}</div>
     <div class="rpt-sub">${subtitle}</div>
+    ${(dateFrom||dateTo)?`<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px">🗓️ ${dateRangeLabel}</div>`:""}
   </div>
   <div class="rpt-meta">
     <strong>${cases.length} قضية</strong>
@@ -4601,7 +4698,128 @@ function rdReports(){
         </div>`;
       }).join("")}
     </div>
-  </div>`;
+  </div>
+
+  <!-- ── جدول الجلسات القادمة ── -->
+  ${(()=>{
+    const today=new Date(); today.setHours(0,0,0,0);
+    const sessions=[];
+    (D.cases||[]).filter(c=>c.caseStatus==="مفتوح").forEach(c=>{
+      if(c.nextSession){
+        const d=new Date(c.nextSession); d.setHours(0,0,0,0);
+        sessions.push({caseId:c.id,caseNum:c.caseNumber||c.autoNumber||"—",autoNum:c.autoNumber||"",caseType:c.caseType||"",personName:c.personName||"",date:c.nextSession,dateObj:d,days:Math.round((d-today)/864e5),charge:c.charge||"",location:c.location||"",degree:c.degree||"",source:"main"});
+      }
+      (c.entries||[]).forEach(e=>{
+        if(e.nextSession){
+          const d=new Date(e.nextSession); d.setHours(0,0,0,0);
+          sessions.push({caseId:c.id,caseNum:c.caseNumber||c.autoNumber||"—",autoNum:c.autoNumber||"",caseType:c.caseType||"",personName:c.personName||"",date:e.nextSession,dateObj:d,days:Math.round((d-today)/864e5),charge:e.charge||c.charge||"",location:c.location||"",degree:e.degree||c.degree||"",source:"entry"});
+        }
+      });
+    });
+    const byCase={};
+    sessions.forEach(s=>{
+      const key=s.caseId;
+      if(!byCase[key]){byCase[key]=s;return;}
+      const prev=byCase[key];
+      if(prev.days<0&&s.days>=0){byCase[key]=s;return;}
+      if(prev.days>=0&&s.days<0) return;
+      if(Math.abs(s.days)<Math.abs(prev.days)) byCase[key]=s;
+    });
+    const sorted=Object.values(byCase).sort((a,b)=>a.dateObj-b.dateObj);
+    if(!sorted.length) return `<div class="card" style="margin-top:20px;text-align:center;padding:24px;color:#475569"><p style="font-size:28px;margin:0">📅</p><p style="margin:8px 0 0">لا توجد جلسات قادمة مسجّلة</p></div>`;
+
+    const overdue=sorted.filter(s=>s.days<0);
+    const thisWeek=sorted.filter(s=>s.days>=0&&s.days<=7);
+    const thisMonth=sorted.filter(s=>s.days>7&&s.days<=30);
+    const later=sorted.filter(s=>s.days>30);
+
+    const typeColor={جنايات:"#c0392b",جنحة:"#d35400",تجاري:"#1a56a0",مدني:"#5b21b6"};
+    const typeBg={جنايات:"rgba(192,57,43,0.12)",جنحة:"rgba(211,84,0,0.12)",تجاري:"rgba(26,86,160,0.12)",مدني:"rgba(91,33,182,0.12)"};
+
+    const rowHtml=(s,i)=>{
+      const tc=typeColor[s.caseType]||"#64748b";
+      const tbg=typeBg[s.caseType]||"rgba(100,116,139,0.1)";
+      const dayLbl=s.days===0?"اليوم 🔴":s.days<0?`تأخّر ${Math.abs(s.days)} يوم ⚠️`:s.days===1?"غداً 🟠":`بعد ${s.days} يوم`;
+      const dayColor=s.days<0?"#ef4444":s.days===0?"#ef4444":s.days<=3?"#f97316":s.days<=7?"#f59e0b":s.days<=30?"#eab308":"#94a3b8";
+      return`<tr style="background:${i%2===0?"rgba(255,255,255,0.015)":"transparent"};border-bottom:1px solid rgba(255,255,255,0.04)">
+        <td style="padding:7px 8px;white-space:nowrap;font-family:monospace;font-size:12px;color:#e2e8f0">${s.date.split("-").reverse().join("/")}</td>
+        <td style="padding:7px 8px;text-align:center"><span style="background:${dayColor}22;color:${dayColor};border-radius:8px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap">${dayLbl}</span></td>
+        <td style="padding:7px 8px"><span style="background:${tbg};color:${tc};border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">${s.caseType||"—"}</span></td>
+        <td style="padding:7px 8px;font-size:12px;font-weight:700;color:#a78bfa">${s.caseNum}</td>
+        <td style="padding:7px 8px;font-size:11px;color:#64748b">${s.autoNum||"—"}</td>
+        <td style="padding:7px 8px;font-size:12px;color:#e2e8f0">${s.personName||"—"}</td>
+        <td style="padding:7px 8px;font-size:11px;color:#94a3b8">${s.degree||"—"}</td>
+        <td style="padding:7px 8px;font-size:11px;color:#64748b">${s.location||"—"}</td>
+        <td style="padding:7px 8px;font-size:11px;color:#94a3b8;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.charge?s.charge.slice(0,60)+(s.charge.length>60?"...":""):"—"}</td>
+      </tr>`;
+    };
+
+    const tblHead=`<table style="width:100%;border-collapse:collapse;font-family:'Cairo',sans-serif">
+      <thead><tr style="background:rgba(255,255,255,0.04);font-size:11px;color:#64748b">
+        <th style="padding:6px 8px;text-align:right;font-weight:700">📅 التاريخ</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:700">⏰ المتبقي</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:700">النوع</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:700">رقم القضية</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:700">الرقم الآلي</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:700">الاسم</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:700">الدرجة</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:700">المحكمة</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:700">التهمة</th>
+      </tr></thead><tbody>`;
+
+    const sectionHtml=(title,color,bg,items)=>{
+      if(!items.length)return"";
+      return`<div style="margin-bottom:10px">
+        <div style="background:${bg};border-right:3px solid ${color};border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;color:${color};margin-bottom:6px">${title} — ${items.length} جلسة</div>
+        <div style="overflow-x:auto">${tblHead}${items.map((s,i)=>rowHtml(s,i)).join("")}</tbody></table></div>
+      </div>`;
+    };
+
+    const personsMap={};
+    sorted.forEach(s=>{
+      if(!s.personName)return;
+      if(!personsMap[s.personName])personsMap[s.personName]={name:s.personName,total:0,overdue:0,soon:0,later:0};
+      personsMap[s.personName].total++;
+      if(s.days<0)personsMap[s.personName].overdue++;
+      else if(s.days<=30)personsMap[s.personName].soon++;
+      else personsMap[s.personName].later++;
+    });
+    const personCards=Object.values(personsMap).map(p=>`
+      <div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700;font-size:13px;color:#e2e8f0">👤 ${p.name}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${p.overdue?`<span style="background:rgba(239,68,68,0.15);color:#ef4444;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">⚠️ ${p.overdue} متأخرة</span>`:""}
+          ${p.soon?`<span style="background:rgba(245,158,11,0.15);color:#f59e0b;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">🔔 ${p.soon} خلال شهر</span>`:""}
+          ${p.later?`<span style="background:rgba(148,163,184,0.1);color:#94a3b8;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">📅 ${p.later} لاحقاً</span>`:""}
+        </div>
+      </div>`).join("");
+
+    return`<div style="margin-top:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3 style="margin:0;font-size:16px;font-weight:800;color:#f1f5f9">📅 جدول الجلسات القادمة</h3>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:11px;color:#64748b">إجمالي: ${sorted.length} جلسة من ${(D.cases||[]).filter(c=>c.caseStatus!=="مغلق").length} قضية مفتوحة</span>
+          <button onclick="showCaseReportMenu()" class="btn-s" style="padding:5px 12px;font-size:11px;background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);color:#a78bfa">🖨️ تقرير PDF</button>
+        </div>
+      </div>
+
+      ${Object.keys(personsMap).length>1?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-bottom:16px">${personCards}</div>`:""}
+
+      <div class="card" style="padding:14px 16px;border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.03)">
+        ${overdue.length?sectionHtml("⚠️ جلسات متأخرة / لم تُحدَّث","#ef4444","rgba(239,68,68,0.1)",overdue):""}
+        ${thisWeek.length?sectionHtml("🔴 هذا الأسبوع (0–7 أيام)","#f97316","rgba(249,115,22,0.1)",thisWeek):""}
+        ${!overdue.length&&!thisWeek.length?`<p style="text-align:center;color:#64748b;padding:12px 0;margin:0;font-size:13px">✅ لا توجد جلسات عاجلة خلال الأسبوع القادم</p>`:""}
+      </div>
+
+      ${thisMonth.length?`<div class="card" style="margin-top:10px;padding:14px 16px;border-color:rgba(234,179,8,0.2);background:rgba(234,179,8,0.03)">
+        ${sectionHtml("🟡 هذا الشهر (8–30 يوم)","#eab308","rgba(234,179,8,0.1)",thisMonth)}
+      </div>`:""}
+
+      ${later.length?`<div class="card" style="margin-top:10px;padding:14px 16px">
+        ${sectionHtml("🔵 لاحقاً (أكثر من 30 يوم)","#60a5fa","rgba(96,165,250,0.1)",later)}
+      </div>`:""}
+    </div>`;
+  })()}`;
 }
 
 function showDetailModal(title,html,shareMsg){

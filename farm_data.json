@@ -61,11 +61,11 @@
       "category": "خارجي",
       "qty": 1,
       "price": 1.5,
-      "discount": 0.25,
-      "total": 1.25,
+      "discount": 0.75,
+      "total": 0.75,
       "location": "محل",
       "payment": "نقد",
-      "cashId": "mrdm4l5fj1u",
+      "cashId": "mrffaoc4uhq",
       "img": ""
     },
     {
@@ -94,12 +94,12 @@
       "product": "عطريات",
       "category": "",
       "qty": 8,
-      "price": 0.8,
+      "price": 1,
       "discount": 0,
-      "total": 6.4,
+      "total": 8,
       "location": "محل",
       "payment": "نقد",
-      "cashId": "mrcgvpwq3wo",
+      "cashId": "mrfff1dwbl7",
       "img": ""
     },
     {
@@ -2087,6 +2087,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-09T14:40:30.438Z",
+  "ts": "2026-07-10T21:07:04.710Z",
   "__last_sale_id__": "mpbmslgq5p9"
 }

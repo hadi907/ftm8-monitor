@@ -2,7 +2,7 @@ name: 🌿 مزرعة هادي — تقرير المقارنة اليومي
 
 on:
   schedule:
-    - cron: '0 19 * * *'
+    - cron: '0 19 * * 0'
   workflow_dispatch:
 
 jobs:

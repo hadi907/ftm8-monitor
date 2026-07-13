@@ -9,6 +9,10 @@ OWM_API_KEY       = os.environ.get("OWM_API_KEY", "").strip()
 TELEGRAM_TOKEN    = os.environ.get("NEWS_TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 
+# نفس المصدر ما يساهم بأكثر من هالعدد في أول تمريرة (تنويع)
+# لو ما اكتمل العدد المطلوب، نعوّض الناقص من أي مصدر بدون تكرار نفس العنوان
+MAX_PER_SOURCE = 2
+
 CITIES = [
     {"name": "الأحمدي", "q_owm": "Al Ahmadi,KW",  "q_wttr": "Al-Ahmadi"},
     {"name": "الوفرة",  "q_owm": "Al Wafra,KW",   "q_wttr": "Al-Wafra"},
@@ -131,52 +135,65 @@ def get_news():
     seen = set()
     sections = []
 
-    # 🇰🇼 أخبار الكويت — عربي (15 خبر)
-    kw_items = []
-    for src in [s for s in NEWS_SOURCES if s["cat"] == "kw"]:
-        for name, title, lang in fetch_titles(src, 5):
-            key = title[:30]
-            if key not in seen:
-                seen.add(key)
-                kw_items.append((name, title))
-        if len(kw_items) >= 15:
-            break
+    def collect_section(cat_sources, fetch_limit, target_count, max_per_source=MAX_PER_SOURCE):
+        fetched = {s["name"]: fetch_titles(s, fetch_limit) for s in cat_sources}
+        items = []
+        counts = {}
 
+        def try_add(name, title, lang, respect_cap):
+            key = title[:30]
+            if key in seen:
+                return False
+            if respect_cap and counts.get(name, 0) >= max_per_source:
+                return False
+            seen.add(key)
+            counts[name] = counts.get(name, 0) + 1
+            items.append((name, title, lang))
+            return True
+
+        for s in cat_sources:
+            for name, title, lang in fetched[s["name"]]:
+                if len(items) >= target_count:
+                    break
+                try_add(name, title, lang, respect_cap=True)
+            if len(items) >= target_count:
+                break
+
+        if len(items) < target_count:
+            for s in cat_sources:
+                for name, title, lang in fetched[s["name"]]:
+                    if len(items) >= target_count:
+                        break
+                    try_add(name, title, lang, respect_cap=False)
+                if len(items) >= target_count:
+                    break
+
+        return items
+
+    kw_sources = [s for s in NEWS_SOURCES if s["cat"] == "kw"]
+    kw_items = collect_section(kw_sources, 5, 15)
     if kw_items:
         lines = ["\n🇰🇼 *أخبار الكويت*"]
-        for i, (src, title) in enumerate(kw_items[:15], 1):
+        for i, (src, title, lang) in enumerate(kw_items[:15], 1):
             lines.append(f"{i}. {title} _{src}_")
         sections.append("\n".join(lines))
 
-    # 🇰🇼 أخبار الكويت — إنجليزي مترجم (3 أخبار)
-    kw_en_items = []
-    kw_en_indices = []
-    for src in [s for s in NEWS_SOURCES if s["cat"] == "kw_en"]:
-        for name, title, lang in fetch_titles(src, 5):
-            key = title[:30]
-            if key not in seen:
-                seen.add(key)
-                kw_en_indices.append(len(kw_en_items))
-                kw_en_items.append((name, title))
-            if len(kw_en_items) >= 3:
-                break
-        if len(kw_en_items) >= 3:
-            break
-
+    kw_en_sources = [s for s in NEWS_SOURCES if s["cat"] == "kw_en"]
+    kw_en_items = collect_section(kw_en_sources, 5, 3)
     if kw_en_items:
-        en_titles = [kw_en_items[i][1] for i in kw_en_indices]
+        en_indices = [i for i, (_, _, lang) in enumerate(kw_en_items) if lang == "en"]
+        en_titles = [kw_en_items[i][1] for i in en_indices]
         translated = translate_titles(en_titles)
         kw_en_items = list(kw_en_items)
-        for idx, new_title in zip(kw_en_indices, translated):
-            name = kw_en_items[idx][0]
-            kw_en_items[idx] = (name, new_title)
+        for idx, new_title in zip(en_indices, translated):
+            name, _, lang = kw_en_items[idx]
+            kw_en_items[idx] = (name, new_title, lang)
 
         lines = ["\n🇰🇼 *الكويت — صحافة إنجليزية*"]
-        for i, (src, title) in enumerate(kw_en_items[:3], 1):
+        for i, (src, title, lang) in enumerate(kw_en_items[:3], 1):
             lines.append(f"{i}. {title} _{src}_")
         sections.append("\n".join(lines))
 
-    # باقي الفئات — 2 خبر لكل فئة
     categories = [
         ("world",   "🌍 *عالمية*"),
         ("fox",     "🦊 *Fox News*"),
@@ -184,33 +201,21 @@ def get_news():
         ("tech",    "💻 *تقنية*"),
     ]
     for cat, label in categories:
-        items = []
-        en_indices = []
+        cat_sources = [s for s in NEWS_SOURCES if s["cat"] == cat]
+        items = collect_section(cat_sources, 3, 2)
 
-        for src in [s for s in NEWS_SOURCES if s["cat"] == cat]:
-            for name, title, lang in fetch_titles(src, 3):
-                key = title[:30]
-                if key not in seen:
-                    seen.add(key)
-                    if lang == "en":
-                        en_indices.append(len(items))
-                    items.append((name, title))
-                if len(items) >= 2:
-                    break
-            if len(items) >= 2:
-                break
-
+        en_indices = [i for i, (_, _, lang) in enumerate(items) if lang == "en"]
         if en_indices:
             en_titles = [items[i][1] for i in en_indices]
             translated = translate_titles(en_titles)
             items = list(items)
             for idx, new_title in zip(en_indices, translated):
-                name = items[idx][0]
-                items[idx] = (name, new_title)
+                name, _, lang = items[idx]
+                items[idx] = (name, new_title, lang)
 
         if items:
             lines = [f"\n{label}"]
-            for i, (src, title) in enumerate(items[:2], 1):
+            for i, (src, title, lang) in enumerate(items[:2], 1):
                 lines.append(f"{i}. {title} _{src}_")
             sections.append("\n".join(lines))
 

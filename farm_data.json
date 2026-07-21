@@ -1,6 +1,40 @@
 {
   "SALES": [
     {
+      "id": "mruzantdn7t",
+      "invNum": "INV-099",
+      "date": "2026-07-21",
+      "client": "نقدا",
+      "invItemId": "mn8jcwciujo",
+      "product": "الافوربيا",
+      "category": "خارجي",
+      "qty": 9,
+      "price": 1.5,
+      "discount": 4.5,
+      "total": 9,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mruzantla83",
+      "img": ""
+    },
+    {
+      "id": "mruzbu55bqh",
+      "invNum": "INV-100",
+      "date": "2026-07-21",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "ربل",
+      "category": "خارجي",
+      "qty": 11,
+      "price": 2,
+      "discount": 0,
+      "total": 22,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mruzbu56zwb",
+      "img": ""
+    },
+    {
       "id": "mrta9r27yb5",
       "invNum": "INV-097",
       "date": "2026-07-18",
@@ -815,40 +849,6 @@
       "payment": "نقد",
       "cashId": "mpmi4ie63nx",
       "img": ""
-    },
-    {
-      "id": "mpid79wp98z",
-      "invNum": "INV-036",
-      "date": "2026-05-22",
-      "client": "نقدا",
-      "invItemId": "",
-      "product": "ربل",
-      "category": "داخلي",
-      "qty": 4,
-      "price": 1.5,
-      "discount": 0,
-      "total": 6,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mpidd7bljuj",
-      "img": ""
-    },
-    {
-      "id": "mpid9w9zp7n",
-      "invNum": "INV-035",
-      "date": "2026-05-22",
-      "client": "نقدا",
-      "invItemId": "mnrxsxblcm6",
-      "product": "دارسينا حمراء ( كوردلينا )",
-      "category": "داخلي",
-      "qty": 6,
-      "price": 12,
-      "discount": 57,
-      "total": 15,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mpidefp9dwv",
-      "img": ""
     }
   ],
   "INV": [
@@ -860,7 +860,7 @@
       "cost": 0,
       "price": 1.5,
       "qty": 236,
-      "remaining": 229,
+      "remaining": 220,
       "minStock": 5,
       "date": "2026-03-27",
       "color": "وردي",
@@ -2105,6 +2105,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-20T14:07:14.546Z",
-  "__last_sale_id__": "mpid9w9zp7n"
+  "ts": "2026-07-21T18:40:15.356Z"
 }

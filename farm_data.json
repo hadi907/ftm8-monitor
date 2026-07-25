@@ -1,6 +1,40 @@
 {
   "SALES": [
     {
+      "id": "ms0fa6paqza",
+      "invNum": "INV-102",
+      "date": "2026-07-24",
+      "client": "ومض",
+      "invItemId": "",
+      "product": "مننوع",
+      "category": "خارجي",
+      "qty": 2,
+      "price": 1,
+      "discount": 0,
+      "total": 2,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "ms0fa6pbkb4",
+      "img": ""
+    },
+    {
+      "id": "ms0f2wfq3y3",
+      "invNum": "INV-101",
+      "date": "2026-07-22",
+      "client": "ومض",
+      "invItemId": "mn8jcwciujo",
+      "product": "الافوربيا",
+      "category": "خارجي",
+      "qty": 2,
+      "price": 1.5,
+      "discount": 1,
+      "total": 2,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "ms0f2wfxcew",
+      "img": ""
+    },
+    {
       "id": "mruzantdn7t",
       "invNum": "INV-099",
       "date": "2026-07-21",
@@ -815,40 +849,6 @@
       "payment": "نقد",
       "cashId": "mplat5gwr3q",
       "img": ""
-    },
-    {
-      "id": "mplb0d4d7kh",
-      "invNum": "INV-038",
-      "date": "2026-05-25",
-      "client": "نقدا",
-      "invItemId": "mnw8a6vw3lw",
-      "product": "ودليه",
-      "category": "داخلي",
-      "qty": 2,
-      "price": 1.5,
-      "discount": 1,
-      "total": 2,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mplb0d4j7nz",
-      "img": ""
-    },
-    {
-      "id": "mplb3suasdt",
-      "invNum": "INV-039",
-      "date": "2026-05-25",
-      "client": "نقدا",
-      "invItemId": "mnrxsxblcm6",
-      "product": "دارسينا حمراء ( كوردلينا )",
-      "category": "داخلي",
-      "qty": 4,
-      "price": 12,
-      "discount": 44,
-      "total": 4,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mpmi4ie63nx",
-      "img": ""
     }
   ],
   "INV": [
@@ -860,7 +860,7 @@
       "cost": 0,
       "price": 1.5,
       "qty": 236,
-      "remaining": 220,
+      "remaining": 218,
       "minStock": 5,
       "date": "2026-03-27",
       "color": "وردي",
@@ -2105,5 +2105,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-25T13:39:55.185Z"
+  "ts": "2026-07-25T15:05:05.629Z"
 }

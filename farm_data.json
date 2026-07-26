@@ -1875,6 +1875,42 @@
       "month": "يوليو 2026",
       "notes": "",
       "cashId": "mrt9ublnla0"
+    },
+    {
+      "id": "ms25zauz8ao",
+      "date": "2026-07-26",
+      "type": "اسمدة",
+      "desc": "كوكوبيد",
+      "amount": 10,
+      "paid": 10,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "القصر الاخضر",
+      "invRef": "",
+      "month": "يوليو 2026",
+      "notes": "",
+      "cashId": "ms25zauz064"
+    },
+    {
+      "id": "ms263fiepkt",
+      "date": "2026-07-26",
+      "type": "أخرى",
+      "desc": "احواض عدد 1000 مقاس 14",
+      "amount": 20,
+      "paid": 20,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "يونايتد تايم",
+      "invRef": "",
+      "month": "يوليو 2026",
+      "notes": "",
+      "cashId": "ms263fiegoe"
     }
   ],
   "DEBTS": [
@@ -2105,6 +2141,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-25T20:20:05.555Z",
-  "__last_sale_id__": "mplat5go7yr"
+  "ts": "2026-07-26T19:13:27.647Z"
 }

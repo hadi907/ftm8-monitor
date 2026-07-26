@@ -1,6 +1,23 @@
 {
   "SALES": [
     {
+      "id": "ms26klxjqep",
+      "invNum": "INV-103",
+      "date": "2026-07-26",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "متفرقات",
+      "category": "",
+      "qty": 1,
+      "price": 7.5,
+      "discount": 0,
+      "total": 7.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "ms26klxj3zp",
+      "img": ""
+    },
+    {
       "id": "ms0fa6paqza",
       "invNum": "INV-102",
       "date": "2026-07-24",
@@ -831,23 +848,6 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mpydgu0zgt8",
-      "img": ""
-    },
-    {
-      "id": "mplat5go7yr",
-      "invNum": "INV-037",
-      "date": "2026-05-25",
-      "client": "نقدا",
-      "invItemId": "moyspgt6atb",
-      "product": "عطره",
-      "category": "خارجي",
-      "qty": 10,
-      "price": 2,
-      "discount": 12.5,
-      "total": 7.5,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mplat5gwr3q",
       "img": ""
     }
   ],
@@ -2141,5 +2141,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-26T19:13:27.647Z"
+  "ts": "2026-07-26T21:01:29.025Z"
 }

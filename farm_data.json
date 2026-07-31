@@ -1,6 +1,23 @@
 {
   "SALES": [
     {
+      "id": "ms95svdznvm",
+      "invNum": "INV-106",
+      "date": "2026-08-01",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "ربل",
+      "category": "",
+      "qty": 11,
+      "price": 2,
+      "discount": 0,
+      "total": 22,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "ms95svdzni8",
+      "img": ""
+    },
+    {
       "id": "ms684irfa6k",
       "invNum": "INV-105",
       "date": "2026-07-29",
@@ -831,23 +848,6 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mpydcde3cj0",
-      "img": ""
-    },
-    {
-      "id": "mpyde95yz3p",
-      "invNum": "INV-054",
-      "date": "2026-06-02",
-      "client": "نقدا",
-      "invItemId": "mnm6zva0zr0",
-      "product": "دارسينا خضراء",
-      "category": "داخلي",
-      "qty": 1,
-      "price": 4,
-      "discount": 2,
-      "total": 2,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mpyde963clj",
       "img": ""
     }
   ],
@@ -2223,5 +2223,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-31T15:16:48.291Z"
+  "ts": "2026-07-31T16:34:36.280Z"
 }

@@ -3,7 +3,7 @@ name: 📊 Daily Report - هادي
 on:
   schedule:
     # 11م الكويت = 20:00 UTC — كل يوم
-    - cron: '0 20 * * *'
+    - cron: '0 20 * * 6'
   workflow_dispatch:
 
 jobs:

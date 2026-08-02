@@ -18,6 +18,40 @@
       "img": ""
     },
     {
+      "id": "msbz4pw9obz",
+      "invNum": "INV-107",
+      "date": "2026-08-01",
+      "client": "ومض",
+      "invItemId": "",
+      "product": "متنوع",
+      "category": "",
+      "qty": 1,
+      "price": 2.5,
+      "discount": 0,
+      "total": 2.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "msbz4pw9vpx",
+      "img": ""
+    },
+    {
+      "id": "msbz7q93u7w",
+      "invNum": "INV-108",
+      "date": "2026-08-01",
+      "client": "ومض",
+      "invItemId": "mn8jz6fmds2",
+      "product": "فل",
+      "category": "خارجي",
+      "qty": 1,
+      "price": 1,
+      "discount": 0.25,
+      "total": 0.75,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "msbz7q9988w",
+      "img": ""
+    },
+    {
       "id": "ms684irfa6k",
       "invNum": "INV-105",
       "date": "2026-07-29",
@@ -815,40 +849,6 @@
       "payment": "نقد",
       "cashId": "mq3red6v6if",
       "img": ""
-    },
-    {
-      "id": "mq16lbwhf5v",
-      "invNum": "INV-057",
-      "date": "2026-06-04",
-      "client": "نقدا",
-      "invItemId": "mnm5pz6i2i8",
-      "product": "فوزير",
-      "category": "داخلي",
-      "qty": 1,
-      "price": 1,
-      "discount": 0,
-      "total": 1,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mq16lbwqbzw",
-      "img": ""
-    },
-    {
-      "id": "mpydcddwg7m",
-      "invNum": "INV-053",
-      "date": "2026-06-02",
-      "client": "نقدا",
-      "invItemId": "mn8jz6fmds2",
-      "product": "فل",
-      "category": "خارجي",
-      "qty": 24,
-      "price": 1,
-      "discount": 6,
-      "total": 18,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mpydcde3cj0",
-      "img": ""
     }
   ],
   "INV": [
@@ -896,7 +896,7 @@
       "cost": 0,
       "price": 1,
       "qty": 500,
-      "remaining": 257,
+      "remaining": 256,
       "minStock": 5,
       "date": "2026-03-27",
       "color": "ابيض",
@@ -1965,6 +1965,24 @@
       "month": "يوليو 2026",
       "notes": "",
       "cashId": "ms69fqwivpu"
+    },
+    {
+      "id": "msbz3bkpwwk",
+      "date": "2026-08-01",
+      "type": "مبيدات",
+      "desc": "بتموس عدد 2",
+      "amount": 24,
+      "paid": 24,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "القصر الاخضر",
+      "invRef": "593",
+      "month": "اغسطس 2026",
+      "notes": "نزمول",
+      "cashId": "msbz3bkpz7k"
     }
   ],
   "DEBTS": [
@@ -2223,6 +2241,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-07-31T16:34:36.280Z",
-  "__last_sale_id__": "mpydcddwg7m"
+  "ts": "2026-08-02T15:49:54.500Z",
+  "__last_sale_id__": "mq3red6nvzn"
 }

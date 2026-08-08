@@ -77,39 +77,39 @@ def build_alerts(D):
                 "detail": f"📅 {doc.get('expiryDate','')} · ⏰ {sl(days)}"
             })
 
-    # تأمين السيارات — 30 يوم
+    # تأمين السيارات — 60 يوم (مطابق لمنطق التطبيق)
     for c in D.get("cars", []):
         exp = c.get("insuranceExpiry")
         if not exp:
             continue
         days = days_left(exp)
-        if days <= 30:
+        if days <= 60:
             alerts.append({
                 "section": "🚗 تأمين سيارات",
                 "line": f"{icon(days)} {c.get('carName','سيارة')}",
                 "detail": f"📅 {exp} · ⏰ {sl(days)}"
             })
 
-    # الإقامات — 30 يوم
+    # الإقامات — 60 يوم (مطابق لمنطق التطبيق)
     for r in D.get("residencies", []):
         exp = r.get("expiryDate")
         if not exp:
             continue
         days = days_left(exp)
-        if days <= 30:
+        if days <= 60:
             alerts.append({
                 "section": "🪪 إقامات",
                 "line": f"{icon(days)} {r.get('name','إقامة')}",
                 "detail": f"📅 {exp} · ⏰ {sl(days)}"
             })
 
-    # العقود — 30 يوم
+    # العقود — 60 يوم (مطابق لمنطق التطبيق)
     for c in D.get("contracts", []):
         exp = c.get("endDate")
         if not exp:
             continue
         days = days_left(exp)
-        if days <= 30:
+        if days <= 60:
             alerts.append({
                 "section": "📜 عقود",
                 "line": f"{icon(days)} {c.get('contractName','عقد')}",

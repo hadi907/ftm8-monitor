@@ -1,0 +1,26 @@
+name: 📸 FTM8 — تأكيد نشر إعلان انستغرام
+
+on:
+  schedule:
+    - cron: '20 7 14,21 8 *'   # 10:20 صباحاً بتوقيت الكويت (UTC+3) بتاريخ 14 و21 أغسطس 2026
+  workflow_dispatch:
+
+jobs:
+  check-instagram-post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 🔍 Send reminder email
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: hadi@ftm8.com
+        run: python check_instagram_publish.py

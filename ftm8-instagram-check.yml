@@ -18,12 +18,8 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: 📦 Install dependencies
-        run: pip install requests
-
-      - name: 🔍 Check Metricool post status & email result
+      - name: 🔍 Send reminder email
         env:
-          METRICOOL_USER_TOKEN: ${{ secrets.METRICOOL_USER_TOKEN }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_TO: hadi@ftm8.com

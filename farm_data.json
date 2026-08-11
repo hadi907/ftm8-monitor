@@ -2019,6 +2019,42 @@
       "month": "اغسطس 2026",
       "notes": "",
       "cashId": "msif4etx5uk"
+    },
+    {
+      "id": "msp17ecte6d",
+      "date": "2026-08-11",
+      "type": "أخرى",
+      "desc": "احواض معلقه + كوكوبيت",
+      "amount": 55,
+      "paid": 55,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "القصر الاخضر",
+      "invRef": "638",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "msp17ectfum"
+    },
+    {
+      "id": "msp1cese4of",
+      "date": "2026-08-11",
+      "type": "مبيدات",
+      "desc": "15-15-15 + خرماشه",
+      "amount": 7.675,
+      "paid": 7.675,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "جمعيه الوفره",
+      "invRef": "1681",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "msp1ceseo59"
     }
   ],
   "DEBTS": [
@@ -2277,6 +2313,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-08-10T18:59:04.590Z",
-  "__last_sale_id__": "mqe86pjz6n7"
+  "ts": "2026-08-11T19:11:41.129Z"
 }

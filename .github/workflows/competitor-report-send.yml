@@ -1,0 +1,22 @@
+name: Send Competitor Report Email
+
+on:
+  push:
+    paths:
+      - competitor_report.json
+  workflow_dispatch:
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Send report email
+        env:
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: hadi@ftm8.com
+        run: python send_competitor_report.py

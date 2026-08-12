@@ -1,0 +1,29 @@
+name: Weekly Agriculture Competitors Instagram Check
+
+on:
+  schedule:
+    # 06:00 UTC Thursday = 09:00 Riyadh (UTC+3) time
+    - cron: "0 6 * * 4"
+  workflow_dispatch: {}   # allows manual "Run workflow" button for testing
+
+jobs:
+  check-and-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Run Instagram check and send email
+        env:
+          EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+        run: python scripts/check_instagram.py

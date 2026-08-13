@@ -2055,6 +2055,60 @@
       "month": "اغسطس 2026",
       "notes": "",
       "cashId": "msp1ceseo59"
+    },
+    {
+      "id": "msrkgqv63do",
+      "date": "2026-08-13",
+      "type": "مبيدات",
+      "desc": "هرمون تجدير",
+      "amount": 4,
+      "paid": 4,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "اتحاد المزارعين",
+      "invRef": "88487",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "msrkgqv6vvc"
+    },
+    {
+      "id": "msrkjid96lp",
+      "date": "2026-08-13",
+      "type": "أخرى",
+      "desc": "احواض مقاس 14 سم عدد 1000",
+      "amount": 20,
+      "paid": 20,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "msrkjid912d"
+    },
+    {
+      "id": "msrkmfyupys",
+      "date": "2026-08-13",
+      "type": "وصلات صحي",
+      "desc": "وصلات",
+      "amount": 0.9,
+      "paid": 0.9,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "الافغاني",
+      "invRef": "4230",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "msrkmfyuqpu"
     }
   ],
   "DEBTS": [
@@ -2313,6 +2367,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-08-11T19:23:47.237Z",
+  "ts": "2026-08-13T13:49:05.863Z",
   "__last_sale_id__": "mqe86pjz6n7"
 }

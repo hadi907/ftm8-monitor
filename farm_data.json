@@ -2109,6 +2109,24 @@
       "month": "اغسطس 2026",
       "notes": "",
       "cashId": "msrkmfyuqpu"
+    },
+    {
+      "id": "msusiwvyd6r",
+      "date": "2026-08-15",
+      "type": "وصلات صحي",
+      "desc": "وصلات وحنفيه",
+      "amount": 2,
+      "paid": 2,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "اتحاد الكويتي للمزارعين",
+      "invRef": "88620",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "msusiwvyiwf"
     }
   ],
   "DEBTS": [
@@ -2367,6 +2385,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-08-13T13:49:05.863Z",
+  "ts": "2026-08-15T19:50:15.486Z",
   "__last_sale_id__": "mqe86pjz6n7"
 }

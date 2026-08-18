@@ -1,6 +1,40 @@
 {
   "SALES": [
     {
+      "id": "msz3at18te9",
+      "invNum": "INV-115",
+      "date": "2026-08-18",
+      "client": "نقدا",
+      "invItemId": "mn8jz6fmds2",
+      "product": "فل",
+      "category": "خارجي",
+      "qty": 14,
+      "price": 1,
+      "discount": 3.5,
+      "total": 10.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "msz3at1go37",
+      "img": ""
+    },
+    {
+      "id": "msz3c8w4946",
+      "invNum": "INV-116",
+      "date": "2026-08-18",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "متنوع",
+      "category": "خارجي",
+      "qty": 1,
+      "price": 2.5,
+      "discount": 0,
+      "total": 2.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "msz3c8w4eqx",
+      "img": ""
+    },
+    {
       "id": "msnl35mkag6",
       "invNum": "INV-113",
       "date": "2026-08-10",
@@ -815,40 +849,6 @@
       "payment": "نقد",
       "cashId": "mqh5al7urb1",
       "img": ""
-    },
-    {
-      "id": "mqh2u0c3bwk",
-      "invNum": "INV-069",
-      "date": "2026-06-16",
-      "client": "ومض",
-      "invItemId": "mn8jz6fmds2",
-      "product": "فل",
-      "category": "خارجي",
-      "qty": 24,
-      "price": 1,
-      "discount": 6,
-      "total": 18,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mqh2u0c9c7c",
-      "img": ""
-    },
-    {
-      "id": "mqe86pjz6n7",
-      "invNum": "INV-064",
-      "date": "2026-06-13",
-      "client": "نقدا",
-      "invItemId": "",
-      "product": "معلقات",
-      "category": "خارجي",
-      "qty": 10,
-      "price": 1,
-      "discount": 0,
-      "total": 10,
-      "location": "محل",
-      "payment": "نقد",
-      "cashId": "mqe86pjznzs",
-      "img": ""
     }
   ],
   "INV": [
@@ -896,7 +896,7 @@
       "cost": 0,
       "price": 1,
       "qty": 500,
-      "remaining": 256,
+      "remaining": 242,
       "minStock": 5,
       "date": "2026-03-27",
       "color": "ابيض",
@@ -2385,6 +2385,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-08-15T19:50:15.486Z",
-  "__last_sale_id__": "mqe86pjz6n7"
+  "ts": "2026-08-18T20:05:15.887Z",
+  "__last_sale_id__": "mqh2s0l27fs"
 }

@@ -1,4 +1,4 @@
-import os, json, requests, smtplib, datetime, re
+import os, json, requests, smtplib, datetime, re, time
 import pandas as pd
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -55,16 +55,27 @@ EMAIL_TO   = os.environ.get('EMAIL_TO', 'hadi@ftm8.com')
 TODAY      = datetime.date.today().isoformat()
 
 def load_app():
-    try:
-        res = requests.get(GITHUB_RAW, timeout=15)
-        data = res.json()
-        # ── إصلاح: يدعم المفاتيحين uppercase (SALES) و lowercase (ps3_sales) ──
-        sales = data.get('SALES', data.get('ps3_sales', []))
-        print(f"✅ farm_data.json — {len(sales)} مبيعة")
-        return sales
-    except Exception as e:
-        print(f"❌ خطأ farm_data.json: {e}")
-        return []
+    """يجلب farm_data.json مع إعادة محاولة تلقائية (حتى 3 مرات) لو صار
+    انقطاع/تأخر مؤقت بالشبكة أو رد غير صالح (مثل 404 مؤقت من CDN GitHub).
+    يرجّع None فقط لو فشلت كل المحاولات — حتى لا يُحسب هذا كـ"صفر مبيعات
+    حقيقي" ويُنتج فارقاً وهمياً بالتقرير."""
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            res = requests.get(GITHUB_RAW, timeout=20)
+            res.raise_for_status()
+            data = res.json()
+            # ── إصلاح: يدعم المفاتيحين uppercase (SALES) و lowercase (ps3_sales) ──
+            sales = data.get('SALES', data.get('ps3_sales', []))
+            print(f"✅ farm_data.json — {len(sales)} مبيعة")
+            return sales
+        except Exception as e:
+            last_err = e
+            print(f"⚠️ محاولة {attempt}/3 لجلب farm_data.json فشلت: {e}")
+            if attempt < 3:
+                time.sleep(5 * attempt)
+    print(f"❌ فشل جلب farm_data.json بعد 3 محاولات: {last_err} — سيتم إيقاف التقرير لتفادي نتائج غير دقيقة")
+    return None
 
 def load_xlsx():
     rows = []
@@ -279,6 +290,9 @@ if __name__ == '__main__':
     print(f"🌿 farm_compare.py — {TODAY} {datetime.datetime.now().strftime('%H:%M')}")
     print(f"📬 من: {EMAIL_FROM} → إلى: {EMAIL_TO}")
     app_sales = load_app()
+    if app_sales is None:
+        print("❌ توقف التقرير: تعذّر جلب بيانات التطبيق (farm_data.json) بعد عدة محاولات — لن يُرسل تقرير بأرقام غير دقيقة")
+        exit(1)
     xlsx_rows = load_xlsx()
     if not app_sales and not xlsx_rows:
         print("❌ لا توجد بيانات"); exit(1)

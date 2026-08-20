@@ -21,6 +21,7 @@ jobs:
           EMAIL_FROM:      ${{ secrets.EMAIL_FROM }}
           EMAIL_PASS:      ${{ secrets.EMAIL_PASS }}
           JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
+          GH_TOKEN:        ${{ secrets.GH_TOKEN }}
         run: |
           MONTH="${{ github.event.inputs.month }}"
           if [ -n "$MONTH" ]; then

@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: 📥 Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
@@ -31,16 +33,32 @@ jobs:
           JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
         run: |
           python3 << 'PYEOF'
-          import requests, json, os
+          import requests, json, os, time
 
           url = os.environ.get('JSONBIN_BIN_URL', 'https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed').rstrip('/') + '/latest'
           key = os.environ.get('JSONBIN_API_KEY', '$2a$10$hymkvXJ9AvDFIag8.j4sf.Qw..HkaR0Qd3KUFYkjkTMOqO6MM68DC')
 
           print(f"🔍 قراءة البيانات من JSONBin...")
-          res = requests.get(url, headers={'X-Master-Key': key}, timeout=15)
-          print(f"Status: {res.status_code}")
 
-          if res.status_code == 200:
+          # ── إعادة محاولة تلقائية حتى 3 مرات لو تأخر رد JSONBin أو انقطع الاتصال ──
+          res = None
+          last_err = None
+          for attempt in range(1, 4):
+              try:
+                  res = requests.get(url, headers={'X-Master-Key': key}, timeout=20)
+                  print(f"Status: {res.status_code} (محاولة {attempt}/3)")
+                  if res.status_code == 200:
+                      break
+                  last_err = f"{res.status_code} — {res.text[:200]}"
+                  res = None
+              except Exception as e:
+                  last_err = str(e)
+                  print(f"⚠️ محاولة {attempt}/3 فشلت: {e}")
+                  res = None
+              if attempt < 3:
+                  time.sleep(5 * attempt)
+
+          if res is not None:
               data = res.json().get('record', {})
 
               # ── تحويل المفاتيح: ps3_* → uppercase ──
@@ -66,7 +84,7 @@ jobs:
                   json.dump(output, f, ensure_ascii=False, indent=2)
               print("✅ تم حفظ farm_data.json بمفاتيح صحيحة (SALES, INV, ...)")
           else:
-              print(f"⚠️ JSONBin غير متاح: {res.status_code} — {res.text[:200]}")
+              print(f"⚠️ JSONBin غير متاح بعد 3 محاولات: {last_err}")
               print("سيتم الاحتفاظ بالملف القديم")
               raise SystemExit(1)
           PYEOF

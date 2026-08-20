@@ -14,6 +14,7 @@ import urllib.request, urllib.error
 FARM_DATA_URL = "https://raw.githubusercontent.com/hadi907/ftm8-monitor/main/farm_data.json"
 JSONBIN_URL   = "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
 JSONBIN_KEY   = os.environ.get("JSONBIN_API_KEY", "")
+GH_TOKEN      = os.environ.get("GH_TOKEN", "")
 EMAIL_FROM    = os.environ.get("EMAIL_FROM", "hishak888@gmail.com")
 EMAIL_PASS    = os.environ.get("EMAIL_PASS", "")
 EMAIL_TO      = "hadi@ftm8.com"
@@ -57,9 +58,13 @@ def fetch_jsonbin():
 raw = None
 
 # أولاً: farm_data.json
+# ── المستودع خاص (private)، فلازم تمرير توكن مصادقة وإلا raw.githubusercontent.com
+#    يرجّع 404 دائماً حتى لو الملف موجود فعلاً ──
 print("📡 جلب البيانات من farm_data.json...")
 try:
     req0 = urllib.request.Request(FARM_DATA_URL)
+    if GH_TOKEN:
+        req0.add_header("Authorization", f"token {GH_TOKEN}")
     with urllib.request.urlopen(req0, timeout=15) as resp:
         raw = json.loads(resp.read().decode())
     print(f"✅ تم جلب البيانات من farm_data.json")

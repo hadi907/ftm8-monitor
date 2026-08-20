@@ -30,6 +30,7 @@ jobs:
           EMAIL_PASS:      ${{ secrets.EMAIL_PASS }}
           JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
           JSONBIN_BIN_URL: ${{ secrets.JSONBIN_BIN_URL }}
+          GH_TOKEN:        ${{ secrets.GH_TOKEN }}
         run: |
           MONTH="${{ github.event.client_payload.month }}"
           if [ -n "$MONTH" ]; then

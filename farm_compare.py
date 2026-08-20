@@ -52,17 +52,21 @@ XLSX_PATH  = os.environ.get('XLSX_PATH', 'Farm_Account.xlsx')
 EMAIL_FROM = os.environ.get('EMAIL_FROM', '')
 EMAIL_PASS = os.environ.get('EMAIL_PASS', '')
 EMAIL_TO   = os.environ.get('EMAIL_TO', 'hadi@ftm8.com')
+GH_TOKEN   = os.environ.get('GH_TOKEN', '')
 TODAY      = datetime.date.today().isoformat()
 
 def load_app():
     """يجلب farm_data.json مع إعادة محاولة تلقائية (حتى 3 مرات) لو صار
     انقطاع/تأخر مؤقت بالشبكة أو رد غير صالح (مثل 404 مؤقت من CDN GitHub).
     يرجّع None فقط لو فشلت كل المحاولات — حتى لا يُحسب هذا كـ"صفر مبيعات
-    حقيقي" ويُنتج فارقاً وهمياً بالتقرير."""
+    حقيقي" ويُنتج فارقاً وهمياً بالتقرير.
+    ── المستودع خاص (private)، فلازم تمرير توكن مصادقة وإلا raw.githubusercontent.com
+    يرجّع 404 دائماً حتى لو الملف موجود فعلاً ──"""
+    headers = {'Authorization': f'token {GH_TOKEN}'} if GH_TOKEN else {}
     last_err = None
     for attempt in range(1, 4):
         try:
-            res = requests.get(GITHUB_RAW, timeout=20)
+            res = requests.get(GITHUB_RAW, headers=headers, timeout=20)
             res.raise_for_status()
             data = res.json()
             # ── إصلاح: يدعم المفاتيحين uppercase (SALES) و lowercase (ps3_sales) ──

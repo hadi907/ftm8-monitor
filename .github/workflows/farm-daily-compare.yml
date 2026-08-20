@@ -1,8 +1,9 @@
-name: 🌿 مزرعة هادي — تقرير المقارنة اليومي
+name: 🌿 مزرعة هادي — تقرير المقارنة (عند تحديث البيانات)
 
 on:
-  schedule:
-    - cron: '0 19 * * 0'
+  push:
+    paths:
+      - 'farm_data.json'
   workflow_dispatch:
 
 jobs:
@@ -28,4 +29,5 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_TO:   hadi@ftm8.com
+          GH_TOKEN:   ${{ secrets.GH_TOKEN }}
         run: python farm_compare.py

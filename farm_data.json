@@ -89,7 +89,7 @@
       "id": "msiefbqyx0i",
       "invNum": "INV-111",
       "date": "2026-08-06",
-      "client": "متنوع",
+      "client": "ومض",
       "invItemId": "",
       "product": "متنوع",
       "category": "خارجي",
@@ -99,7 +99,7 @@
       "total": 6,
       "location": "محل",
       "payment": "نقد",
-      "cashId": "msiefbqyblx",
+      "cashId": "mt7ilwbx8mf",
       "img": ""
     },
     {
@@ -2385,5 +2385,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-08-24T17:25:40.307Z"
+  "ts": "2026-08-24T18:40:23.226Z"
 }

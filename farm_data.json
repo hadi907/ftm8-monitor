@@ -2065,14 +2065,14 @@
       "paid": 4,
       "remaining": 0,
       "status": "مدفوع",
-      "source": "مزرعة",
+      "source": "نقدا",
       "paidBy": "",
       "payment": "نقد",
       "vendor": "اتحاد المزارعين",
       "invRef": "88487",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "msrkgqv6vvc"
+      "cashId": "mt7omdfoauh"
     },
     {
       "id": "msrkjid96lp",
@@ -2119,14 +2119,14 @@
       "paid": 2,
       "remaining": 0,
       "status": "مدفوع",
-      "source": "مزرعة",
+      "source": "نقدا",
       "paidBy": "",
       "payment": "نقد",
       "vendor": "اتحاد الكويتي للمزارعين",
       "invRef": "88620",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "msusiwvyiwf"
+      "cashId": "mt7oj1hzy15"
     }
   ],
   "DEBTS": [
@@ -2385,5 +2385,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-08-24T19:30:23.229Z"
+  "ts": "2026-08-24T20:30:23.315Z"
 }

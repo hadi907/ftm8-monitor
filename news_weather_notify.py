@@ -15,84 +15,84 @@ TELEGRAM_CHAT_ID  = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 MAX_PER_SOURCE = 2
 
 CITIES = [
-        {"name": "الأحمدي", "q_owm": "Al Ahmadi,KW",  "q_wttr": "Al-Ahmadi"},
-        {"name": "الوفرة",  "q_owm": "Al Wafra,KW",   "q_wttr": "Al-Wafra"},
+    {"name": "الأحمدي", "q_owm": "Al Ahmadi,KW",  "q_wttr": "Al-Ahmadi"},
+    {"name": "الوفرة",  "q_owm": "Al Wafra,KW",   "q_wttr": "Al-Wafra"},
 ]
 
 NEWS_SOURCES = [
-        # 🇰🇼 أخبار الكويت — عربي
+    # 🇰🇼 أخبار الكويت — عربي
     {"name": "أخبار الكويت",     "url": "https://news.google.com/rss/search?q=الكويت&hl=ar&gl=KW&ceid=KW:ar",                      "cat": "kw",      "lang": "ar"},
-        {"name": "حكومة الكويت",     "url": "https://news.google.com/rss/search?q=مجلس+الوزراء+الكويت&hl=ar&gl=KW&ceid=KW:ar",         "cat": "kw",      "lang": "ar"},
-        {"name": "أمن الكويت",       "url": "https://news.google.com/rss/search?q=الداخلية+الكويت+الجيش&hl=ar&gl=KW&ceid=KW:ar",       "cat": "kw",      "lang": "ar"},
-        {"name": "مجلس الأمة",       "url": "https://news.google.com/rss/search?q=مجلس+الأمة+الكويت&hl=ar&gl=KW&ceid=KW:ar",           "cat": "kw",      "lang": "ar"},
-        {"name": "الكويت اليوم",     "url": "https://news.google.com/rss/search?q=الكويت+اليوم&hl=ar&gl=KW&ceid=KW:ar",                "cat": "kw",      "lang": "ar"},
-        {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",                                           "cat": "kw",      "lang": "ar"},
-        {"name": "القبس",            "url": "https://www.alqabas.com/feed/",                                                            "cat": "kw",      "lang": "ar"},
-        {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss/",                                                           "cat": "kw",      "lang": "ar"},
-        {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                                                           "cat": "kw",      "lang": "ar"},
-        {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                                                         "cat": "kw",      "lang": "ar"},
-        # 🇰🇼 أخبار الكويت — إنجليزي (تُترجم)
-        {"name": "KUNA English",     "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=en",                                          "cat": "kw_en",   "lang": "en"},
-        {"name": "Kuwait Google",    "url": "https://news.google.com/rss/search?q=kuwait+news&hl=en-KW&gl=KW&ceid=KW:en",              "cat": "kw_en",   "lang": "en"},
-        # 🌍 عالمية
-        {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                                  "cat": "world",   "lang": "ar"},
-        {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                                    "cat": "world",   "lang": "ar"},
-        {"name": "RT عربي",          "url": "https://arabic.rt.com/rss/",                                                               "cat": "world",   "lang": "ar"},
-        {"name": "Fox News",         "url": "https://feeds.foxnews.com/foxnews/world",                                                  "cat": "fox",     "lang": "en"},
-        # 💰 اقتصاد
-        {"name": "اقتصاد الكويت",    "url": "https://news.google.com/rss/search?q=اقتصاد+الكويت&hl=ar&gl=KW&ceid=KW:ar",              "cat": "economy", "lang": "ar"},
-        {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                                                       "cat": "economy", "lang": "ar"},
-        # 💻 تقنية
-        {"name": "تقنية",            "url": "https://news.google.com/rss/search?q=تقنية+ذكاء+اصطناعي&hl=ar&gl=KW&ceid=KW:ar",         "cat": "tech",    "lang": "ar"},
+    {"name": "حكومة الكويت",     "url": "https://news.google.com/rss/search?q=مجلس+الوزراء+الكويت&hl=ar&gl=KW&ceid=KW:ar",         "cat": "kw",      "lang": "ar"},
+    {"name": "أمن الكويت",       "url": "https://news.google.com/rss/search?q=الداخلية+الكويت+الجيش&hl=ar&gl=KW&ceid=KW:ar",       "cat": "kw",      "lang": "ar"},
+    {"name": "مجلس الأمة",       "url": "https://news.google.com/rss/search?q=مجلس+الأمة+الكويت&hl=ar&gl=KW&ceid=KW:ar",           "cat": "kw",      "lang": "ar"},
+    {"name": "الكويت اليوم",     "url": "https://news.google.com/rss/search?q=الكويت+اليوم&hl=ar&gl=KW&ceid=KW:ar",                "cat": "kw",      "lang": "ar"},
+    {"name": "KUNA",             "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=ar",                                           "cat": "kw",      "lang": "ar"},
+    {"name": "القبس",            "url": "https://www.alqabas.com/feed/",                                                            "cat": "kw",      "lang": "ar"},
+    {"name": "الأنباء",          "url": "https://www.alanba.com.kw/rss/",                                                           "cat": "kw",      "lang": "ar"},
+    {"name": "الجريدة الكويتية", "url": "https://www.aljarida.com/feed/",                                                           "cat": "kw",      "lang": "ar"},
+    {"name": "الراي",            "url": "https://www.alraimedia.com/feed/",                                                         "cat": "kw",      "lang": "ar"},
+    # 🇰🇼 أخبار الكويت — إنجليزي (تُترجم)
+    {"name": "KUNA English",     "url": "https://www.kuna.net.kw/rss/rssfeeds.aspx?l=en",                                          "cat": "kw_en",   "lang": "en"},
+    {"name": "Kuwait Google",    "url": "https://news.google.com/rss/search?q=kuwait+news&hl=en-KW&gl=KW&ceid=KW:en",              "cat": "kw_en",   "lang": "en"},
+    # 🌍 عالمية
+    {"name": "BBC عربي",         "url": "https://feeds.bbci.co.uk/arabic/rss.xml",                                                  "cat": "world",   "lang": "ar"},
+    {"name": "سكاي نيوز",        "url": "https://www.skynewsarabia.com/rss.xml",                                                    "cat": "world",   "lang": "ar"},
+    {"name": "RT عربي",          "url": "https://arabic.rt.com/rss/",                                                               "cat": "world",   "lang": "ar"},
+    {"name": "Fox News",         "url": "https://feeds.foxnews.com/foxnews/world",                                                  "cat": "fox",     "lang": "en"},
+    # 💰 اقتصاد
+    {"name": "اقتصاد الكويت",    "url": "https://news.google.com/rss/search?q=اقتصاد+الكويت&hl=ar&gl=KW&ceid=KW:ar",              "cat": "economy", "lang": "ar"},
+    {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                                                       "cat": "economy", "lang": "ar"},
+    # 💻 تقنية
+    {"name": "تقنية",            "url": "https://news.google.com/rss/search?q=تقنية+ذكاء+اصطناعي&hl=ar&gl=KW&ceid=KW:ar",         "cat": "tech",    "lang": "ar"},
 ]
 
 # ─── ترجمة مجانية (Google + احتياطي MyMemory) ─────────────────
 def _translate_google(title: str) -> str | None:
-        url = (f"https://translate.googleapis.com/translate_a/single"
-                          f"?client=gtx&sl=en&tl=ar&dt=t&q={urllib.parse.quote(title)}")
-        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-        r.raise_for_status()
-        return r.json()[0][0][0]
+    url = (f"https://translate.googleapis.com/translate_a/single"
+           f"?client=gtx&sl=en&tl=ar&dt=t&q={urllib.parse.quote(title)}")
+    r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+    r.raise_for_status()
+    return r.json()[0][0][0]
 
 def _translate_mymemory(title: str) -> str | None:
-        url = (f"https://api.mymemory.translated.net/get"
-                          f"?q={urllib.parse.quote(title)}&langpair=en|ar")
-        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-        r.raise_for_status()
-        return r.json()["responseData"]["translatedText"]
+    url = (f"https://api.mymemory.translated.net/get"
+           f"?q={urllib.parse.quote(title)}&langpair=en|ar")
+    r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+    r.raise_for_status()
+    return r.json()["responseData"]["translatedText"]
 
 def translate_titles(titles_en: list[str]) -> list[str]:
-        if not titles_en:
-                    return titles_en
+    if not titles_en:
+        return titles_en
 
-        translated = []
-        for title in titles_en:
-                    result = None
+    translated = []
+    for title in titles_en:
+        result = None
 
-            # المحاولة عبر Google — مع إعادة محاولة عند 429 (طلبات كثيرة)
-                    for attempt in range(3):
-                                    try:
-                                                        result = _translate_google(title)
-                                                        print(f"✅ ترجمة (Google): {title[:40]} ← {result[:40]}")
-                                                        break
-except requests.exceptions.HTTPError as e:
-                if e.response is not None and e.response.status_code == 429:
-                                        wait = 3 * (attempt + 1)
-                                        print(f"⏳ 429 من Google، انتظار {wait}ث قبل إعادة المحاولة...")
-                                        time.sleep(wait)
-                                        continue
-                                    print(f"⚠️ خطأ Google في الترجمة: {e}")
+        # المحاولة عبر Google — مع إعادة محاولة عند 429 (طلبات كثيرة)
+        for attempt in range(3):
+            try:
+                result = _translate_google(title)
+                print(f"✅ ترجمة (Google): {title[:40]} ← {result[:40]}")
                 break
-except Exception as e:
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code == 429:
+                    wait = 3 * (attempt + 1)
+                    print(f"⏳ 429 من Google، انتظار {wait}ث قبل إعادة المحاولة...")
+                    time.sleep(wait)
+                    continue
+                print(f"⚠️ خطأ Google في الترجمة: {e}")
+                break
+            except Exception as e:
                 print(f"⚠️ خطأ Google في الترجمة: {e}")
                 break
 
         # لو Google فشل نهائياً، نجرب مصدر احتياطي
         if result is None:
-                        try:
-                                            result = _translate_mymemory(title)
-                                            print(f"✅ ترجمة (MyMemory): {title[:40]} ← {result[:40]}")
-except Exception as e:
+            try:
+                result = _translate_mymemory(title)
+                print(f"✅ ترجمة (MyMemory): {title[:40]} ← {result[:40]}")
+            except Exception as e:
                 print(f"⚠️ خطأ MyMemory في الترجمة: {e}")
 
         translated.append(result if result else title)
@@ -102,27 +102,27 @@ except Exception as e:
 
 # ─── جلب الطقس ───────────────────────────────────────────────
 def get_weather_owm(city):
-        url = (f"https://api.openweathermap.org/data/2.5/weather"
-                          f"?q={urllib.parse.quote(city['q_owm'])}"
-                          f"&appid={OWM_API_KEY}&units=metric&lang=ar")
-        r = requests.get(url, timeout=10)
-        r.raise_for_status()
-        d = r.json()
-        if d.get("cod") != 200:
-                    raise ValueError(d.get("message"))
-                temp     = round(d["main"]["temp"])
+    url = (f"https://api.openweathermap.org/data/2.5/weather"
+           f"?q={urllib.parse.quote(city['q_owm'])}"
+           f"&appid={OWM_API_KEY}&units=metric&lang=ar")
+    r = requests.get(url, timeout=10)
+    r.raise_for_status()
+    d = r.json()
+    if d.get("cod") != 200:
+        raise ValueError(d.get("message"))
+    temp     = round(d["main"]["temp"])
     feels    = round(d["main"]["feels_like"])
     humidity = d["main"]["humidity"]
     wind     = round(d["wind"]["speed"] * 3.6)
     desc     = d["weather"][0]["description"]
     main_w   = d["weather"][0]["main"].lower()
     icon = ("☀️" if "clear" in main_w else "⛅" if "cloud" in main_w else
-                        "🌧️" if "rain" in main_w else "🌫️" if "haze" in main_w or "dust" in main_w else "🌡️")
+            "🌧️" if "rain" in main_w else "🌫️" if "haze" in main_w or "dust" in main_w else "🌡️")
     return (f"{icon} *{city['name']}:* {temp}°م (يبدو {feels}°م)\n"
-                        f"   💧 {humidity}%  💨 {wind} كم/س  | {desc}")
+            f"   💧 {humidity}%  💨 {wind} كم/س  | {desc}")
 
 def get_weather_wttr(city):
-        url = f"https://wttr.in/{city['q_wttr']}?format=j1"
+    url = f"https://wttr.in/{city['q_wttr']}?format=j1"
     r = requests.get(url, timeout=10, headers={"User-Agent": "curl/7.0"})
     r.raise_for_status()
     d = r.json()
@@ -132,139 +132,137 @@ def get_weather_wttr(city):
     desc = cur["weatherDesc"][0]["value"]
     code = int(cur["weatherCode"])
     icon = ("☀️" if code == 113 else "⛅" if code in [116,119,122] else
-                        "🌧️" if code >= 263 else "🌡️")
+            "🌧️" if code >= 263 else "🌡️")
     return (f"{icon} *{city['name']}:* {temp}°م (يبدو {feels}°م)\n"
-                        f"   💧 {humidity}%  💨 {wind} كم/س  | {desc}")
+            f"   💧 {humidity}%  💨 {wind} كم/س  | {desc}")
 
 def get_weather():
-        lines = ["☁️ *الطقس الآن*"]
+    lines = ["☁️ *الطقس الآن*"]
     for city in CITIES:
-                try:
-                                lines.append(get_weather_owm(city) if OWM_API_KEY else (_ for _ in ()).throw(ValueError()))
-except Exception:
+        try:
+            lines.append(get_weather_owm(city) if OWM_API_KEY else (_ for _ in ()).throw(ValueError()))
+        except Exception:
             try:
-                                lines.append(get_weather_wttr(city))
-except Exception:
+                lines.append(get_weather_wttr(city))
+            except Exception:
                 lines.append(f"⚠️ {city['name']}: تعذّر جلب الطقس")
     return "\n".join(lines)
 
 # ─── جلب الأخبار ─────────────────────────────────────────────
 def fetch_titles(src, limit):
-        titles = []
-        try:
-                    r = requests.get(src["url"], timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-                    root = ET.fromstring(r.content)
-                    for item in root.findall(".//item")[:limit*2]:
-                                    t = item.findtext("title","").strip()
-                                    if t:
-                                                        titles.append((src["name"], t, src.get("lang", "ar")))
-                                                    if len(titles) >= limit:
-                                                                        break
-        except Exception:
-                    pass
-                return titles
+    titles = []
+    try:
+        r = requests.get(src["url"], timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        root = ET.fromstring(r.content)
+        for item in root.findall(".//item")[:limit*2]:
+            t = item.findtext("title","").strip()
+            if t:
+                titles.append((src["name"], t, src.get("lang", "ar")))
+            if len(titles) >= limit:
+                break
+    except Exception:
+        pass
+    return titles
 
 def get_news():
-        seen = set()
+    seen = set()
     sections = []
 
     def collect_section(cat_sources, fetch_limit, target_count, max_per_source=MAX_PER_SOURCE):
-                fetched = {s["name"]: fetch_titles(s, fetch_limit) for s in cat_sources}
-                items = []
-                counts = {}
+        fetched = {s["name"]: fetch_titles(s, fetch_limit) for s in cat_sources}
+        items = []
+        counts = {}
 
         def try_add(name, title, lang, respect_cap):
-                        key = title[:30]
-                        if key in seen:
-                                            return False
-                                        if respect_cap and counts.get(name, 0) >= max_per_source:
-                                                            return False
-                                                        seen.add(key)
+            key = title[:30]
+            if key in seen:
+                return False
+            if respect_cap and counts.get(name, 0) >= max_per_source:
+                return False
+            seen.add(key)
             counts[name] = counts.get(name, 0) + 1
             items.append((name, title, lang))
             return True
 
         for s in cat_sources:
-                        for name, title, lang in fetched[s["name"]]:
-                                            if len(items) >= target_count:
-                                                                    break
-                                                                try_add(name, title, lang, respect_cap=True)
+            for name, title, lang in fetched[s["name"]]:
+                if len(items) >= target_count:
+                    break
+                try_add(name, title, lang, respect_cap=True)
             if len(items) >= target_count:
-                                break
+                break
 
         if len(items) < target_count:
-                        for s in cat_sources:
-                                            for name, title, lang in fetched[s["name"]]:
-                                                                    if len(items) >= target_count:
-                                                                                                break
-                                                                                            try_add(name, title, lang, respect_cap=False)
+            for s in cat_sources:
+                for name, title, lang in fetched[s["name"]]:
+                    if len(items) >= target_count:
+                        break
+                    try_add(name, title, lang, respect_cap=False)
                 if len(items) >= target_count:
-                                        break
+                    break
 
         return items
 
     kw_sources = [s for s in NEWS_SOURCES if s["cat"] == "kw"]
     kw_items = collect_section(kw_sources, 5, 15)
     if kw_items:
-                lines = ["\n🇰🇼 *أخبار الكويت*"]
+        lines = ["\n🇰🇼 *أخرار الكويت*"]
         for i, (src, title, lang) in enumerate(kw_items[:15], 1):
-                        lines.append(f"{i}. {title} _{src}_")
+            lines.append(f"{i}. {title} _{src}_")
         sections.append("\n".join(lines))
 
     kw_en_sources = [s for s in NEWS_SOURCES if s["cat"] == "kw_en"]
     kw_en_items = collect_section(kw_en_sources, 5, 3)
     if kw_en_items:
-                en_indices = [i for i, (_, _, lang) in enumerate(kw_en_items) if lang == "en"]
+        en_indices = [i for i, (_, _, lang) in enumerate(kw_en_items) if lang == "en"]
         en_titles = [kw_en_items[i][1] for i in en_indices]
         translated = translate_titles(en_titles)
         kw_en_items = list(kw_en_items)
         for idx, new_title in zip(en_indices, translated):
-                        name, _, lang = kw_en_items[idx]
+            name, _, lang = kw_en_items[idx]
             kw_en_items[idx] = (name, new_title, lang)
 
         lines = ["\n🇰🇼 *الكويت — صحافة إنجليزية*"]
         for i, (src, title, lang) in enumerate(kw_en_items[:3], 1):
-                        lines.append(f"{i}. {title} _{src}_")
+            lines.append(f"{i}. {title} _{src}_")
         sections.append("\n".join(lines))
 
     categories = [
-                ("world",   "🌍 *عالمية*"),
-                ("fox",     "🦊 *Fox News*"),
-                ("economy", "💰 *اقتصاد*"),
-                ("tech",    "💻 *تقنية*"),
+        ("world",   "🌍 *عالمية*"),
+        ("fox",     "🦊*Fox News*"),
+        ("economy", "💰 *اقتصاد*"),
+        ("tech",    "💻 *تقنية*"),
     ]
     for cat, label in categories:
-                cat_sources = [s for s in NEWS_SOURCES if s["cat"] == cat]
+        cat_sources = [s for s in NEWS_SOURCES if s["cat"] == cat]
         items = collect_section(cat_sources, 3, 2)
 
         en_indices = [i for i, (_, _, lang) in enumerate(items) if lang == "en"]
         if en_indices:
-                        en_titles = [items[i][1] for i in en_indices]
+            en_titles = [items[i][1] for i in en_indices]
             translated = translate_titles(en_titles)
             items = list(items)
             for idx, new_title in zip(en_indices, translated):
-                                name, _, lang = items[idx]
+                name, _, lang = items[idx]
                 items[idx] = (name, new_title, lang)
 
         if items:
-                        lines = [f"\n{label}"]
+            lines = [f"\n{label}"]
             for i, (src, title, lang) in enumerate(items[:2], 1):
-                                lines.append(f"{i}. {title} _{src}_")
+                lines.append(f"{i}. {title} _{src}_")
             sections.append("\n".join(lines))
 
     return "📰 *أبرز الأخبار*\n" + "\n".join(sections)
 
-# ─── إرسال تيليغرام ──────────────────────────────────────────
 def send_telegram(message: str):
-        url  = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    url  = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     data = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "Markdown"}
     r = requests.post(url, json=data, timeout=15)
     print(f"Telegram: {r.status_code} | {r.text[:200]}")
     return r.status_code == 200
 
-# ─── التجميع والإرسال ────────────────────────────────────────
 def main():
-        kuwait_tz = timezone(timedelta(hours=3))
+    kuwait_tz = timezone(timedelta(hours=3))
     now_kw    = datetime.now(kuwait_tz)
     now       = now_kw.strftime("%A، %d %B %Y — %I:%M %p")
     period    = "🌅 الصباحية" if now_kw.hour < 12 else "🌆 المسائية"
@@ -275,12 +273,12 @@ def main():
 
     full_message = f"{header}\n{weather}\n\n{news}"
 
-    print("─── الرسالة ───────────────────────")
+    print("─── الرسالة ─────────────────────")
     print(full_message)
-    print("───────────────────────────────────")
+    print("────────────────────────────────────────")
 
     ok = send_telegram(full_message)
-    print("✅ أُرسلت بنجاح!" if ok else "❌ فشل الإرسال")
+    print("✅ أُرسلت بنجاح!" if ok else "❭ فشل الإرسال")
 
 if __name__ == "__main__":
-        main()
+    main()

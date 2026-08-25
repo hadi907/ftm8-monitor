@@ -2163,6 +2163,24 @@
       "month": "اغسطس 2026",
       "notes": "",
       "cashId": "mt94383x4pw"
+    },
+    {
+      "id": "mt94sup942e",
+      "date": "2026-08-24",
+      "type": "اسمدة",
+      "desc": "بتموس",
+      "amount": 4.125,
+      "paid": 4.125,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "مزرعة",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "اتحاد الجمعيات",
+      "invRef": "",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "mt94sup9qxk"
     }
   ],
   "DEBTS": [
@@ -2449,5 +2467,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-08-25T20:31:05.851Z"
+  "ts": "2026-08-25T20:42:41.064Z",
+  "__last_sale_id__": "mqiitlq0vef"
 }

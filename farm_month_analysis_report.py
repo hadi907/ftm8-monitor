@@ -275,9 +275,6 @@ tbody td{{padding:6px 8px;border:1px solid #ddd;vertical-align:top}}
 <div class="kgrid">
   <div class="kpi kg"><div class="v">{fmt(t_sell_cash)}</div><div class="l">💵 بيع نقداً</div></div>
   <div class="kpi kb"><div class="v">{fmt(t_sell_wamd)}</div><div class="l">🏦 بيع ومض</div></div>
-  <div class="kpi kt"><div class="v">{fmt(t_sell_card)}</div><div class="l">💳 بيع بطاقة</div></div>
-  <div class="kpi kg"><div class="v">{fmt(t_paid_cash)}</div><div class="l">💵 صرف (تحصيل) نقداً</div></div>
-  <div class="kpi kb"><div class="v">{fmt(t_paid_wamd)}</div><div class="l">🏦 صرف (تحصيل) ومض</div></div>
   <div class="kpi ko"><div class="v">{fmt(kpi_remaining_total)}</div><div class="l">⏳ إجمالي المتبقي حالياً</div></div>
 </div>
 

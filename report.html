@@ -49,6 +49,10 @@ body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#071a07,
   <div class="section-title">📅 شهر محدد</div>
   <div class="months-grid" id="months-grid"></div>
 
+  <div class="section-title" style="margin-top:22px">🧮 تحليل الشهر</div>
+  <button class="btn-all" style="background:linear-gradient(135deg,#0d47a1,#1565c0)" onclick="sendMonthAnalysis('')">🧮 كل الأشهر — تحليل الشهر</button>
+  <div class="months-grid" id="ma-months-grid"></div>
+
   <div class="status" id="status"></div>
   <p class="info">سيصل التقرير على إيميلك<br><strong>hadi@ftm8.com</strong><br>خلال دقيقة واحدة ⏱️</p>
 </div>
@@ -61,8 +65,9 @@ var _d='G8gu36wbcf';
 var REPO='hadi907/ftm8-monitor';
 var PASS='0008';
 
-function buildMonths(){
-  var grid=document.getElementById('months-grid');
+function buildMonthButtons(gridId,handler){
+  var grid=document.getElementById(gridId);
+  if(!grid) return;
   var now=new Date();
   var arM=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
   var html='';
@@ -70,13 +75,13 @@ function buildMonths(){
     var d=new Date(now.getFullYear(),now.getMonth()-i,1);
     var ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
     var label=arM[d.getMonth()+1]+' '+d.getFullYear();
-    html+='<button class="btn-month" onclick="sendReport(\''+ym+'\')">'+label+'</button>';
+    html+='<button class="btn-month" onclick="'+handler+'(\''+ym+'\')">'+label+'</button>';
   }
   grid.innerHTML=html;
 }
 
 var _sending=false;
-async function sendReport(month){
+async function sendDispatch(eventType,month){
   if(_sending)return;
   var pass=document.getElementById('pass-input').value.trim();
   var st=document.getElementById('status');
@@ -97,7 +102,7 @@ async function sendReport(month){
         'Accept':'application/vnd.github+json',
         'Content-Type':'application/json'
       },
-      body:JSON.stringify({event_type:'send-report',client_payload:{month:month||'',password:pass}})
+      body:JSON.stringify({event_type:eventType,client_payload:{month:month||'',password:pass}})
     });
     if(resp.status===204||resp.ok){
       st.className='status success';
@@ -113,8 +118,11 @@ async function sendReport(month){
     _sending=false;
   }
 }
+function sendReport(month){ return sendDispatch('send-report',month); }
+function sendMonthAnalysis(month){ return sendDispatch('send-month-analysis',month); }
 
-buildMonths();
+buildMonthButtons('months-grid','sendReport');
+buildMonthButtons('ma-months-grid','sendMonthAnalysis');
 </script>
 </body>
 </html>

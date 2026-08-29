@@ -149,8 +149,8 @@
       "discount": 0,
       "total": 59,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "mtcm5bt4c9o",
+      "payment": "ومض",
+      "cashId": "mteche1cg4k",
       "img": ""
     },
     {
@@ -200,8 +200,8 @@
       "discount": 0,
       "total": 90,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "msnl35mkjqf",
+      "payment": "نقدا",
+      "cashId": "mtech1e8oas",
       "img": ""
     },
     {
@@ -217,8 +217,8 @@
       "discount": 0,
       "total": 8,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "msnl7awggh3",
+      "payment": "نقدا",
+      "cashId": "mtecgojtd51",
       "img": ""
     },
     {
@@ -234,8 +234,8 @@
       "discount": 0,
       "total": 10,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "msiediyvh1n",
+      "payment": "ومض",
+      "cashId": "mtecgbxf56b",
       "img": ""
     },
     {
@@ -251,8 +251,8 @@
       "discount": 0,
       "total": 6,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "mt7ilwbx8mf",
+      "payment": "ومض",
+      "cashId": "mtecfxb9l8n",
       "img": ""
     },
     {
@@ -268,8 +268,8 @@
       "discount": 1,
       "total": 29,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "msieghzg7h6",
+      "payment": "ومض",
+      "cashId": "mtecfofsgcm",
       "img": ""
     },
     {
@@ -285,8 +285,8 @@
       "discount": 0,
       "total": 1,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "msgd4giz1f7",
+      "payment": "ومض",
+      "cashId": "mtece3og1gk",
       "img": ""
     },
     {
@@ -302,8 +302,8 @@
       "discount": 0,
       "total": 22,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "ms95svdzni8",
+      "payment": "نقدا",
+      "cashId": "mtecfd6tnn3",
       "img": ""
     },
     {
@@ -319,8 +319,8 @@
       "discount": 0,
       "total": 2.5,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "msbz4pw9vpx",
+      "payment": "ومض",
+      "cashId": "mtecc4sgrmt",
       "img": ""
     },
     {
@@ -336,8 +336,8 @@
       "discount": 0.25,
       "total": 0.75,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "msbz7q9988w",
+      "payment": "ومض",
+      "cashId": "mtecbmtbgfn",
       "img": ""
     },
     {
@@ -1982,7 +1982,8 @@
       "invRef": "593",
       "month": "اغسطس 2026",
       "notes": "نزمول",
-      "cashId": "msbz3bkpz7k"
+      "cashId": "msbz3bkpz7k",
+      "maClass": "نقدا"
     },
     {
       "id": "msieshhq1vj",
@@ -2000,7 +2001,8 @@
       "invRef": "12223",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "msieshhqfi8"
+      "cashId": "msieshhqfi8",
+      "maClass": "ومض"
     },
     {
       "id": "msif4etxnqj",
@@ -2018,7 +2020,8 @@
       "invRef": "E126-016429",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "msif4etx5uk"
+      "cashId": "msif4etx5uk",
+      "maClass": "ومض"
     },
     {
       "id": "msp17ecte6d",
@@ -2036,7 +2039,8 @@
       "invRef": "638",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "msp17ectfum"
+      "cashId": "msp17ectfum",
+      "maClass": "نقدا"
     },
     {
       "id": "msp1cese4of",
@@ -2054,7 +2058,8 @@
       "invRef": "1681",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "msp1ceseo59"
+      "cashId": "msp1ceseo59",
+      "maClass": "نقدا"
     },
     {
       "id": "msrkgqv63do",
@@ -2072,7 +2077,8 @@
       "invRef": "88487",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "mt7omdfoauh"
+      "cashId": "mt7omdfoauh",
+      "maClass": "نقدا"
     },
     {
       "id": "msrkjid96lp",
@@ -2090,7 +2096,8 @@
       "invRef": "",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "msrkjid912d"
+      "cashId": "msrkjid912d",
+      "maClass": "نقدا"
     },
     {
       "id": "msrkmfyupys",
@@ -2108,7 +2115,8 @@
       "invRef": "4230",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "msrkmfyuqpu"
+      "cashId": "msrkmfyuqpu",
+      "maClass": "نقدا"
     },
     {
       "id": "msusiwvyd6r",
@@ -2126,7 +2134,8 @@
       "invRef": "88620",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "mt7oj1hzy15"
+      "cashId": "mt7oj1hzy15",
+      "maClass": "نقدا"
     },
     {
       "id": "mt93q1h5p1j",
@@ -2144,7 +2153,8 @@
       "invRef": "92",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "mt93q1h5chi"
+      "cashId": "mt93q1h5chi",
+      "maClass": "ابوادم"
     },
     {
       "id": "mt94383xur7",
@@ -2162,7 +2172,8 @@
       "invRef": "",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "mt94383x4pw"
+      "cashId": "mt94383x4pw",
+      "maClass": "ابواسحاق"
     },
     {
       "id": "mt94sup942e",
@@ -2180,7 +2191,8 @@
       "invRef": "",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "mt94sup9qxk"
+      "cashId": "mt94sup9qxk",
+      "maClass": "ومض"
     },
     {
       "id": "mtckdj40eev",
@@ -2198,7 +2210,8 @@
       "invRef": "666",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "mtcmarhdzea"
+      "cashId": "mtcmarhdzea",
+      "maClass": "نقدا"
     },
     {
       "id": "mtckgai4npd",
@@ -2216,7 +2229,8 @@
       "invRef": "",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "mtckgai4kp8"
+      "cashId": "mtckgai4kp8",
+      "maClass": "نقدا"
     },
     {
       "id": "mtckxiruczd",
@@ -2234,7 +2248,8 @@
       "invRef": "",
       "month": "اغسطس 2026",
       "notes": "",
-      "cashId": "mtckxiru0yp"
+      "cashId": "mtckxiru0yp",
+      "maClass": "ومض"
     }
   ],
   "DEBTS": [
@@ -2521,6 +2536,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-08-28T07:15:48.701Z",
-  "__last_sale_id__": "mqxzwtlr99k"
+  "ts": "2026-08-29T12:56:57.808Z"
 }

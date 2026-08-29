@@ -1,0 +1,31 @@
+name: 🧮 تحليل الشهر — إرسال أسبوعي تلقائي (كل سبت 9ص الكويت)
+
+on:
+  schedule:
+    - cron: '0 6 * * 6'   # كل سبت 9:00 صباحاً بتوقيت الكويت (UTC+3) = 06:00 UTC
+  workflow_dispatch:   # تشغيل يدوي للاختبار
+
+jobs:
+  send-month-analysis-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: تحديد الشهر الحالي
+        id: month
+        run: echo "value=$(date +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: توليد وإرسال تقرير تحليل الشهر (الشهر الحالي فقط)
+        env:
+          EMAIL_FROM:      ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASS:      ${{ secrets.EMAIL_PASS }}
+          JSONBIN_API_KEY: ${{ secrets.JSONBIN_API_KEY }}
+          JSONBIN_BIN_URL: ${{ secrets.JSONBIN_BIN_URL }}
+          GH_TOKEN:        ${{ secrets.GH_TOKEN }}
+        run: python3 farm_month_analysis_report.py "${{ steps.month.outputs.value }}"

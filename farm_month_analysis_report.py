@@ -246,7 +246,7 @@ body{{font-family:'Tajawal',Arial,sans-serif;direction:rtl;background:#f5f5f5;fo
 .kb{{background:linear-gradient(135deg,#0d47a1,#1565c0)}}
 .kt{{background:linear-gradient(135deg,#00695c,#00897b)}}
 .ko{{background:linear-gradient(135deg,#e65100,#f57c00)}}
-.pools{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 20px 16px}}
+.pools{{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:0 20px 16px}}
 .pool{{border-radius:8px;padding:14px 18px;color:#fff}}
 .pool .t{{font-size:0.82rem;opacity:.85}}
 .pool .v{{font-size:1.6rem;font-weight:900;direction:ltr;margin-top:4px}}
@@ -275,7 +275,13 @@ tbody td{{padding:6px 8px;border:1px solid #ddd;vertical-align:top}}
 <div class="kgrid">
   <div class="kpi kg"><div class="v">{fmt(t_sell_cash)}</div><div class="l">💵 بيع نقداً</div></div>
   <div class="kpi kb"><div class="v">{fmt(t_sell_wamd)}</div><div class="l">🏦 بيع ومض</div></div>
-  <div class="kpi ko"><div class="v">{fmt(kpi_remaining_total)}</div><div class="l">⏳ إجمالي المتبقي حالياً</div></div>
+  <div class="kpi ko"><div class="v">{fmt(t_sell_cash + t_sell_wamd)}</div><div class="l">🧾 إجمالي المبيعات</div></div>
+</div>
+
+<div class="kgrid">
+  <div class="kpi kg"><div class="v">{fmt(class_totals.get("نقدا",0))}</div><div class="l">💵 مصروفات نقدا</div></div>
+  <div class="kpi kb"><div class="v">{fmt(class_totals.get("ومض",0))}</div><div class="l">🏦 مصروفات ومض</div></div>
+  <div class="kpi ko"><div class="v">{fmt(class_totals.get("نقدا",0) + class_totals.get("ومض",0))}</div><div class="l">🧾 إجمالي المصروفات</div></div>
 </div>
 
 <div class="pools">
@@ -289,54 +295,26 @@ tbody td{{padding:6px 8px;border:1px solid #ddd;vertical-align:top}}
     <div class="v">{fmt(wamd_bal)}</div>
     <div class="s">بيع ومض {fmt(wamd_in)} − مصروفات ومض {fmt(wamd_out)}</div>
   </div>
+  <div class="pool" style="background:linear-gradient(135deg,#e65100,#ff8f00)">
+    <div class="t">⏳ إجمالي المتبقي حالياً</div>
+    <div class="v">{fmt(kpi_remaining_total)}</div>
+    <div class="s">رصيد نقدا {fmt(cash_bal)} + رصيد ومض {fmt(wamd_bal)}</div>
+  </div>
 </div>
+"""
 
-<div class="section-title">👤 تفصيل حسب العميل</div>
-<div style="overflow-x:auto;padding:0 20px">
-<table>
-<thead><tr>
-<th>#</th><th>العميل</th><th>بيع نقدا</th><th>بيع ومض</th><th>بيع بطاقة</th>
-<th>صرف نقدا</th><th>صرف ومض</th><th>صرف غير محدد</th><th>المتبقي حالياً</th>
-</tr></thead><tbody>"""
+# ── تصنيف المصاريف — صف الشركاء + إجمالي (نفس بيانات القسم الأصلي بالأسفل، بدون خانة "غير مصنّف") ──
+partner_keys = sorted(k for k in class_totals if k not in ("نقدا", "ومض"))
+partner_total = sum(class_totals[k] for k in partner_keys)
+if partner_keys:
+    html += '<div class="kgrid" style="grid-template-columns:repeat(' + str(len(partner_keys) + 1) + ',1fr)">'
+    for k in partner_keys:
+        html += f'<div class="kpi kt"><div class="v">{fmt(class_totals[k])}</div><div class="l">👤 مصروفات {k}</div></div>'
+    html += f'<div class="kpi ko"><div class="v">{fmt(partner_total)}</div><div class="l">🧾 الإجمالي</div></div>'
+    html += '</div>'
 
-if not rows:
-    html += '<tr><td colspan="9" style="text-align:center;padding:16px;color:#888">لا توجد عمليات عملاء بهذه الفترة</td></tr>'
-else:
-    for i, c in enumerate(rows):
-        rc = '#b71c1c' if c["remaining"] > 0 else '#1b5e20'
-        html += (
-            f'<tr><td style="text-align:center;color:#888">{i+1}</td>'
-            f'<td style="font-weight:700">{c["name"]}</td>'
-            f'<td style="direction:ltr;text-align:center">{fmt(c["sellCash"]) if c["sellCash"]>0 else "—"}</td>'
-            f'<td style="direction:ltr;text-align:center">{fmt(c["sellWamd"]) if c["sellWamd"]>0 else "—"}</td>'
-            f'<td style="direction:ltr;text-align:center">{fmt(c["sellCard"]) if c["sellCard"]>0 else "—"}</td>'
-            f'<td style="direction:ltr;text-align:center;color:#1b5e20">{fmt(c["paidCash"]) if c["paidCash"]>0 else "—"}</td>'
-            f'<td style="direction:ltr;text-align:center;color:#1b5e20">{fmt(c["paidWamd"]) if c["paidWamd"]>0 else "—"}</td>'
-            f'<td style="direction:ltr;text-align:center;color:#888">{fmt(c["paidOther"]) if c["paidOther"]>0 else "—"}</td>'
-            f'<td style="direction:ltr;text-align:center;font-weight:800;color:{rc}">{fmt(c["remaining"])}</td></tr>'
-        )
-
-html += (
-    f'</tbody><tfoot><tr class="grand">'
-    f'<td colspan="2" style="text-align:right">الإجمالي</td>'
-    f'<td style="text-align:center;direction:ltr">{fmt(t_sell_cash)}</td>'
-    f'<td style="text-align:center;direction:ltr">{fmt(t_sell_wamd)}</td>'
-    f'<td style="text-align:center;direction:ltr">{fmt(t_sell_card)}</td>'
-    f'<td style="text-align:center;direction:ltr">{fmt(t_paid_cash)}</td>'
-    f'<td style="text-align:center;direction:ltr">{fmt(t_paid_wamd)}</td>'
-    f'<td style="text-align:center;direction:ltr">{fmt(t_paid_other)}</td>'
-    f'<td style="text-align:center;direction:ltr">{fmt(t_remain)}</td>'
-    f'</tr></tfoot></table></div>'
-)
-
-# ── تصنيف المصاريف ──
-html += '<div class="section-title">🏷️ تصنيف المصاريف</div><div class="cls-grid">'
-html += f'<div class="kpi kg"><div class="v">{fmt(class_totals.get("نقدا",0))}</div><div class="l">💵 مصروفات نقدا</div></div>'
-html += f'<div class="kpi kb"><div class="v">{fmt(class_totals.get("ومض",0))}</div><div class="l">🏦 مصروفات ومض</div></div>'
-for k in sorted(k for k in class_totals if k not in ("نقدا", "ومض")):
-    html += f'<div class="kpi kt"><div class="v">{fmt(class_totals[k])}</div><div class="l">👤 مصروفات {k}</div></div>'
-html += f'<div class="kpi ko"><div class="v">{fmt(unclassified)}</div><div class="l">❔ مصروفات غير مصنّف</div></div>'
-html += '</div>'
+# ── تصنيف المصاريف: جدول التفاصيل فقط (بدون ملخص مكرر — الملخص صار بالأعلى) ──
+html += '<div class="section-title">🏷️ تصنيف المصاريف</div>'
 
 html += '<div style="overflow-x:auto;padding:0 20px 10px"><table><thead><tr><th>التاريخ</th><th>البيان</th><th>المبلغ (دك)</th><th>التصنيف</th></tr></thead><tbody>'
 if not class_rows:

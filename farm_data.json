@@ -3017,6 +3017,23 @@
       "payment": "نقد",
       "cashId": "mtg64mdvnx2",
       "img": ""
+    },
+    {
+      "id": "mtg65f0sb3b",
+      "invNum": "INV-131",
+      "date": "2026-08-30",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "تين",
+      "category": "داخلي",
+      "qty": 5,
+      "price": 1.5,
+      "discount": 0,
+      "total": 7.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mtg65f0swx4",
+      "img": ""
     }
   ],
   "EXP": [
@@ -6732,6 +6749,19 @@
       "month": "أغسطس ٢٠٢٦",
       "notes": "مبيعة: صبار - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mtg65f0swx4",
+      "date": "2026-08-30",
+      "type": "وارد",
+      "amount": 7.5,
+      "paid": 7.5,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-131",
+      "month": "أغسطس ٢٠٢٦",
+      "notes": "مبيعة: تين - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -7045,5 +7075,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-08-30T18:54:12.164Z"
+  "date": "2026-08-30T18:54:49.643Z"
 }

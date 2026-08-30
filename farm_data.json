@@ -3937,6 +3937,25 @@
       "cashId": "mtfot7kxvus",
       "img": "",
       "maClass": "نقدا"
+    },
+    {
+      "id": "mtg80e299a7",
+      "date": "2026-08-30",
+      "type": "أخرى",
+      "desc": "اقامه نزمول مده 3 سنوات",
+      "amount": 35,
+      "paid": 35,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "ومض",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "mtg80e296bd",
+      "img": ""
     }
   ],
   "CASH": [
@@ -6786,6 +6805,19 @@
       "month": "أغسطس ٢٠٢٦",
       "notes": "مبيعة: تين - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mtg80e296bd",
+      "date": "2026-08-30",
+      "type": "صادر",
+      "amount": 35,
+      "paid": 35,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "—",
+      "month": "اغسطس 2026",
+      "notes": "مصروف: أخرى - اقامه نزمول مده 3 سنوات",
+      "autoFrom": "expense"
     }
   ],
   "CUST": [],
@@ -7099,5 +7131,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-08-30T19:12:42.209Z"
+  "date": "2026-08-30T19:49:36.324Z"
 }

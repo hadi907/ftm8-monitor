@@ -3955,7 +3955,28 @@
       "month": "اغسطس 2026",
       "notes": "",
       "cashId": "mtg80e296bd",
-      "img": ""
+      "img": "",
+      "maClass": "ومض"
+    },
+    {
+      "id": "mtg8xj471j0",
+      "date": "2026-08-31",
+      "type": "رواتب",
+      "desc": "رواتب +كهرباء وماء",
+      "amount": 470,
+      "paid": 470,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "اغسطس 2026",
+      "notes": "",
+      "cashId": "mtg8xj47n3d",
+      "img": "",
+      "maClass": "نقدا"
     }
   ],
   "CASH": [
@@ -6818,6 +6839,19 @@
       "month": "اغسطس 2026",
       "notes": "مصروف: أخرى - اقامه نزمول مده 3 سنوات",
       "autoFrom": "expense"
+    },
+    {
+      "id": "mtg8xj47n3d",
+      "date": "2026-08-31",
+      "type": "صادر",
+      "amount": 470,
+      "paid": 470,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "—",
+      "month": "اغسطس 2026",
+      "notes": "مصروف: رواتب - رواتب +كهرباء وماء",
+      "autoFrom": "expense"
     }
   ],
   "CUST": [],
@@ -7131,5 +7165,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-08-30T19:49:36.324Z"
+  "date": "2026-08-30T20:15:05.659Z"
 }

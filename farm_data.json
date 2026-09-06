@@ -1962,7 +1962,8 @@
       "invRef": "89698",
       "month": "سبتمبر 2026",
       "notes": "",
-      "cashId": "mtozfstefde"
+      "cashId": "mtozfstefde",
+      "maClass": "نقدا"
     }
   ],
   "DEBTS": [
@@ -2249,5 +2250,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-09-06T00:39:39.539Z"
+  "ts": "2026-09-06T01:09:09.529Z",
+  "__last_sale_id__": "mtfqelt9zxg"
 }

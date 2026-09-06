@@ -54,6 +54,9 @@ EMAIL_PASS = os.environ.get('EMAIL_PASS', '')
 EMAIL_TO   = os.environ.get('EMAIL_TO', 'hadi@ftm8.com')
 GH_TOKEN   = os.environ.get('GH_TOKEN', '')
 TODAY      = datetime.date.today().isoformat()
+CURRENT_MONTH = TODAY[:7]  # 'YYYY-MM' — تقرير المقارنة يقتصر على الشهر الحالي فقط
+AR_MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+MONTH_LABEL = f"{AR_MONTH_NAMES[int(CURRENT_MONTH[5:7])-1]} {CURRENT_MONTH[:4]}"
 
 def load_app():
     """يجلب farm_data.json مع إعادة محاولة تلقائية (حتى 3 مرات) لو صار
@@ -233,7 +236,7 @@ def build_html(r):
             'padding:10px 16px;border-radius:6px;font-size:12px;color:#1565c0;margin-top:12px">'
             '<b>ملاحظة:</b> ' + str(len(r['out_of_range'])) + ' فاتورة قديمة (قبل ' + str(r['min_app_date']) +
             ') بقيمة ' + f"{r['out_of_range_total']:.3f}" +
-            ' دك موجودة في XLSX وفي التطبيق محلياً، لكنها خارج نطاق آخر 50 فاتورة المرفوعة لـ JSONBin — لا تُعتبر فارقاً.'
+            ' دك موجودة في XLSX وفي التطبيق محلياً، لكنها خارج نطاق آخر 50 فاتورة المرفوعة لـ JSONBin (ضمن الشهر الحالي) — لا تُعتبر فارقاً.'
             '</div>'
         )
 
@@ -241,11 +244,11 @@ def build_html(r):
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Tajawal,Arial;direction:rtl;background:#f5f5f5;padding:20px}.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #e0e0e0}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.kpi{background:#f8fffe;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0}.kpi-lbl{font-size:12px;color:#666;margin-bottom:4px}.kpi-val{font-size:20px;font-weight:900;direction:ltr}table{width:100%;border-collapse:collapse;font-size:13px}th{background:#1b5e20;color:#fff;padding:10px 12px;text-align:right}tr:nth-child(even){background:#f9f9f9}</style></head>
 <body><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1b5e20;padding-bottom:12px;margin-bottom:16px">
-<div><h1 style="font-size:18px;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</h1><p style="color:#555;font-size:13px">تقرير المقارنة — __TODAY__</p></div>
+<div><h1 style="font-size:18px;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</h1><p style="color:#555;font-size:13px">تقرير المقارنة — __MONTHLABEL__ — __TODAY__</p></div>
 <div style="background:__BGCOL__;padding:10px 20px;border-radius:8px;text-align:center"><div style="font-size:22px">__ICON__</div><div style="font-size:12px;font-weight:700;color:__DC__">__STATUS__</div></div></div>
 <div class="kpis">
-<div class="kpi"><div class="kpi-lbl">مبيعات التطبيق (آخر 50)</div><div class="kpi-val" style="color:#1b5e20">__APPTOTAL__ دك</div><div style="font-size:11px;color:#999">__APPCOUNT__ سجل</div></div>
-<div class="kpi"><div class="kpi-lbl">مبيعات XLSX (بنفس النطاق)</div><div class="kpi-val" style="color:#1565c0">__XLSXRANGE__ دك</div><div style="font-size:11px;color:#999">من __MINDATE__</div></div>
+<div class="kpi"><div class="kpi-lbl">مبيعات التطبيق (الشهر الحالي)</div><div class="kpi-val" style="color:#1b5e20">__APPTOTAL__ دك</div><div style="font-size:11px;color:#999">__APPCOUNT__ سجل</div></div>
+<div class="kpi"><div class="kpi-lbl">مبيعات XLSX (الشهر الحالي)</div><div class="kpi-val" style="color:#1565c0">__XLSXRANGE__ دك</div><div style="font-size:11px;color:#999">من __MINDATE__</div></div>
 <div class="kpi"><div class="kpi-lbl">الفارق</div><div class="kpi-val" style="color:__DC__">__DIFFTOTAL__ دك</div></div>
 <div class="kpi"><div class="kpi-lbl">الفوارق الحقيقية</div><div class="kpi-val" style="color:__DC__">__DIFFCOUNT__</div></div></div>
 __NOTE__
@@ -258,6 +261,7 @@ __NOTE__
 
     html = (template
         .replace('__TODAY__', TODAY)
+        .replace('__MONTHLABEL__', MONTH_LABEL)
         .replace('__BGCOL__', '#fff3e0' if r['diffs'] else '#e8f5e9')
         .replace('__ICON__', icon)
         .replace('__DC__', dc)
@@ -274,7 +278,7 @@ __NOTE__
     return html
 
 def send_email(html_body, diff_count):
-    subject = f"{'⚠️' if diff_count else '✅'} مزرعة هادي اسحاق - مقارنة — {TODAY}"
+    subject = f"{'⚠️' if diff_count else '✅'} مزرعة هادي اسحاق - مقارنة {MONTH_LABEL} — {TODAY}"
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From']    = EMAIL_FROM
@@ -300,6 +304,13 @@ if __name__ == '__main__':
     xlsx_rows = load_xlsx()
     if not app_sales and not xlsx_rows:
         print("❌ لا توجد بيانات"); exit(1)
+
+    # ── تقييد المقارنة على الشهر الحالي فقط (بطلب هادي) ──
+    app_all_count  = len(app_sales)
+    xlsx_all_count = len(xlsx_rows)
+    app_sales = [s for s in app_sales if (s.get('date') or '')[:7] == CURRENT_MONTH]
+    xlsx_rows = [r for r in xlsx_rows if (r.get('date') or '')[:7] == CURRENT_MONTH]
+    print(f"📅 تصفية للشهر الحالي ({MONTH_LABEL}): تطبيق {len(app_sales)}/{app_all_count} | XLSX {len(xlsx_rows)}/{xlsx_all_count}")
     result = compare(app_sales, xlsx_rows)
     print(f"📊 تطبيق={result['app_total']:.3f} | XLSX (بالنطاق)={result['xlsx_credit_in_range']:.3f} | فارق={result['diff_total']:+.3f} | فوارق حقيقية={len(result['diffs'])} | خارج النطاق (غير محسوبة كفارق)={len(result['out_of_range'])}")
     html = build_html(result)

@@ -3143,6 +3143,23 @@
       "payment": "نقد",
       "cashId": "mtq0306tw41",
       "img": ""
+    },
+    {
+      "id": "mtq0539tw6p",
+      "invNum": "INV-135",
+      "date": "2026-09-06",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "ربل",
+      "category": "داخلي",
+      "qty": 2,
+      "price": 1.5,
+      "discount": 0,
+      "total": 3,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mtq0539t0w2",
+      "img": ""
     }
   ],
   "EXP": [
@@ -7042,6 +7059,19 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: ليمون جراس - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mtq0539t0w2",
+      "date": "2026-09-06",
+      "type": "وارد",
+      "amount": 3,
+      "paid": 3,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-135",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: ربل - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -7355,5 +7385,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-06T16:02:40.837Z"
+  "date": "2026-09-06T16:04:18.113Z"
 }

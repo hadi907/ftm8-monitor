@@ -1969,7 +1969,27 @@
       "invRef": "11328",
       "month": "سبتمبر 2026",
       "notes": "",
-      "cashId": "mtq0acmwzu9"
+      "cashId": "mtq0acmwzu9",
+      "maClass": "نقدا"
+    },
+    {
+      "id": "mtrvym2okti",
+      "date": "2026-09-07",
+      "type": "وصلات صحي",
+      "desc": "محابس",
+      "amount": 2.15,
+      "paid": 2.15,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "اتحاد المزارعين",
+      "invRef": "89876",
+      "month": "يبتمبر 2026",
+      "notes": "",
+      "cashId": "mtrvym2pf8v",
+      "maClass": "نقدا"
     }
   ],
   "DEBTS": [
@@ -2256,6 +2276,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-09-06T16:08:25.215Z",
-  "__last_sale_id__": "mtfqelt5t8r"
+  "ts": "2026-09-07T23:54:00.209Z"
 }

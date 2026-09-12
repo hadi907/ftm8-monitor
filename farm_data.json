@@ -3330,6 +3330,23 @@
       "payment": "نقد",
       "cashId": "mty6nk0q2mi",
       "img": ""
+    },
+    {
+      "id": "mty6o6yjntt",
+      "invNum": "INV-146",
+      "date": "2026-09-11",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "متنوع",
+      "category": "خارجي",
+      "qty": 2,
+      "price": 1,
+      "discount": 0,
+      "total": 2,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mty6o6ykl9a",
+      "img": ""
     }
   ],
   "EXP": [
@@ -7438,6 +7455,19 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: دارسينا اسود - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mty6o6ykl9a",
+      "date": "2026-09-11",
+      "type": "وارد",
+      "amount": 2,
+      "paid": 2,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-146",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -7751,5 +7781,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-12T09:28:46.726Z"
+  "date": "2026-09-12T09:29:16.454Z"
 }

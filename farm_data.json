@@ -540,7 +540,7 @@
       "cost": 0,
       "price": 2,
       "qty": 20,
-      "remaining": 7,
+      "remaining": 0,
       "minStock": 5,
       "date": "2026-05-09",
       "color": "اخضر",
@@ -3261,6 +3261,23 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mty668n8xsm",
+      "img": ""
+    },
+    {
+      "id": "mty69nycmyv",
+      "invNum": "INV-142",
+      "date": "2026-09-11",
+      "client": "نقدا",
+      "invItemId": "moyspgt6atb",
+      "product": "عطره",
+      "category": "خارجي",
+      "qty": 10,
+      "price": 2,
+      "discount": 12.5,
+      "total": 7.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mty69nyh6qr",
       "img": ""
     }
   ],
@@ -7318,6 +7335,19 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mty69nyh6qr",
+      "date": "2026-09-11",
+      "type": "وارد",
+      "amount": 7.5,
+      "paid": 7.5,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-142",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: عطره - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -7631,5 +7661,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-12T09:15:18.829Z"
+  "date": "2026-09-12T09:17:58.677Z"
 }

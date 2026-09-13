@@ -3225,8 +3225,8 @@
       "discount": 0,
       "total": 20,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "mu089xdtwa6",
+      "payment": "ومض",
+      "cashId": "mu09b2b2iu6",
       "img": ""
     },
     {
@@ -7522,19 +7522,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mu089xdtwa6",
-      "date": "2026-09-11",
-      "type": "وارد",
-      "amount": 20,
-      "paid": 20,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-139",
-      "month": "سبتمبر ٢٠٢٦",
-      "notes": "مبيعة: متنوع - ومض",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mu08a8xbla9",
       "date": "2026-09-11",
       "type": "وارد",
@@ -7621,6 +7608,19 @@
       "remaining": 0,
       "payment": "ومض",
       "ref": "INV-138",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - ومض",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "mu09b2b2iu6",
+      "date": "2026-09-11",
+      "type": "وارد",
+      "amount": 20,
+      "paid": 20,
+      "remaining": 0,
+      "payment": "ومض",
+      "ref": "INV-139",
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - ومض",
       "autoFrom": "sale"
@@ -7937,5 +7937,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-13T20:18:25.440Z"
+  "date": "2026-09-13T20:18:35.117Z"
 }

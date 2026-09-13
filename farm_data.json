@@ -3250,7 +3250,7 @@
       "id": "mty668n66mj",
       "invNum": "INV-141",
       "date": "2026-09-11",
-      "client": "نقدا",
+      "client": "ومض",
       "invItemId": "",
       "product": "متنوع",
       "category": "داخلي",
@@ -3260,7 +3260,7 @@
       "total": 5,
       "location": "محل",
       "payment": "نقد",
-      "cashId": "mty668n8xsm",
+      "cashId": "mu08b3w7xf9",
       "img": ""
     },
     {
@@ -7387,19 +7387,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mty668n8xsm",
-      "date": "2026-09-11",
-      "type": "وارد",
-      "amount": 5,
-      "paid": 5,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-141",
-      "month": "سبتمبر ٢٠٢٦",
-      "notes": "مبيعة: متنوع - نقدا",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mty69nyh6qr",
       "date": "2026-09-11",
       "type": "وارد",
@@ -7527,6 +7514,19 @@
       "ref": "INV-140",
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: صبار - ومض",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "mu08b3w7xf9",
+      "date": "2026-09-11",
+      "type": "وارد",
+      "amount": 5,
+      "paid": 5,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-141",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - ومض",
       "autoFrom": "sale"
     }
   ],
@@ -7841,5 +7841,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-13T19:49:57.446Z"
+  "date": "2026-09-13T19:50:37.581Z"
 }

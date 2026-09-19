@@ -3500,6 +3500,23 @@
       "payment": "نقد",
       "cashId": "mu8txaidpq9",
       "img": ""
+    },
+    {
+      "id": "mu8ty9k2qfp",
+      "invNum": "INV-156",
+      "date": "2026-09-19",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "صبار",
+      "category": "داخلي",
+      "qty": 30,
+      "price": 1,
+      "discount": 0,
+      "total": 30,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mu8ty9k20a1",
+      "img": ""
     }
   ],
   "EXP": [
@@ -7868,6 +7885,19 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mu8ty9k20a1",
+      "date": "2026-09-19",
+      "type": "وارد",
+      "amount": 30,
+      "paid": 30,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-156",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: صبار - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -8181,5 +8211,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-19T20:17:53.927Z"
+  "date": "2026-09-19T20:18:39.480Z"
 }

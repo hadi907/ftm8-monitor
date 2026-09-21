@@ -69,7 +69,7 @@ def build_alerts(D):
         if doc.get("renewed"):
             continue
         days = days_left(doc.get("expiryDate"))
-        notify_at = int(doc.get("notifyDays") or 30)
+        notify_at = 30
         if days <= notify_at:
             alerts.append({
                 "section": "📋 وثائق",
@@ -77,39 +77,39 @@ def build_alerts(D):
                 "detail": f"📅 {doc.get('expiryDate','')} · ⏰ {sl(days)}"
             })
 
-    # تأمين السيارات — 60 يوم (مطابق لمنطق التطبيق)
+    # تأمين السيارات — 30 يوم
     for c in D.get("cars", []):
         exp = c.get("insuranceExpiry")
         if not exp:
             continue
         days = days_left(exp)
-        if days <= 60:
+        if days <= 30:
             alerts.append({
                 "section": "🚗 تأمين سيارات",
                 "line": f"{icon(days)} {c.get('carName','سيارة')}",
                 "detail": f"📅 {exp} · ⏰ {sl(days)}"
             })
 
-    # الإقامات — 60 يوم (مطابق لمنطق التطبيق)
+    # الإقامات — 30 يوم
     for r in D.get("residencies", []):
         exp = r.get("expiryDate")
         if not exp:
             continue
         days = days_left(exp)
-        if days <= 60:
+        if days <= 30:
             alerts.append({
                 "section": "🪪 إقامات",
                 "line": f"{icon(days)} {r.get('name','إقامة')}",
                 "detail": f"📅 {exp} · ⏰ {sl(days)}"
             })
 
-    # العقود — 60 يوم (مطابق لمنطق التطبيق)
+    # العقود — 30 يوم
     for c in D.get("contracts", []):
         exp = c.get("endDate")
         if not exp:
             continue
         days = days_left(exp)
-        if days <= 60:
+        if days <= 30:
             alerts.append({
                 "section": "📜 عقود",
                 "line": f"{icon(days)} {c.get('contractName','عقد')}",

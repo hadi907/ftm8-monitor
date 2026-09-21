@@ -1001,11 +1001,11 @@ function showToast(msg,color="#10b981"){
 }
 function getNotifs(){
   const list=[];
-  D.documents.forEach(d=>{if(d.renewed)return;const days=du(d.expiryDate);if(days<=(+d.notifyDays||30))list.push({name:d.name,type:d.type,expiryDate:d.expiryDate,daysLeft:days,icon:"📋"});});
+  D.documents.forEach(d=>{if(d.renewed)return;const days=du(d.expiryDate);if(days<=30)list.push({name:d.name,type:d.type,expiryDate:d.expiryDate,daysLeft:days,icon:"📋"});});
   D.deposits.forEach(d=>{const days=du(d.endDate);if(days<=30)list.push({name:"وديعة: "+d.name,type:"وديعة",expiryDate:d.endDate,daysLeft:days,icon:"💰"});});
-  D.cars.forEach(c=>{const days=du(c.insuranceExpiry);if(days<=60)list.push({name:"تأمين: "+c.carName,type:"سيارة",expiryDate:c.insuranceExpiry,daysLeft:days,icon:"🚗"});});
-  D.residencies.forEach(r=>{const days=du(r.expiryDate);if(days<=60)list.push({name:"إقامة: "+r.name,type:"إقامة",expiryDate:r.expiryDate,daysLeft:days,icon:"🪪"});});
-  D.contracts.forEach(c=>{const days=du(c.endDate);if(days<=60)list.push({name:"عقد: "+c.contractName,type:"عقد",expiryDate:c.endDate,daysLeft:days,icon:"📜"});});
+  D.cars.forEach(c=>{const days=du(c.insuranceExpiry);if(days<=30)list.push({name:"تأمين: "+c.carName,type:"سيارة",expiryDate:c.insuranceExpiry,daysLeft:days,icon:"🚗"});});
+  D.residencies.forEach(r=>{const days=du(r.expiryDate);if(days<=30)list.push({name:"إقامة: "+r.name,type:"إقامة",expiryDate:r.expiryDate,daysLeft:days,icon:"🪪"});});
+  D.contracts.forEach(c=>{const days=du(c.endDate);if(days<=30)list.push({name:"عقد: "+c.contractName,type:"عقد",expiryDate:c.endDate,daysLeft:days,icon:"📜"});});
   (D.cases||[]).filter(c=>c.caseStatus==="مفتوح"&&c.nextSession).forEach(c=>{
     const days=du(c.nextSession);
     if(days<=30)list.push({name:"قضية: "+(c.caseNumber||c.autoNumber||""),type:c.caseType||"قضية",expiryDate:c.nextSession,daysLeft:days,icon:"⚖️"});
@@ -1811,7 +1811,7 @@ function rdDash(){
     ...D.documents.filter(d=>!d.renewed&&du(d.expiryDate)<=30).map(d=>({name:d.name,icon:TI[d.type]||"📋",expiryDate:d.expiryDate})),
     ...D.deposits.filter(d=>d.endDate&&du(d.endDate)<=30).map(d=>({name:"وديعة: "+d.name,icon:"💰",expiryDate:d.endDate})),
     ...D.cars.filter(c=>c.insuranceExpiry&&du(c.insuranceExpiry)<=30).map(c=>({name:"تأمين: "+c.carName,icon:"🚗",expiryDate:c.insuranceExpiry})),
-    ...D.residencies.filter(r=>r.expiryDate&&du(r.expiryDate)<=60).map(r=>({name:"إقامة: "+r.name,icon:"🪪",expiryDate:r.expiryDate})),
+    ...D.residencies.filter(r=>r.expiryDate&&du(r.expiryDate)<=30).map(r=>({name:"إقامة: "+r.name,icon:"🪪",expiryDate:r.expiryDate})),
     ...D.contracts.filter(c=>c.endDate&&du(c.endDate)<=30).map(c=>({name:"عقد: "+c.contractName,icon:"📜",expiryDate:c.endDate})),
     ...(D.cases||[]).filter(c=>c.caseStatus==="مفتوح"&&c.nextSession&&du(c.nextSession)<=30).map(c=>({name:"قضية: "+(c.caseNumber||c.autoNumber||""),icon:"⚖️",expiryDate:c.nextSession}))
   ].sort((a,b)=>du(a.expiryDate)-du(b.expiryDate));
@@ -2740,7 +2740,7 @@ function rdDocs(){
     ...D.contracts.map(c=>({name:"عقد: "+c.contractName,icon:"📜",expiry:c.endDate})),
     ...D.documents.filter(d=>!d.renewed).map(d=>({name:d.name,icon:TI[d.type]||"📋",expiry:d.expiryDate})),
     ...(D.cases||[]).filter(c=>c.caseStatus==="مفتوح"&&c.nextSession).map(c=>({name:"قضية: "+(c.caseNumber||c.autoNumber||""),icon:"⚖️",expiry:c.nextSession}))
-  ].filter(x=>x.expiry&&du(x.expiry)<=60).sort((a,b)=>du(a.expiry)-du(b.expiry));
+  ].filter(x=>x.expiry&&du(x.expiry)<=30).sort((a,b)=>du(a.expiry)-du(b.expiry));
 
   const tabs=[
     {id:"cars",label:"🚗 السيارات",count:D.cars.length},
@@ -4517,7 +4517,7 @@ function rdReports(){
   const monthNet=monthSalary!=null?monthSalary+allTransfersRpt+allDepositsRpt-te:null;
   const savingsRate=monthSalary>0&&monthNet!=null?((monthNet/monthSalary)*100).toFixed(1):null;
 
-  const urgentDocs=D.documents.filter(d=>!d.renewed&&du(d.expiryDate)<=60);
+  const urgentDocs=D.documents.filter(d=>!d.renewed&&du(d.expiryDate)<=30);
   const catTotals=CATS.map(cat=>({cat,total:D.expenses.filter(e=>e.category===cat).reduce((s,e)=>s+(+e.amount||0),0),items:D.expenses.filter(e=>e.category===cat)})).filter(x=>x.total>0).sort((a,b)=>b.total-a.total);
 
   let yearOpts="";
@@ -4631,7 +4631,7 @@ function rdReports(){
 
       <!-- Urgent Docs -->
       ${urgentDocs.length>0?`<div class="card" style="border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.04);cursor:pointer" onclick="showDocsDetail()">
-        <div style="display:flex;justify-content:space-between"><div class="card-title" style="margin:0;color:#fca5a5">⚠️ وثائق تنتهي خلال 60 يوم</div><span style="font-size:11px;color:#475569">›</span></div>
+        <div style="display:flex;justify-content:space-between"><div class="card-title" style="margin:0;color:#fca5a5">⚠️ وثائق تنتهي خلال 30 يوم</div><span style="font-size:11px;color:#475569">›</span></div>
         ${urgentDocs.slice(0,4).map(d=>{const days=du(d.expiryDate);return`<div style="display:flex;justify-content:space-between;margin-top:8px"><span style="font-size:12px">${TI[d.type]} ${esc(d.name)}</span><span style="color:${sc(days)};font-weight:700;font-size:12px">${sl(days)}</span></div>`;}).join("")}
       </div>`:""}
 
@@ -4897,9 +4897,9 @@ function showDepositsDetail(){
   showDetailModal("تفاصيل الودائع",html,`📊 الودائع\n\n${D.deposits.map(d=>`• ${d.name}: ${fmt(d.amount)} | فائدة: ${fmt(d.expectedReturn)}`).join("\n")}`);
 }
 function showDocsDetail(){
-  const urgentDocs=D.documents.filter(d=>!d.renewed&&du(d.expiryDate)<=60);
+  const urgentDocs=D.documents.filter(d=>!d.renewed&&du(d.expiryDate)<=30);
   let html="";urgentDocs.forEach(doc=>{const days=du(doc.expiryDate);html+=`<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;margin-bottom:9px;border-right:3px solid ${sc(days)}"><div style="display:flex;justify-content:space-between"><p style="margin:0;font-size:14px;font-weight:700">${TI[doc.type]} ${esc(doc.name)}</p><span style="color:${sc(days)};font-weight:800">${sl(days)}</span></div><p style="margin:4px 0 0;font-size:12px;color:#64748b">${doc.type} · ${doc.expiryDate}</p></div>`;});
-  showDetailModal(`وثائق تنتهي خلال 60 يوم (${urgentDocs.length})`,html,`📊 وثائق تنتهي قريباً\n\n${urgentDocs.map(d=>`• ${d.name} — ${sl(du(d.expiryDate))}`).join("\n")}`);
+  showDetailModal(`وثائق تنتهي خلال 30 يوم (${urgentDocs.length})`,html,`📊 وثائق تنتهي قريباً\n\n${urgentDocs.map(d=>`• ${d.name} — ${sl(du(d.expiryDate))}`).join("\n")}`);
 }
 function shareFullReport(){
   const txt=buildMonthlyReport(MONTHS[reportMonth],reportYear,reportMonth);
@@ -5349,7 +5349,7 @@ function checkAutoAlerts(){
   D.documents.forEach(doc=>{
     if(doc.renewed) return;
     const days=du(doc.expiryDate);
-    const notifyAt=+(doc.notifyDays||30);
+    const notifyAt=30;
     if(days<=notifyAt){
       const icon=days<0?"🔴":days<=7?"🟠":"🟡";
       alerts.push(`${icon} وثيقة: ${doc.name}\n   📅 ${doc.expiryDate}\n   ⏰ ${sl(days)}`);
@@ -5360,14 +5360,14 @@ function checkAutoAlerts(){
   D.cars.forEach(c=>{
     if(!c.insuranceExpiry) return;
     const days=du(c.insuranceExpiry);
-    if(days<=60){const icon=days<0?"🔴":days<=7?"🟠":"🟡";alerts.push(`${icon} 🚗 تأمين: ${c.carName}\n   📅 ${c.insuranceExpiry}\n   ⏰ ${sl(days)}`);}
+    if(days<=30){const icon=days<0?"🔴":days<=7?"🟠":"🟡";alerts.push(`${icon} 🚗 تأمين: ${c.carName}\n   📅 ${c.insuranceExpiry}\n   ⏰ ${sl(days)}`);}
   });
 
   // 1c. الإقامات
   D.residencies.forEach(r=>{
     if(!r.expiryDate) return;
     const days=du(r.expiryDate);
-    if(days<=60){const icon=days<0?"🔴":days<=7?"🟠":"🟡";alerts.push(`${icon} 🪪 إقامة: ${r.name}\n   📅 ${r.expiryDate}\n   ⏰ ${sl(days)}`);}
+    if(days<=30){const icon=days<0?"🔴":days<=7?"🟠":"🟡";alerts.push(`${icon} 🪪 إقامة: ${r.name}\n   📅 ${r.expiryDate}\n   ⏰ ${sl(days)}`);}
   });
 
   // 1d. العقود

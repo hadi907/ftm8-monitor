@@ -3636,6 +3636,23 @@
       "payment": "نقد",
       "cashId": "mucsq2k7jj9",
       "img": ""
+    },
+    {
+      "id": "mucsrc6tf4q",
+      "invNum": "INV-164",
+      "date": "2026-09-21",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "دارسينا اسود",
+      "category": "",
+      "qty": 29,
+      "price": 2.5,
+      "discount": 0,
+      "total": 72.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mucsrc6tqz0",
+      "img": ""
     }
   ],
   "EXP": [
@@ -8206,6 +8223,19 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: دارسينا متنوع - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mucsrc6tqz0",
+      "date": "2026-09-21",
+      "type": "وارد",
+      "amount": 72.5,
+      "paid": 72.5,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-164",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: دارسينا اسود - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -8519,5 +8549,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-22T14:55:22.114Z"
+  "date": "2026-09-22T14:56:21.240Z"
 }

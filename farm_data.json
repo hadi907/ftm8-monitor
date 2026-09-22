@@ -178,7 +178,7 @@
       "cost": 0,
       "price": 5,
       "qty": 39,
-      "remaining": 34,
+      "remaining": 28,
       "minStock": 5,
       "date": "2026-04-05",
       "color": "",
@@ -3787,6 +3787,23 @@
       "location": "محل",
       "payment": "نقد",
       "cashId": "mud4q4vcw8a",
+      "img": ""
+    },
+    {
+      "id": "mud4rnvd7s6",
+      "invNum": "INV-171",
+      "date": "2026-09-22",
+      "client": "نقدا",
+      "invItemId": "mnm5s16sczq",
+      "product": "اناناس",
+      "category": "داخلي",
+      "qty": 6,
+      "price": 5,
+      "discount": 6,
+      "total": 24,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mud4rnvjors",
       "img": ""
     }
   ],
@@ -8452,6 +8469,19 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mud4rnvjors",
+      "date": "2026-09-22",
+      "type": "وارد",
+      "amount": 24,
+      "paid": 24,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-171",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: اناناس - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -8765,5 +8795,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-22T20:31:20.488Z"
+  "date": "2026-09-22T20:32:31.785Z"
 }

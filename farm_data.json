@@ -3769,6 +3769,7 @@
       "invNum": "INV-169",
       "date": "2026-09-22",
       "client": "نقدا",
+      "client2": "ابوادم",
       "invItemId": "",
       "product": "متنوع",
       "category": "",
@@ -3778,7 +3779,7 @@
       "total": 20,
       "location": "محل",
       "payment": "نقد",
-      "cashId": "mud4oyd3f0z",
+      "cashId": "mud5l1gzojg",
       "img": ""
     },
     {
@@ -8458,19 +8459,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mud4oyd3f0z",
-      "date": "2026-09-22",
-      "type": "وارد",
-      "amount": 20,
-      "paid": 20,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-169",
-      "month": "سبتمبر ٢٠٢٦",
-      "notes": "مبيعة: متنوع - نقدا",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mud4q4vcw8a",
       "date": "2026-09-22",
       "type": "وارد",
@@ -8520,6 +8508,19 @@
       "ref": "INV-160",
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: زهور التهاني - نقدا",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "mud5l1gzojg",
+      "date": "2026-09-22",
+      "type": "وارد",
+      "amount": 20,
+      "paid": 20,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-169",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - نقدا",
       "autoFrom": "sale"
     }
   ],
@@ -8834,5 +8835,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-22T20:54:53.248Z"
+  "date": "2026-09-22T20:55:22.442Z"
 }

@@ -512,7 +512,7 @@
       "cost": 0,
       "price": 181,
       "qty": 35,
-      "remaining": 10,
+      "remaining": 0,
       "minStock": 5,
       "date": "2026-05-03",
       "color": "",
@@ -564,7 +564,7 @@
       "sku": "1023",
       "cost": 0,
       "price": 2,
-      "qty": 30,
+      "qty": 40,
       "remaining": 0,
       "minStock": 5,
       "date": "2026-05-09",
@@ -578,6 +578,14 @@
       "batches": [
         {
           "date": "2026-06-12",
+          "qty": 10,
+          "cost": "0.000",
+          "price": "2.000",
+          "supplier": "",
+          "notes": ""
+        },
+        {
+          "date": "2026-09-22",
           "qty": 10,
           "cost": "0.000",
           "price": "2.000",
@@ -3607,6 +3615,7 @@
       "invNum": "INV-160",
       "date": "2026-09-19",
       "client": "نقدا",
+      "client2": "زهور التهاني",
       "invItemId": "",
       "product": "زهور التهاني",
       "category": "",
@@ -3616,7 +3625,7 @@
       "total": 243,
       "location": "محل",
       "payment": "نقد",
-      "cashId": "muctq5bjwrz",
+      "cashId": "mud5kexq4ao",
       "img": ""
     },
     {
@@ -8410,19 +8419,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "muctq5bjwrz",
-      "date": "2026-09-19",
-      "type": "وارد",
-      "amount": 243,
-      "paid": 243,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-160",
-      "month": "سبتمبر ٢٠٢٦",
-      "notes": "مبيعة: زهور التهاني - نقدا",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mud4a2bko1f",
       "date": "2026-09-22",
       "type": "وارد",
@@ -8511,6 +8507,19 @@
       "ref": "INV-172",
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: عطره - نقدا",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "mud5kexq4ao",
+      "date": "2026-09-19",
+      "type": "وارد",
+      "amount": 243,
+      "paid": 243,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-160",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: زهور التهاني - نقدا",
       "autoFrom": "sale"
     }
   ],
@@ -8825,5 +8834,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-22T20:38:23.431Z"
+  "date": "2026-09-22T20:54:53.248Z"
 }

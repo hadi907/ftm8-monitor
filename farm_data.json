@@ -3653,6 +3653,23 @@
       "payment": "نقد",
       "cashId": "mucsrc6tqz0",
       "img": ""
+    },
+    {
+      "id": "mucss1zgmbt",
+      "invNum": "INV-165",
+      "date": "2026-09-21",
+      "client": "نقدا",
+      "invItemId": "",
+      "product": "متنوع",
+      "category": "",
+      "qty": 1,
+      "price": 1.5,
+      "discount": 0,
+      "total": 1.5,
+      "location": "محل",
+      "payment": "نقد",
+      "cashId": "mucss1zgt3l",
+      "img": ""
     }
   ],
   "EXP": [
@@ -8236,6 +8253,19 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: دارسينا اسود - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mucss1zgt3l",
+      "date": "2026-09-21",
+      "type": "وارد",
+      "amount": 1.5,
+      "paid": 1.5,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "INV-165",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -8549,5 +8579,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-22T14:56:21.240Z"
+  "date": "2026-09-22T14:56:54.667Z"
 }

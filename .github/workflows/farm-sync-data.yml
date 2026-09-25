@@ -40,23 +40,25 @@ jobs:
 
           print(f"🔍 قراءة البيانات من JSONBin...")
 
-          # ── إعادة محاولة تلقائية حتى 3 مرات لو تأخر رد JSONBin أو انقطع الاتصال ──
+          # ── إعادة محاولة تلقائية حتى 4 مرات لو تأخر رد JSONBin أو انقطع الاتصال ──
+          # (مهلة الاتصال 15ث + مهلة القراءة 60ث بدل 20ث)
+          MAX_TRIES = 4
           res = None
           last_err = None
-          for attempt in range(1, 4):
+          for attempt in range(1, MAX_TRIES + 1):
               try:
-                  res = requests.get(url, headers={'X-Master-Key': key}, timeout=20)
-                  print(f"Status: {res.status_code} (محاولة {attempt}/3)")
+                  res = requests.get(url, headers={'X-Master-Key': key}, timeout=(15, 60))
+                  print(f"Status: {res.status_code} (محاولة {attempt}/{MAX_TRIES})")
                   if res.status_code == 200:
                       break
                   last_err = f"{res.status_code} — {res.text[:200]}"
                   res = None
               except Exception as e:
                   last_err = str(e)
-                  print(f"⚠️ محاولة {attempt}/3 فشلت: {e}")
+                  print(f"⚠️ محاولة {attempt}/{MAX_TRIES} فشلت: {e}")
                   res = None
-              if attempt < 3:
-                  time.sleep(5 * attempt)
+              if attempt < MAX_TRIES:
+                  time.sleep(10 * attempt)
 
           if res is not None:
               data = res.json().get('record', {})
@@ -84,9 +86,11 @@ jobs:
                   json.dump(output, f, ensure_ascii=False, indent=2)
               print("✅ تم حفظ farm_data.json بمفاتيح صحيحة (SALES, INV, ...)")
           else:
-              print(f"⚠️ JSONBin غير متاح بعد 3 محاولات: {last_err}")
-              print("سيتم الاحتفاظ بالملف القديم")
-              raise SystemExit(1)
+              # انقطاع مؤقت من JSONBin — لا نعتبره فشلاً: الملف القديم يبقى كما هو
+              # والمزامنة التالية (بعد ساعة) تحدّثه تلقائياً
+              print(f"::warning::JSONBin غير متاح مؤقتاً بعد {MAX_TRIES} محاولات: {last_err}")
+              print("سيتم الاحتفاظ بالملف القديم بدون تغيير — المزامنة القادمة ستحدّثه")
+              raise SystemExit(0)
           PYEOF
 
       - name: 💾 Commit farm_data.json

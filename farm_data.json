@@ -2706,6 +2706,25 @@
       "notes": "",
       "cashId": "mugl2p0kknv",
       "maClass": "ومض"
+    },
+    {
+      "id": "muk7pwppv8g",
+      "date": "2026-09-27",
+      "type": "أخرى",
+      "desc": "ياسمين ازرق",
+      "amount": 6,
+      "paid": 6,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "سبتمبر 2026",
+      "notes": "",
+      "cashId": "muk7pwpp8kn",
+      "maClass": "نقدا"
     }
   ],
   "DEBTS": [
@@ -2992,5 +3011,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-09-27T18:02:55.086Z"
+  "ts": "2026-09-27T21:07:39.650Z",
+  "__last_sale_id__": "mtg5vzf26eb"
 }

@@ -3536,7 +3536,8 @@
       "id": "mu8tw6j6kcj",
       "invNum": "INV-154",
       "date": "2026-09-17",
-      "client": "نقدا",
+      "client": "ومض",
+      "client2": "",
       "invItemId": "",
       "product": "متنوع",
       "category": "داخلي",
@@ -3545,8 +3546,8 @@
       "discount": 0,
       "total": 9,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "mu8tw6j6d3z",
+      "payment": "ومض",
+      "cashId": "mulqj1dui3c",
       "img": ""
     },
     {
@@ -5215,6 +5216,46 @@
       "month": "سبتمبر 2026",
       "notes": "",
       "cashId": "muk7pwpp8kn",
+      "img": "",
+      "maClass": "نقدا"
+    },
+    {
+      "id": "mulfts81q0e",
+      "date": "2026-09-28",
+      "type": "اسمدة",
+      "desc": "رمل سافي",
+      "amount": 20,
+      "paid": 20,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "سبتمبر 2026",
+      "notes": "",
+      "cashId": "mulfts825tj",
+      "img": "",
+      "maClass": "نقدا"
+    },
+    {
+      "id": "mulfwhtu4si",
+      "date": "2026-09-28",
+      "type": "أخرى",
+      "desc": "احواض حجم 14 عدد 3000",
+      "amount": 60,
+      "paid": 60,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "معرفي",
+      "invRef": "",
+      "month": "سبتمبر 2026",
+      "notes": "",
+      "cashId": "mulfwhtuyur",
       "img": "",
       "maClass": "نقدا"
     }
@@ -8484,19 +8525,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mu8tw6j6d3z",
-      "date": "2026-09-17",
-      "type": "وارد",
-      "amount": 9,
-      "paid": 9,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-154",
-      "month": "سبتمبر ٢٠٢٦",
-      "notes": "مبيعة: متنوع - نقدا",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mu8txaidpq9",
       "date": "2026-09-17",
       "type": "وارد",
@@ -8924,6 +8952,45 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: صبار تايجر - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mulfts825tj",
+      "date": "2026-09-28",
+      "type": "صادر",
+      "amount": 20,
+      "paid": 20,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "—",
+      "month": "سبتمبر 2026",
+      "notes": "مصروف: اسمدة - رمل سافي",
+      "autoFrom": "expense"
+    },
+    {
+      "id": "mulfwhtuyur",
+      "date": "2026-09-28",
+      "type": "صادر",
+      "amount": 60,
+      "paid": 60,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "—",
+      "month": "سبتمبر 2026",
+      "notes": "مصروف: أخرى - احواض حجم 14 عدد 3000 - معرفي",
+      "autoFrom": "expense"
+    },
+    {
+      "id": "mulqj1dui3c",
+      "date": "2026-09-17",
+      "type": "وارد",
+      "amount": 9,
+      "paid": 9,
+      "remaining": 0,
+      "payment": "ومض",
+      "ref": "INV-154",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - ومض",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -9237,5 +9304,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-28T16:02:16.958Z"
+  "date": "2026-09-28T21:03:50.389Z"
 }

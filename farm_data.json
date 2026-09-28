@@ -3626,7 +3626,8 @@
       "id": "mu8u3gjxi5b",
       "invNum": "INV-159",
       "date": "2026-09-17",
-      "client": "نقدا",
+      "client": "ومض",
+      "client2": "",
       "invItemId": "",
       "product": "زعتر",
       "category": "داخلي",
@@ -3635,8 +3636,8 @@
       "discount": 0,
       "total": 7.5,
       "location": "محل",
-      "payment": "نقد",
-      "cashId": "mu8u3gjxggh",
+      "payment": "ومض",
+      "cashId": "mulqlrpnxsb",
       "img": ""
     },
     {
@@ -8529,19 +8530,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mu8u3gjxggh",
-      "date": "2026-09-17",
-      "type": "وارد",
-      "amount": 7.5,
-      "paid": 7.5,
-      "remaining": 0,
-      "payment": "نقد",
-      "ref": "INV-159",
-      "month": "سبتمبر ٢٠٢٦",
-      "notes": "مبيعة: زعتر - نقدا",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mucs6lg7wzw",
       "date": "2026-09-19",
       "type": "صادر",
@@ -8995,6 +8983,19 @@
       "month": "سبتمبر ٢٠٢٦",
       "notes": "مبيعة: نعناع - ومض",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mulqlrpnxsb",
+      "date": "2026-09-17",
+      "type": "وارد",
+      "amount": 7.5,
+      "paid": 7.5,
+      "remaining": 0,
+      "payment": "ومض",
+      "ref": "INV-159",
+      "month": "سبتمبر ٢٠٢٦",
+      "notes": "مبيعة: زعتر - ومض",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -9308,5 +9309,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-09-28T21:05:25.435Z"
+  "date": "2026-09-28T21:05:57.799Z"
 }

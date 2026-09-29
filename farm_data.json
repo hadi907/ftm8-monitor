@@ -2770,6 +2770,25 @@
       "notes": "",
       "cashId": "mulfwhtuyur",
       "maClass": "نقدا"
+    },
+    {
+      "id": "mun3ofamle2",
+      "date": "2026-09-29",
+      "type": "رواتب",
+      "desc": "بونص نزمول 20 + رواتب 420+50 كهرباء وماء",
+      "amount": 490,
+      "paid": 490,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "سبتمبر 2026",
+      "notes": "",
+      "cashId": "mun3ofamvb6",
+      "maClass": "نقدا"
     }
   ],
   "DEBTS": [
@@ -3056,5 +3075,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-09-29T15:24:12.993Z"
+  "ts": "2026-09-29T20:28:56.999Z"
 }

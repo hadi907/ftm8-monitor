@@ -44,6 +44,9 @@ NEWS_SOURCES = [
     {"name": "CNBC عربية",       "url": "https://arabic.cnbc.com/rss/feeds/",                                                       "cat": "economy", "lang": "ar"},
     # 💻 تقنية
     {"name": "تقنية",            "url": "https://news.google.com/rss/search?q=تقنية+ذكاء+اصطناعي&hl=ar&gl=KW&ceid=KW:ar",         "cat": "tech",    "lang": "ar"},
+    # 🤖 الذكاء الاصطناعي (أحدث الأخبار — آخر 24 ساعة)
+    {"name": "ذكاء اصطناعي",     "url": "https://news.google.com/rss/search?q=الذكاء+الاصطناعي+when:1d&hl=ar&gl=KW&ceid=KW:ar",     "cat": "ai",      "lang": "ar"},
+    {"name": "AI News",          "url": "https://news.google.com/rss/search?q=artificial+intelligence+when:1d&hl=en-US&gl=US&ceid=US:en", "cat": "ai", "lang": "en"},
 ]
 
 # ─── ترجمة مجانية (Google + احتياطي MyMemory) ─────────────────
@@ -206,7 +209,7 @@ def get_news():
     kw_sources = [s for s in NEWS_SOURCES if s["cat"] == "kw"]
     kw_items = collect_section(kw_sources, 5, 15)
     if kw_items:
-        lines = ["\n🇰🇼 *أخرار الكويت*"]
+        lines = ["\n🇰🇼 *أخبار الكويت*"]
         for i, (src, title, lang) in enumerate(kw_items[:15], 1):
             lines.append(f"{i}. {title} _{src}_")
         sections.append("\n".join(lines))
@@ -228,14 +231,15 @@ def get_news():
         sections.append("\n".join(lines))
 
     categories = [
-        ("world",   "🌍 *عالمية*"),
-        ("fox",     "🦊*Fox News*"),
-        ("economy", "💰 *اقتصاد*"),
-        ("tech",    "💻 *تقنية*"),
+        ("world",   "🌍 *عالمية*",            2),
+        ("fox",     "🦊*Fox News*",           2),
+        ("economy", "💰 *اقتصاد*",            2),
+        ("tech",    "💻 *تقنية*",             2),
+        ("ai",      "🤖 *الذكاء الاصطناعي*",  5),
     ]
-    for cat, label in categories:
+    for cat, label, count in categories:
         cat_sources = [s for s in NEWS_SOURCES if s["cat"] == cat]
-        items = collect_section(cat_sources, 3, 2)
+        items = collect_section(cat_sources, max(3, count), count)
 
         en_indices = [i for i, (_, _, lang) in enumerate(items) if lang == "en"]
         if en_indices:
@@ -248,7 +252,7 @@ def get_news():
 
         if items:
             lines = [f"\n{label}"]
-            for i, (src, title, lang) in enumerate(items[:2], 1):
+            for i, (src, title, lang) in enumerate(items[:count], 1):
                 lines.append(f"{i}. {title} _{src}_")
             sections.append("\n".join(lines))
 

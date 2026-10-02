@@ -4042,6 +4042,24 @@
       "payment": "نقد",
       "cashId": "mur03vou1ua",
       "img": ""
+    },
+    {
+      "id": "mur1gi25m8h",
+      "invNum": "INV-183",
+      "date": "2026-10-02",
+      "client": "",
+      "client2": "ايمن",
+      "invItemId": "",
+      "product": "متنوع",
+      "category": "",
+      "qty": 1,
+      "price": 105,
+      "discount": 0,
+      "total": 105,
+      "location": "محل",
+      "payment": "معلق",
+      "cashId": "mur1gi25zre",
+      "img": ""
     }
   ],
   "EXP": [
@@ -9060,6 +9078,19 @@
       "month": "أكتوبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mur1gi25zre",
+      "date": "2026-10-02",
+      "type": "وارد",
+      "amount": 105,
+      "paid": 105,
+      "remaining": 0,
+      "payment": "معلق",
+      "ref": "INV-183",
+      "month": "أكتوبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -9373,5 +9404,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-10-02T13:30:50.250Z"
+  "date": "2026-10-02T14:08:38.689Z"
 }

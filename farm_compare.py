@@ -291,8 +291,10 @@ def send_email(html_body, diff_count):
             srv.login(EMAIL_FROM, EMAIL_PASS)
             srv.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
         print(f"✅ تم إرسال التقرير")
+        return True
     except Exception as e:
         print(f"❌ فشل Gmail: {e}")
+        return False
 
 if __name__ == '__main__':
     print(f"🌿 farm_compare.py — {TODAY} {datetime.datetime.now().strftime('%H:%M')}")
@@ -313,5 +315,21 @@ if __name__ == '__main__':
     print(f"📅 تصفية للشهر الحالي ({MONTH_LABEL}): تطبيق {len(app_sales)}/{app_all_count} | XLSX {len(xlsx_rows)}/{xlsx_all_count}")
     result = compare(app_sales, xlsx_rows)
     print(f"📊 تطبيق={result['app_total']:.3f} | XLSX (بالنطاق)={result['xlsx_credit_in_range']:.3f} | فارق={result['diff_total']:+.3f} | فوارق حقيقية={len(result['diffs'])} | خارج النطاق (غير محسوبة كفارق)={len(result['out_of_range'])}")
+    # ── الإرسال فقط عند وجود فوارق، ومرة واحدة لكل مجموعة فوارق (بطلب هادي 2026-10-03) ──
+    if not result['diffs']:
+        print("✅ لا توجد فوارق — لن يُرسل إيميل")
+        exit(0)
+    sig_src = json.dumps([(d['ref'], d['desc'], d['type'], d['diff']) for d in result['diffs']], ensure_ascii=False, sort_keys=True)
+    sig = TODAY + '|' + sig_src
+    SIG_FILE = os.environ.get('SIG_FILE', '.compare_state/last_sent.txt')
+    try:
+        last = open(SIG_FILE, encoding='utf-8').read()
+    except Exception:
+        last = ''
+    if last == sig:
+        print("ℹ️ نفس الفوارق أُرسلت اليوم مسبقاً — لن يُكرَّر الإيميل")
+        exit(0)
     html = build_html(result)
-    send_email(html, len(result['diffs']))
+    if send_email(html, len(result['diffs'])):
+        os.makedirs(os.path.dirname(SIG_FILE) or '.', exist_ok=True)
+        open(SIG_FILE, 'w', encoding='utf-8').write(sig)

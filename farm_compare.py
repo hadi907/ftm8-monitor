@@ -315,19 +315,20 @@ if __name__ == '__main__':
     print(f"📅 تصفية للشهر الحالي ({MONTH_LABEL}): تطبيق {len(app_sales)}/{app_all_count} | XLSX {len(xlsx_rows)}/{xlsx_all_count}")
     result = compare(app_sales, xlsx_rows)
     print(f"📊 تطبيق={result['app_total']:.3f} | XLSX (بالنطاق)={result['xlsx_credit_in_range']:.3f} | فارق={result['diff_total']:+.3f} | فوارق حقيقية={len(result['diffs'])} | خارج النطاق (غير محسوبة كفارق)={len(result['out_of_range'])}")
-    # ── الإرسال فقط عند وجود فوارق، ومرة واحدة لكل مجموعة فوارق (بطلب هادي 2026-10-03) ──
-    if not result['diffs']:
-        print("✅ لا توجد فوارق — لن يُرسل إيميل")
-        exit(0)
-    sig_src = json.dumps([(d['ref'], d['desc'], d['type'], d['diff']) for d in result['diffs']], ensure_ascii=False, sort_keys=True)
-    sig = TODAY + '|' + sig_src
+    # ── الإرسال فقط عند حدوث تغيير بنتيجة المقارنة (فوارق أو تطابق) — بطلب هادي 2026-10-03 ──
+    sig = json.dumps({
+        'month': CURRENT_MONTH,
+        'app_total': result['app_total'], 'app_count': result['app_count'],
+        'xlsx_total': result['xlsx_credit_in_range'], 'xlsx_count': result['xlsx_count'],
+        'diffs': [(d['ref'], d['desc'], d['type'], d['diff']) for d in result['diffs']],
+    }, ensure_ascii=False, sort_keys=True)
     SIG_FILE = os.environ.get('SIG_FILE', '.compare_state/last_sent.txt')
     try:
         last = open(SIG_FILE, encoding='utf-8').read()
     except Exception:
         last = ''
     if last == sig:
-        print("ℹ️ نفس الفوارق أُرسلت اليوم مسبقاً — لن يُكرَّر الإيميل")
+        print("ℹ️ لا تغيير منذ آخر إيميل — لن يُرسل إيميل")
         exit(0)
     html = build_html(result)
     if send_email(html, len(result['diffs'])):

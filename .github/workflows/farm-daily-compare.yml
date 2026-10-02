@@ -23,6 +23,13 @@ jobs:
       - name: 📦 Install dependencies
         run: pip install requests openpyxl pandas
 
+      - name: 💾 Restore last-sent state
+        uses: actions/cache/restore@v4
+        with:
+          path: .compare_state
+          key: compare-state-${{ github.run_id }}
+          restore-keys: compare-state-
+
       - name: 🔍 Run comparison & send report
         env:
           XLSX_PATH:  Farm_Account.xlsx
@@ -31,3 +38,11 @@ jobs:
           EMAIL_TO:   hadi@ftm8.com
           GH_TOKEN:   ${{ secrets.GH_TOKEN }}
         run: python farm_compare.py
+
+
+      - name: 💾 Save last-sent state
+        if: always() && hashFiles('.compare_state/**') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .compare_state
+          key: compare-state-${{ github.run_id }}

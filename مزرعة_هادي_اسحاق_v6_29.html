@@ -489,6 +489,7 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
       <button class="chip" onclick="setSF('خارجي')">🌳 خارجي</button>
       <button class="chip" onclick="setSF('نقد')">💵 نقد</button>
       <button class="chip" onclick="setSF('بطاقة')">💳 بطاقة</button>
+      <button class="chip" onclick="setSF('معلق')" style="color:#e65100;border-color:#e65100">⏳ معلق</button>
     </div>
     <div class="twrap"><table>
       <thead><tr><th>#</th><th>رقم الفاتورة</th><th>التاريخ</th><th>العميل</th><th>المنتج</th><th>الفئة</th><th>الكمية</th><th>السعر</th><th>الخصم</th><th>الإجمالي</th><th>مكان البيع</th><th>طريقة الدفع</th><th>المخزون بعد البيع</th><th>إجراء</th></tr></thead>
@@ -812,7 +813,7 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
       <div style="margin-top:14px;background:#f8fff8;border:1.5px solid var(--g5);border-radius:10px;padding:13px 16px">
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">
           <label style="font-weight:700;color:var(--g2);font-size:0.85rem">💳 طريقة الدفع:</label>
-          <select id="iv-pay" style="border:1.5px solid var(--border);border-radius:6px;padding:5px 10px;font-family:inherit;font-size:0.82rem"><option>نقد</option><option>نقدا</option><option>بطاقة</option><option>تحويل</option><option>ومض</option></select>
+          <select id="iv-pay" style="border:1.5px solid var(--border);border-radius:6px;padding:5px 10px;font-family:inherit;font-size:0.82rem"><option>نقد</option><option>نقدا</option><option>بطاقة</option><option>تحويل</option><option>ومض</option><option value="معلق">⏳ معلق (لم يُستلم)</option></select>
           <div style="display:flex;gap:0;border:1.5px solid var(--border);border-radius:7px;overflow:hidden">
             <button id="iv-pay-full-btn" onclick="setPayMode('full')" style="padding:6px 14px;font-family:inherit;font-size:0.78rem;font-weight:700;background:var(--g3);color:#fff;border:none;cursor:pointer">✅ دفع كامل</button>
             <button id="iv-pay-part-btn" onclick="setPayMode('part')" style="padding:6px 14px;font-family:inherit;font-size:0.78rem;font-weight:700;background:#fff;color:var(--g3);border:none;cursor:pointer;border-right:1.5px solid var(--border)">🔄 دفع جزئي (عربون)</button>
@@ -1175,15 +1176,21 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
   <!-- KPI SUMMARY: بيع نقداً + بيع ومض + إجمالي المبيعات -->
   <div class="kpi-grid" id="ma-kpis" style="margin-top:18px"></div>
 
+
   <!-- تصنيف المصاريف صف 2: نقدا + ومض + إجمالي المصروفات — يُقرأ من نفس بيانات #ma-class-summary أسفل الصفحة، تقرير مستقل تماماً -->
   <div class="kpi-grid" id="ma-class-summary-top" style="margin-top:14px"></div>
 
-  <!-- تصنيف المصاريف صف 3: مصروفات الشركاء + إجمالي — نفس المصدر أيضاً -->
-  <div class="kpi-grid" id="ma-class-partners-top" style="margin-top:14px"></div>
-
-  <!-- CASH / WAMD POOL BALANCES + إجمالي المتبقي حالياً (مرتبطان بفلتر الشهر أعلاه — الشهر كاملاً من يوم 1) -->
+  <!-- صف 3: الباقي نقدا + الباقي ومض + إجمالي المتبقي حالياً (مرتبطان بفلتر الشهر أعلاه — الشهر كاملاً من يوم 1) — ترتيب 2026-09-29 -->
   <div id="ma-pools-box" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px"></div>
 
+  <!-- مصروفات الشركاء + إجمالي — نفس المصدر أيضاً (نُقل بعد صف الباقي 2026-09-29، بدون أي تغيير بالحساب) -->
+  <div class="kpi-grid" id="ma-class-partners-top" style="margin-top:14px"></div>
+
+  <!-- ⏳ تفاصيل المبيعات المعلقة (2026-10-02) — مجمّعة حسب الفاتورة -->
+  <div class="tcard" id="ma-pending-card" style="margin-top:14px;display:none;border:2px solid #e65100">
+    <div class="tcard-head" style="background:#e65100"><h3 style="color:#fff">⏳ تفاصيل المبيعات المعلقة (لم تُستلم) — <span id="ma-pending-period"></span></h3></div>
+    <div class="twrap"><table><thead><tr><th>#</th><th>رقم الفاتورة</th><th>التاريخ</th><th>العميل</th><th>الأصناف</th><th>المبلغ (د.ك)</th><th>تعديل</th></tr></thead><tbody id="ma-pending-tb"></tbody><tfoot id="ma-pending-foot"></tfoot></table></div>
+  </div>
   <!-- ── تصنيف المصاريف (نقدا/ومض/شريك) — تقرير مستقل تماماً ── -->
   <div class="tcard" style="margin-top:18px">
     <div class="tcard-head"><h3>🏷️ تصنيف المصاريف (نقدا / ومض / شريك) — تقرير منفصل</h3></div>
@@ -1713,7 +1720,7 @@ td.group-label{background:var(--g7)!important;font-weight:800;color:var(--g2);fo
     <div class="f1"><label>سعر الحبة (د.ك)</label><input id="sf-price" type="number" step="0.001" min="0" placeholder="0.000"></div>
     <div class="f1"><label>الخصم (د.ك)</label><input id="sf-disc" type="number" step="0.001" min="0" value="0"></div>
     <div class="f1"><label>مكان البيع</label><select id="sf-loc"><option>محل</option><option>اونلاين</option><option>معرض</option></select></div>
-    <div class="f1"><label>طريقة الدفع</label><select id="sf-pay"><option>نقد</option><option>نقدا</option><option>بطاقة</option><option>تحويل</option><option>ومض</option></select></div>
+    <div class="f1"><label>طريقة الدفع</label><select id="sf-pay"><option>نقد</option><option>نقدا</option><option>بطاقة</option><option>تحويل</option><option>ومض</option><option value="معلق">⏳ معلق (لم يُستلم)</option></select></div>
     <div class="f1 full"><label>📷 صورة المنتج / الفاتورة (اختياري)</label>
       <div class="img-upload-box" onclick="document.getElementById('sf-img-file').click()">
         <input type="file" id="sf-img-file" accept="image/*" onchange="handleImgUpload('sf-img-file','sf-img-preview','sf-img-data')">
@@ -1951,8 +1958,12 @@ function loadAll(){
 
   // WALLET MIGRATION: add existing sales
   var _wc=false;
+  // ⏳ معلق 2026-10-02: المبيعة المعلقة لا تدخل المحفظة حتى تُستلم
+  var _pendIds={};SALES.forEach(function(s){if(s.payment==='معلق')_pendIds[s.id]=1;});
+  var _wl0=WALLET.length;WALLET=WALLET.filter(function(x){return !(x.autoFrom==='sale'&&x.saleId&&_pendIds[x.saleId]);});if(WALLET.length!==_wl0)_wc=true;
   SALES.forEach(function(s){
     if(!s.total||s.total<=0) return;
+    if(s.payment==='معلق') return;
     if(WALLET.find(function(x){return x.saleId===s.id;})) return;
     WALLET.push({id:'wlt_s_'+s.id,date:s.date,type:'وارد',dest:'sale',
       desc:'مبيعة: '+(s.product||'')+(s.client?' — '+s.client:''),
@@ -3275,7 +3286,8 @@ function rReports(){var _rw=document.getElementById('rep-wallet-bal');if(_rw){va
     '<div class="kpi r"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(tE)+'</div><div class="kpi-label">💸 إجمالي المصروفات</div><div class="kpi-sub">'+EXP.length+' مصروف</div></div>'+
     '<div class="kpi '+(profit>=0?'g':'r')+'"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(profit)+'</div><div class="kpi-label">🏆 صافي الربح الإجمالي</div><div class="kpi-sub">مبيعات − مصروفات</div></div>'+
     '<div class="kpi t"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(cashIn-cashOut)+'</div><div class="kpi-label">💵 رصيد الكاش</div><div class="kpi-sub">📥'+fmt(cashIn)+' 📤'+fmt(cashOut)+'</div></div>'+
-    '<div class="kpi b"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(stockVal)+'</div><div class="kpi-label">📦 قيمة المخزون</div><div class="kpi-sub">'+INV.length+' صنف</div></div>';
+    '<div class="kpi b"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(stockVal)+'</div><div class="kpi-label">📦 قيمة المخزون</div><div class="kpi-sub">'+INV.length+' صنف</div></div>'+
+    (function(){var _pd=salesData.filter(function(x){return x.payment==='معلق';});var _pt=_pd.reduce(function(a,x){return a+(x.total||0);},0);return '<div class="kpi o" title="اضغط لعرض تفاصيل المعلق" onclick="nav(\'month_analysis\');setTimeout(maShowPending,150)" style="cursor:pointer;border:2px solid #e65100;background:#fff3e0"><div class="kpi-accent" style="background:#e65100"></div><div class="kpi-val" style="color:#e65100">'+fmt(_pt)+'</div><div class="kpi-label">⏳ مبيعات معلقة (لم تُستلم)</div><div class="kpi-sub">'+_pd.length+' بند — اضغط للتفاصيل</div></div>';})();
   const pl=[
     {l:'📥 إجمالي المبيعات',        v:tS,       note:SALES.length+' فاتورة',          s:'font-weight:800;font-size:1rem'},
     {l:'  − خصومات المبيعات',       v:disc,     note:'',                              s:'color:var(--red)'},
@@ -7359,7 +7371,7 @@ function toggleSettlePending(){
 // والمتبقي الحالي (من DEBTS[].remaining). لا يعدّل أي بيانة — قراءة فقط.
 function buildMonthAnalysisData(selM){
   var byClient={};
-  function ensure(n){if(!byClient[n])byClient[n]={name:n,sellCash:0,sellWamd:0,sellCard:0,paidCash:0,paidWamd:0,paidOther:0,remaining:0};return byClient[n];}
+  function ensure(n){if(!byClient[n])byClient[n]={name:n,sellCash:0,sellWamd:0,sellCard:0,sellPending:0,paidCash:0,paidWamd:0,paidOther:0,remaining:0};return byClient[n];}
 
   SALES.forEach(function(s){
     if(!s.date) return;
@@ -7372,6 +7384,7 @@ function buildMonthAnalysisData(selM){
     if(pay==='نقد'||pay==='نقدا') c.sellCash+=amt;
     else if(pay==='تحويل'||pay==='ومض') c.sellWamd+=amt;
     else if(pay==='بطاقة') c.sellCard+=amt;
+    else if(pay==='معلق') c.sellPending+=amt; // ⏳ معلق 2026-10-02: لا يُحسب نقدا ولا ومض
     else c.sellCash+=amt;
   });
 
@@ -7399,7 +7412,7 @@ function buildMonthAnalysisData(selM){
   });
 
   var rows=Object.keys(byClient).map(function(n){return byClient[n];}).filter(function(c){
-    var hasActivity=(c.sellCash+c.sellWamd+c.sellCard+c.paidCash+c.paidWamd+c.paidOther)>0.0005;
+    var hasActivity=(c.sellCash+c.sellWamd+c.sellCard+(c.sellPending||0)+c.paidCash+c.paidWamd+c.paidOther)>0.0005;
     return selM?hasActivity:true;
   });
   rows.sort(function(a,b){return a.name.localeCompare(b.name,'ar');});
@@ -7414,13 +7427,14 @@ function buildMonthAnalysisData(selM){
 // نقدا/ومض) نقدا/ومض يدوياً بحيث تنخصم من الصندوق الصحيح بدل ما تبقى خارج الحساب.
 // لا تُعدَّل هذه الدالة أي بيانات — قراءة فقط.
 function buildNaqdaWamdBalances(selM){
-  var cashIn=0,wamdIn=0,cashOut=0,wamdOut=0;
+  var cashIn=0,wamdIn=0,cashOut=0,wamdOut=0,pendingIn=0,pendingCount=0;
   function inScope(d){ if(!d) return false; return selM ? d.slice(0,7)===selM : true; }
   SALES.forEach(function(s){
     if(!inScope(s.date)) return;
     var amt=s.total||0;
     if(s.payment==='نقد'||s.payment==='نقدا') cashIn+=amt;
     else if(s.payment==='تحويل'||s.payment==='ومض') wamdIn+=amt;
+    else if(s.payment==='معلق'){pendingIn+=amt;pendingCount++;} // ⏳ معلق: خارج الصندوقين
   });
   EXP.forEach(function(e){
     if(!inScope(e.date)) return;
@@ -7430,7 +7444,7 @@ function buildNaqdaWamdBalances(selM){
     if(eff==='نقدا') cashOut+=amt;
     else if(eff==='ومض') wamdOut+=amt;
   });
-  return {period:selM||'كل الفترات',cashIn:cashIn,cashOut:cashOut,cashBal:cashIn-cashOut,wamdIn:wamdIn,wamdOut:wamdOut,wamdBal:wamdIn-wamdOut};
+  return {period:selM||'كل الفترات',cashIn:cashIn,cashOut:cashOut,cashBal:cashIn-cashOut,wamdIn:wamdIn,wamdOut:wamdOut,wamdBal:wamdIn-wamdOut,pendingIn:pendingIn,pendingCount:pendingCount};
 }
 function renderNaqdaWamdPools(containerId,selM){
   var pb=document.getElementById(containerId||'ma-pools-box');
@@ -7439,7 +7453,7 @@ function renderNaqdaWamdPools(containerId,selM){
   pb.innerHTML=
     '<div style="flex:1;min-width:260px;background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;border-radius:10px;padding:14px 20px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
-        +'<div style="font-size:0.85rem;opacity:.85">💵 رصيد نقدا (كاش باليد)</div>'
+        +'<div style="font-size:0.85rem;opacity:.85">💵 الباقي نقدا (كاش باليد)</div>'
         +'<div style="font-size:0.7rem;opacity:.75">'+p.period+'</div>'
       +'</div>'
       +'<div style="font-size:1.8rem;font-weight:900;direction:ltr;margin-top:4px">'+fmt(p.cashBal)+'</div>'
@@ -7447,7 +7461,7 @@ function renderNaqdaWamdPools(containerId,selM){
     +'</div>'
     +'<div style="flex:1;min-width:260px;background:linear-gradient(135deg,#0d47a1,#1565c0);color:#fff;border-radius:10px;padding:14px 20px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center">'
-        +'<div style="font-size:0.85rem;opacity:.85">🏦 رصيد ومض (الحساب البنكي)</div>'
+        +'<div style="font-size:0.85rem;opacity:.85">🏦 الباقي ومض (الحساب البنكي)</div>'
         +'<div style="font-size:0.7rem;opacity:.75">'+p.period+'</div>'
       +'</div>'
       +'<div style="font-size:1.8rem;font-weight:900;direction:ltr;margin-top:4px">'+fmt(p.wamdBal)+'</div>'
@@ -7459,8 +7473,41 @@ function renderNaqdaWamdPools(containerId,selM){
         +'<div style="font-size:0.7rem;opacity:.75">'+p.period+'</div>'
       +'</div>'
       +'<div style="font-size:1.8rem;font-weight:900;direction:ltr;margin-top:4px">'+fmt(p.cashBal+p.wamdBal)+'</div>'
-      +'<div style="font-size:0.72rem;opacity:.8;margin-top:4px">رصيد نقدا '+fmt(p.cashBal)+' + رصيد ومض '+fmt(p.wamdBal)+'</div>'
+      +'<div style="font-size:0.72rem;opacity:.8;margin-top:4px">الباقي نقدا '+fmt(p.cashBal)+' + الباقي ومض '+fmt(p.wamdBal)+'</div>'
     +'</div>';
+}
+
+// ── ⏳ تفاصيل المعلق (2026-10-02): قراءة فقط من SALES حيث payment==='معلق'، مجمّعة حسب رقم الفاتورة ──
+function buildPendingGroups(selM){
+  var g={},order=[];
+  SALES.forEach(function(s){
+    if(s.payment!=='معلق'||!s.date) return;
+    if(selM&&s.date.slice(0,7)!==selM) return;
+    var key=(s.invNum&&String(s.invNum).trim())?('inv:'+s.invNum):('id:'+s.id);
+    if(!g[key]){g[key]={invNum:s.invNum||'—',date:s.date,client:s.client||'—',items:[],total:0,firstId:s.id};order.push(key);}
+    g[key].items.push((s.product||'')+' × '+(s.qty||0));
+    g[key].total+=(s.total||0);
+    if(s.date<g[key].date) g[key].date=s.date;
+  });
+  return order.map(function(k){return g[k];}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0;});
+}
+function renderMaPending(selM){
+  var card=document.getElementById('ma-pending-card');if(!card) return;
+  var groups=buildPendingGroups(selM);
+  var pe=document.getElementById('ma-pending-period');if(pe) pe.textContent=selM||'كل الفترات';
+  if(!groups.length){card.style.display='none';return;}
+  card.style.display='';
+  var tot=0;
+  document.getElementById('ma-pending-tb').innerHTML=groups.map(function(x,i){
+    tot+=x.total;
+    return '<tr><td>'+(i+1)+'</td><td><strong>'+x.invNum+'</strong></td><td>'+x.date+'</td><td><strong>'+x.client+'</strong></td><td style="font-size:0.8rem">'+x.items.join('<br>')+'</td><td style="direction:ltr;font-weight:800;color:#e65100">'+fmt(x.total)+'</td><td><button class="btn-icon" title="تعديل المبيعة" onclick="openM(\'sale\',\''+x.firstId+'\')">✏️</button></td></tr>';
+  }).join('');
+  document.getElementById('ma-pending-foot').innerHTML='<tr style="background:#e65100;color:#fff;font-weight:800"><td colspan="5" style="padding:9px 12px">إجمالي المعلق ('+groups.length+' فاتورة)</td><td style="direction:ltr">'+fmt(tot)+'</td><td></td></tr>';
+}
+function maShowPending(){
+  var c=document.getElementById('ma-pending-card');
+  if(c&&c.style.display!=='none'){c.scrollIntoView({behavior:'smooth',block:'start'});}
+  else{alert('لا توجد مبيعات معلقة بهذه الفترة — جرّب اختيار «كل الفترات»');}
 }
 
 function rMonthAnalysis(){
@@ -7481,6 +7528,7 @@ function rMonthAnalysis(){
 
   renderNaqdaWamdPools('ma-pools-box',selM);
   rMaClassTable(selM);
+  try{renderMaPending(selM);}catch(e){console.error(e);}
 
   var periodStr=selM||'كل الفترات';
   var pEl=document.getElementById('ma-print-period');if(pEl)pEl.textContent=periodStr;
@@ -7500,7 +7548,7 @@ function rMonthAnalysis(){
     kpis.innerHTML=
       '<div class="kpi g"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(tSellCash)+'</div><div class="kpi-label">💵 بيع نقداً</div></div>'+
       '<div class="kpi b"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(tSellWamd)+'</div><div class="kpi-label">🏦 بيع ومض</div></div>'+
-      '<div class="kpi o"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(tSellCash+tSellWamd)+'</div><div class="kpi-label">🧾 إجمالي المبيعات</div></div>';
+      '<div class="kpi o"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(tSellCash+tSellWamd)+'</div><div class="kpi-label">🧾 إجمالي المبيعات</div></div>'; // مربع المعلق أُزيل من هنا 2026-10-02 (التفاصيل بجدول #ma-pending-card)
   }
 
   var tb=document.getElementById('ma-tb');
@@ -7591,49 +7639,33 @@ function printMonthAnalysis(){
     +'<div><div style="font-size:16pt;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</div>'
     +'<div style="color:#555;font-size:10pt;margin-top:2px">تحليل الشهر — '+periodStr+'</div></div>'
     +'<div style="text-align:left;font-size:8.5pt;color:#888">'+today+'</div></div>'
-    +'<div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">'
-    +'<div style="flex:1;min-width:220px;background:#1b5e20;color:#fff;border-radius:8px;padding:9px 14px"><div style="font-size:8pt;opacity:.85">💵 رصيد نقدا ('+pools.period+')</div><strong style="direction:ltr;display:block;font-size:12pt">'+pools.cashBal.toFixed(3)+'</strong></div>'
-    +'<div style="flex:1;min-width:220px;background:#0d47a1;color:#fff;border-radius:8px;padding:9px 14px"><div style="font-size:8pt;opacity:.85">🏦 رصيد ومض ('+pools.period+')</div><strong style="direction:ltr;display:block;font-size:12pt">'+pools.wamdBal.toFixed(3)+'</strong></div>'
+    // ترتيب 2026-09-29 (بطلب هادي): 3 صفوف × 3 مربعات — بيع / مصروفات / الباقي — كلها من pools (نفس حساب صندوقي نقدا/ومض)
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px">'
+    +'<div style="background:#e8f5e9;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#555;opacity:1">💵 بيع نقدا</div><strong style="direction:ltr;display:block;font-size:13pt;color:#1b5e20;margin-top:2px">'+(pools.cashIn).toFixed(3)+'</strong></div>'
+    +'<div style="background:#e3f2fd;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#555;opacity:1">🏦 بيع ومض</div><strong style="direction:ltr;display:block;font-size:13pt;color:#0d47a1;margin-top:2px">'+(pools.wamdIn).toFixed(3)+'</strong></div>'
+    +'<div style="background:#fff3e0;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#555;opacity:1">🧾 إجمالي البيع</div><strong style="direction:ltr;display:block;font-size:13pt;color:#e65100;margin-top:2px">'+(pools.cashIn+pools.wamdIn).toFixed(3)+'</strong></div>'
     +'</div>'
-    +'<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">'
-    +'<div style="flex:1;min-width:120px;background:#e8f5e9;border-radius:7px;padding:8px 10px;text-align:center"><div style="font-size:0.7rem;color:#555">بيع نقداً</div><strong style="direction:ltr;display:block">'+tSellCash.toFixed(3)+'</strong></div>'
-    +'<div style="flex:1;min-width:120px;background:#e3f2fd;border-radius:7px;padding:8px 10px;text-align:center"><div style="font-size:0.7rem;color:#555">بيع ومض</div><strong style="direction:ltr;display:block">'+tSellWamd.toFixed(3)+'</strong></div>'
-    +'<div style="flex:1;min-width:120px;background:#f3e5f5;border-radius:7px;padding:8px 10px;text-align:center"><div style="font-size:0.7rem;color:#555">بيع بطاقة</div><strong style="direction:ltr;display:block">'+tSellCard.toFixed(3)+'</strong></div>'
-    +'<div style="flex:1;min-width:120px;background:#e8f5e9;border-radius:7px;padding:8px 10px;text-align:center"><div style="font-size:0.7rem;color:#555">صرف نقداً</div><strong style="direction:ltr;display:block">'+tPaidCash.toFixed(3)+'</strong></div>'
-    +'<div style="flex:1;min-width:120px;background:#e3f2fd;border-radius:7px;padding:8px 10px;text-align:center"><div style="font-size:0.7rem;color:#555">صرف ومض</div><strong style="direction:ltr;display:block">'+tPaidWamd.toFixed(3)+'</strong></div>'
-    +'<div style="flex:1;min-width:120px;background:#fff3e0;border-radius:7px;padding:8px 10px;text-align:center"><div style="font-size:0.7rem;color:#555">إجمالي المتبقي حالياً</div><strong style="direction:ltr;display:block">'+(pools.cashBal+pools.wamdBal).toFixed(3)+'</strong></div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px">'
+    +'<div style="background:#e8f5e9;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#555;opacity:1">💵 مصروفات نقدا</div><strong style="direction:ltr;display:block;font-size:13pt;color:#1b5e20;margin-top:2px">'+(pools.cashOut).toFixed(3)+'</strong></div>'
+    +'<div style="background:#e3f2fd;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#555;opacity:1">🏦 مصروفات ومض</div><strong style="direction:ltr;display:block;font-size:13pt;color:#0d47a1;margin-top:2px">'+(pools.wamdOut).toFixed(3)+'</strong></div>'
+    +'<div style="background:#fff3e0;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#555;opacity:1">🧾 إجمالي المصروفات</div><strong style="direction:ltr;display:block;font-size:13pt;color:#e65100;margin-top:2px">'+(pools.cashOut+pools.wamdOut).toFixed(3)+'</strong></div>'
     +'</div>'
-    +'<table style="width:100%;border-collapse:collapse;font-size:8pt">'
-    +'<thead><tr style="background:#1b5e20">'
-    +'<th style="padding:7px 8px;text-align:right;color:#fff">#</th>'
-    +'<th style="padding:7px 8px;text-align:right;color:#fff">العميل</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#b9f6ca">بيع نقداً</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#b9f6ca">بيع ومض</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#b9f6ca">بيع بطاقة</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#fff">صرف نقداً</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#fff">صرف ومض</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#fff">صرف غير محدد</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#ff8a80">المتبقي حالياً</th>'
-    +'</tr></thead><tbody>'+rowsHtml+'</tbody>'
-    +'<tfoot><tr style="background:#1b5e20">'
-    +'<td colspan="2" style="padding:8px 10px;color:#fff;font-weight:900;text-align:right">الإجمالي</td>'
-    +'<td style="padding:8px;text-align:center;color:#b9f6ca;font-weight:900;direction:ltr">'+tSellCash.toFixed(3)+'</td>'
-    +'<td style="padding:8px;text-align:center;color:#b9f6ca;font-weight:900;direction:ltr">'+tSellWamd.toFixed(3)+'</td>'
-    +'<td style="padding:8px;text-align:center;color:#b9f6ca;font-weight:900;direction:ltr">'+tSellCard.toFixed(3)+'</td>'
-    +'<td style="padding:8px;text-align:center;color:#fff;font-weight:900;direction:ltr">'+tPaidCash.toFixed(3)+'</td>'
-    +'<td style="padding:8px;text-align:center;color:#fff;font-weight:900;direction:ltr">'+tPaidWamd.toFixed(3)+'</td>'
-    +'<td style="padding:8px;text-align:center;color:#fff;font-weight:900;direction:ltr">'+tPaidOther.toFixed(3)+'</td>'
-    +'<td style="padding:8px;text-align:center;color:#ff8a80;font-weight:900;direction:ltr">'+tRemain.toFixed(3)+'</td>'
-    +'</tr></tfoot></table>'
-    +'<h3 style="margin:18px 0 8px;color:#37474f;font-size:11pt">🏷️ تصنيف المصاريف (نقدا / ومض / شريك)</h3>'
-    +'<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">'+classSummaryHtml+'</div>'
-    +'<table style="width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:14px">'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">'
+    +'<div style="background:#1b5e20;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#fff;opacity:.9">💵 الباقي نقدا ('+pools.period+')</div><strong style="direction:ltr;display:block;font-size:13pt;color:#fff;margin-top:2px">'+(pools.cashBal).toFixed(3)+'</strong><div style="font-size:7pt;color:#fff;opacity:.85;margin-top:3px">بيع نقدا − مصروفات نقدا</div></div>'
+    +'<div style="background:#0d47a1;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#fff;opacity:.9">🏦 الباقي ومض ('+pools.period+')</div><strong style="direction:ltr;display:block;font-size:13pt;color:#fff;margin-top:2px">'+(pools.wamdBal).toFixed(3)+'</strong><div style="font-size:7pt;color:#fff;opacity:.85;margin-top:3px">بيع ومض − مصروفات ومض</div></div>'
+    +'<div style="background:#e65100;border-radius:9px;padding:10px 12px;text-align:center"><div style="font-size:8.5pt;color:#fff;opacity:.9">⏳ إجمالي المتبقي حالياً</div><strong style="direction:ltr;display:block;font-size:13pt;color:#fff;margin-top:2px">'+(pools.cashBal+pools.wamdBal).toFixed(3)+'</strong><div style="font-size:7pt;color:#fff;opacity:.85;margin-top:3px">الباقي نقدا + الباقي ومض</div></div>'
+    +'</div>'
+    +'<div style="background:#fff3e0;border:2px solid #e65100;border-radius:9px;padding:8px 12px;text-align:center;margin-bottom:10px"><div style="font-size:8.5pt;color:#555">⏳ بيع معلق (لم يُستلم) — '+pools.pendingCount+' بند، غير داخل نقدا/ومض</div><strong style="direction:ltr;display:block;font-size:13pt;color:#e65100;margin-top:2px">'+(pools.pendingIn).toFixed(3)+'</strong></div>'
+    +(function(){var gr=buildPendingGroups(selM);if(!gr.length)return '';return '<table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:8pt"><thead><tr style="background:#e65100;color:#fff"><th style="padding:5px">#</th><th style="padding:5px">رقم الفاتورة</th><th style="padding:5px">التاريخ</th><th style="padding:5px">العميل</th><th style="padding:5px">الأصناف</th><th style="padding:5px">المبلغ</th></tr></thead><tbody>'+gr.map(function(x,i){return '<tr style="border-bottom:1px solid #e0e0e0;background:'+(i%2?'#fff8f0':'#fff')+'"><td style="padding:4px 6px">'+(i+1)+'</td><td style="padding:4px 6px">'+x.invNum+'</td><td style="padding:4px 6px">'+x.date+'</td><td style="padding:4px 6px;font-weight:700">'+x.client+'</td><td style="padding:4px 6px">'+x.items.join('، ')+'</td><td style="padding:4px 6px;text-align:center;direction:ltr;font-weight:800;color:#e65100">'+x.total.toFixed(3)+'</td></tr>';}).join('')+'</tbody></table>';})()
+    +'<h3 style="margin:6px 0 8px;color:#37474f;font-size:11pt">🏷️ تصنيف المصاريف (نقدا / ومض / شريك)</h3>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:8pt;margin-bottom:10px">'
     +'<thead><tr style="background:#37474f">'
     +'<th style="padding:7px 8px;text-align:right;color:#fff">التاريخ</th>'
     +'<th style="padding:7px 8px;text-align:right;color:#fff">النوع / الوصف</th>'
     +'<th style="padding:7px 8px;text-align:center;color:#fff">المبلغ</th>'
     +'<th style="padding:7px 8px;text-align:center;color:#fff">التصنيف</th>'
     +'</tr></thead><tbody>'+(classRowsHtml||'<tr><td colspan="4" style="padding:8px;text-align:center;color:#888">لا توجد مصاريف بهذه الفترة</td></tr>')+'</tbody></table>'
+    // جدول "تفصيل حسب العميل" أُزيل من الطباعة 2026-09-29 بطلب هادي (مكرر مع صف البيع) — عرض فقط، الحسابات بلا تغيير
     +'<div class="no-print"><button onclick="window.print()" style="padding:10px 28px;background:#1b5e20;color:#fff;border:none;border-radius:7px;font-size:12pt;cursor:pointer;font-family:inherit;font-weight:700">🖨️ طباعة / PDF</button></div>'
     +'</body></html>';
 
@@ -7751,7 +7783,7 @@ function renderMaClassPartnersTop(selM){
     tPartners+=totals[k];
     return '<div class="kpi t"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(totals[k])+'</div><div class="kpi-label">👤 مصروفات '+k+'</div></div>';
   }).join('');
-  html+='<div class="kpi o"><div class="kpi-accent"></div><div class="kpi-val">'+fmt(tPartners)+'</div><div class="kpi-label">🧾 الإجمالي</div></div>';
+  // مربع "🧾 الإجمالي" أُزيل من الشاشة 2026-09-29 بطلب هادي (غير مطلوب) — عرض فقط، tPartners ما زال يُحسب
   box.innerHTML=html;
 }
 
@@ -8666,6 +8698,7 @@ function resetWallet(){
   // Re-add all sales
   SALES.forEach(function(s){
     if(!s.total||s.total<=0) return;
+    if(s.payment==='معلق') return; // ⏳ معلق لا يدخل المحفظة
     WALLET.push({id:'wlt_s_'+s.id,date:s.date,type:'وارد',dest:'sale',
       desc:'مبيعة: '+(s.product||'')+(s.client?' — '+s.client:''),
       amount:s.total,notes:s.invNum||'',autoFrom:'sale',saleId:s.id});
@@ -8687,6 +8720,7 @@ function resetWallet(){
 function addToWallet(saleItem){
   // Called from saveSale — add sale amount to wallet
   if(!saleItem||!saleItem.total) return;
+  if(saleItem.payment==='معلق') return; // ⏳ معلق لا يدخل المحفظة
   var existing=WALLET.find(function(x){return x.saleId===saleItem.id;});
   if(existing) return;
   WALLET.push({id:uid(),date:saleItem.date,type:'\u0648\u0627\u0631\u062f',dest:'sale',
@@ -8701,7 +8735,7 @@ function addToWallet(saleItem){
 function syncSaleWallet(saleItem){
   if(!saleItem||!saleItem.id) return;
   WALLET=WALLET.filter(function(x){return x.saleId!==saleItem.id;});
-  if(saleItem.total>0){
+  if(saleItem.total>0&&saleItem.payment!=='معلق'){ // ⏳ معلق لا يدخل المحفظة
     WALLET.push({id:'wlt_s_'+saleItem.id,date:saleItem.date,type:'وارد',dest:'sale',
       desc:'مبيعة: '+(saleItem.product||'')+(saleItem.client?' — '+saleItem.client:''),
       amount:saleItem.total,notes:saleItem.invNum||'',autoFrom:'sale',saleId:saleItem.id});

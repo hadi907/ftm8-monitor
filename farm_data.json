@@ -4065,7 +4065,7 @@
       "id": "mur1icqygu1",
       "invNum": "INV-184",
       "date": "2026-10-02",
-      "client": "",
+      "client": "نقدا",
       "client2": "ابوادم",
       "invItemId": "",
       "product": "متنوع",
@@ -4075,8 +4075,8 @@
       "discount": 0,
       "total": 48,
       "location": "محل",
-      "payment": "معلق",
-      "cashId": "mur1icqz3k3",
+      "payment": "نقدا",
+      "cashId": "muuv0u03vvw",
       "img": ""
     },
     {
@@ -9167,19 +9167,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mur1icqz3k3",
-      "date": "2026-10-02",
-      "type": "وارد",
-      "amount": 48,
-      "paid": 48,
-      "remaining": 0,
-      "payment": "معلق",
-      "ref": "INV-184",
-      "month": "أكتوبر ٢٠٢٦",
-      "notes": "مبيعة: متنوع",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mur26dp9t91",
       "date": "2026-10-02",
       "type": "صادر",
@@ -9214,6 +9201,19 @@
       "remaining": 0,
       "payment": "نقد",
       "ref": "INV-186",
+      "month": "أكتوبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - نقدا",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "muuv0u03vvw",
+      "date": "2026-10-02",
+      "type": "وارد",
+      "amount": 48,
+      "paid": 48,
+      "remaining": 0,
+      "payment": "نقدا",
+      "ref": "INV-184",
       "month": "أكتوبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - نقدا",
       "autoFrom": "sale"
@@ -9530,5 +9530,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-10-05T06:08:48.483Z"
+  "date": "2026-10-05T06:19:34.661Z"
 }

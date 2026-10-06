@@ -2835,6 +2835,25 @@
       "notes": "",
       "cashId": "muuv4rtfb0i",
       "maClass": "نقدا"
+    },
+    {
+      "id": "muwhr92kz4c",
+      "date": "2026-10-06",
+      "type": "اسمدة",
+      "desc": "بتموس عدد 13 كيس",
+      "amount": 200,
+      "paid": 200,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "القصر الاخضر",
+      "invRef": "",
+      "month": "اكتوبر 2026",
+      "notes": "",
+      "cashId": "muwhr92kipp",
+      "maClass": "نقدا"
     }
   ],
   "DEBTS": [
@@ -3121,6 +3140,6 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-10-05T19:35:02.970Z",
+  "ts": "2026-10-06T09:45:36.896Z",
   "__last_sale_id__": "mty6o6yjntt"
 }

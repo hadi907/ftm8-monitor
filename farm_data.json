@@ -4281,7 +4281,7 @@
       "id": "mv498uf46ta",
       "invNum": "INV-196",
       "date": "2026-10-11",
-      "client": "",
+      "client": "ومض",
       "client2": "ابوادم",
       "invItemId": "",
       "product": "صبار",
@@ -4291,8 +4291,8 @@
       "discount": 0,
       "total": 15,
       "location": "محل",
-      "payment": "معلق",
-      "cashId": "mv498uf40f3",
+      "payment": "ومض",
+      "cashId": "mv5b7274ury",
       "img": ""
     },
     {
@@ -9686,19 +9686,6 @@
       "autoFrom": "sale"
     },
     {
-      "id": "mv498uf40f3",
-      "date": "2026-10-11",
-      "type": "وارد",
-      "amount": 15,
-      "paid": 15,
-      "remaining": 0,
-      "payment": "معلق",
-      "ref": "INV-196",
-      "month": "أكتوبر ٢٠٢٦",
-      "notes": "مبيعة: صبار",
-      "autoFrom": "sale"
-    },
-    {
       "id": "mv5axofhbwq",
       "date": "2026-10-12",
       "type": "وارد",
@@ -9722,6 +9709,19 @@
       "ref": "INV-189",
       "month": "أكتوبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - ومض",
+      "autoFrom": "sale"
+    },
+    {
+      "id": "mv5b7274ury",
+      "date": "2026-10-11",
+      "type": "وارد",
+      "amount": 15,
+      "paid": 15,
+      "remaining": 0,
+      "payment": "ومض",
+      "ref": "INV-196",
+      "month": "أكتوبر ٢٠٢٦",
+      "notes": "مبيعة: صبار - ومض",
       "autoFrom": "sale"
     }
   ],
@@ -10036,5 +10036,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-10-12T13:49:32.010Z"
+  "date": "2026-10-12T13:50:00.821Z"
 }

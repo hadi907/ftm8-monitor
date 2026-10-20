@@ -4408,7 +4408,7 @@
       "invNum": "INV-203",
       "date": "2026-10-20",
       "client": "",
-      "client2": "مشتل بلانتو",
+      "client2": "مشتل بلانتو 98584823",
       "invItemId": "",
       "product": "متنوع",
       "category": "",
@@ -4418,7 +4418,7 @@
       "total": 383,
       "location": "محل",
       "payment": "معلق",
-      "cashId": "mvgogwl4zov",
+      "cashId": "mvgoooxmwee",
       "img": ""
     }
   ],
@@ -5919,6 +5919,25 @@
       "cashId": "mvfo6n58lih",
       "img": "",
       "maClass": "نقدا"
+    },
+    {
+      "id": "mvgol8jruou",
+      "date": "2026-10-20",
+      "type": "صيانة",
+      "desc": "سير للمراوح عدد 10",
+      "amount": 20,
+      "paid": 20,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "كاظمه لقطع الغيار",
+      "invRef": "2815",
+      "month": "اكتوبر 2026",
+      "notes": "",
+      "cashId": "mvgol8jr6cn",
+      "img": ""
     }
   ],
   "CASH": [
@@ -10096,7 +10115,20 @@
       "autoFrom": "expense"
     },
     {
-      "id": "mvgogwl4zov",
+      "id": "mvgol8jr6cn",
+      "date": "2026-10-20",
+      "type": "صادر",
+      "amount": 20,
+      "paid": 20,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "2815",
+      "month": "اكتوبر 2026",
+      "notes": "مصروف: صيانة - سير للمراوح عدد 10 - كاظمه لقطع الغيار",
+      "autoFrom": "expense"
+    },
+    {
+      "id": "mvgoooxmwee",
       "date": "2026-10-20",
       "type": "وارد",
       "amount": 383,
@@ -10420,5 +10452,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-10-20T12:47:03.127Z"
+  "date": "2026-10-20T12:53:06.400Z"
 }

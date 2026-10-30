@@ -205,6 +205,20 @@ cash_bal = cash_in - cash_out
 wamd_bal = wamd_in - wamd_out
 kpi_remaining_total = cash_bal + wamd_bal  # "إجمالي المتبقي حالياً" = نفس منطق الشاشة (وليس دين العملاء)
 
+# ══ المبيعات المعلقة (لم تُستلم) — نفس قسم "تفاصيل المبيعات المعلقة" بالتطبيق — أُضيف 2026-10-30 ══
+pending = {}
+for s_ in sales:
+    if not in_scope(s_.get("date", "")) or s_.get("payment", "") != "معلق":
+        continue
+    key = s_.get("invNum") or s_.get("id")
+    p_ = pending.setdefault(key, {"inv": s_.get("invNum") or "—", "date": s_.get("date", ""),
+                                  "client": (s_.get("client") or s_.get("client2") or "").strip() or "—",
+                                  "items": [], "total": 0.0})
+    p_["items"].append(f'{s_.get("product","") or "—"} × {s_.get("qty", 1)}')
+    p_["total"] += float(s_.get("total", 0) or 0)
+pending_rows = sorted(pending.values(), key=lambda x: (x["date"], x["inv"]))
+pending_total = sum(x["total"] for x in pending_rows)
+
 # ══ تصنيف المصاريف (نفس منطق buildMaClassRows / renderMaClassSummary بالتطبيق) ══
 class_rows = [e for e in exps if e.get("date") and in_scope(e.get("date", ""))]
 class_rows.sort(key=lambda e: e.get("date", ""))
@@ -212,7 +226,7 @@ class_rows.sort(key=lambda e: e.get("date", ""))
 class_totals = {}
 unclassified = 0.0
 for e in class_rows:
-    cls = e.get("maClass") or ""
+    cls = e.get("maClass") or (e.get("source") if e.get("source") in ("نقدا", "ومض") else "") or ""
     amt = float(e.get("amount", 0) or 0)
     if not cls:
         unclassified += amt
@@ -302,6 +316,27 @@ tbody td{{padding:6px 8px;border:1px solid #ddd;vertical-align:top}}
   </div>
 </div>
 """
+
+# ── تفاصيل المبيعات المعلقة ──
+if pending_rows:
+    html += (f'<div style="margin:0 20px 16px;border:2px solid #e65100;border-radius:10px;overflow:hidden">'
+             f'<div style="background:linear-gradient(135deg,#e65100,#f57c00);color:#fff;padding:10px 14px;font-weight:800;font-size:10pt">'
+             f'⏳ تفاصيل المبيعات المعلقة (لم تُستلم) — {period_str}</div>'
+             '<div style="overflow-x:auto"><table><thead><tr style="background:#fff3e0;color:#bf360c">'
+             '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">#</th>'
+             '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">رقم الفاتورة</th>'
+             '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">التاريخ</th>'
+             '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">العميل</th>'
+             '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">الأصناف</th>'
+             '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">المبلغ (د.ك)</th></tr></thead><tbody>')
+    for i, x in enumerate(pending_rows, 1):
+        html += (f'<tr><td>{i}</td><td style="font-weight:700">{x["inv"]}</td><td>{x["date"]}</td>'
+                 f'<td style="font-weight:700">{x["client"]}</td><td>{"، ".join(x["items"])}</td>'
+                 f'<td style="direction:ltr;text-align:center;font-weight:900;color:#e65100">{fmt(x["total"])}</td></tr>')
+    html += (f'<tr style="background:#e65100;color:#fff;font-weight:900"><td colspan="5" style="border:1px solid #bf360c">'
+             f'إجمالي المعلق ({len(pending_rows)} فاتورة)</td>'
+             f'<td style="direction:ltr;text-align:center;border:1px solid #bf360c">{fmt(pending_total)}</td></tr>'
+             '</tbody></table></div></div>')
 
 # ── تصنيف المصاريف — صف الشركاء + إجمالي (نفس بيانات القسم الأصلي بالأسفل، بدون خانة "غير مصنّف") ──
 partner_keys = sorted(k for k in class_totals if k not in ("نقدا", "ومض"))

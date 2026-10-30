@@ -1,0 +1,336 @@
+import os, json, requests, smtplib, datetime, re, time
+import pandas as pd
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+# ── خريطة الشهور العربية والإنجليزية ──
+AR_MONTHS = {
+    'يناير':1,'فبراير':2,'مارس':3,'أبريل':4,'ابريل':4,'مايو':5,
+    'يونيو':6,'يونيه':6,'يوليو':7,'يوليه':7,'أغسطس':8,'اغسطس':8,
+    'سبتمبر':9,'أكتوبر':10,'اكتوبر':10,'نوفمبر':11,'ديسمبر':12,
+    'jan':1,'feb':2,'mar':3,'apr':4,'may':5,'jun':6,
+    'jul':7,'aug':8,'sep':9,'oct':10,'nov':11,'dec':12
+}
+AR_DIGITS = str.maketrans('٠١٢٣٤٥٦٧٨٩','0123456789')
+
+def parse_date(date_v):
+    """يحلّل التاريخ بجميع الصيغ: datetime، عربي، إنجليزي، أرقام عربية"""
+    if date_v is None: return None
+    try:
+        if pd.isna(date_v): return None
+    except: pass
+    if hasattr(date_v, 'date'):
+        return date_v.date().isoformat()
+    s = str(date_v).strip().translate(AR_DIGITS)
+    if not s or s in ['nan','None','NaT','']: return None
+    m = re.match(r'^(\d{1,2})[-/\s]+([^\d\s\-]+)[-/\s]+(\d{2,4})$', s)
+    if m:
+        day, month_str, year = m.group(1), m.group(2).strip().lower(), m.group(3)
+        month_num = AR_MONTHS.get(month_str)
+        if month_num:
+            yr = int(year)
+            if yr < 100: yr += 2000
+            try:
+                return datetime.date(yr, month_num, int(day)).isoformat()
+            except: pass
+    for fmt in ('%Y-%m-%d','%d/%m/%Y','%m/%d/%Y','%d-%m-%Y','%Y/%m/%d'):
+        try: return datetime.datetime.strptime(s, fmt).date().isoformat()
+        except: pass
+    try: return pd.to_datetime(s, dayfirst=True).date().isoformat()
+    except: pass
+    return s
+
+def norm_ref(r):
+    """تطبيع المرجع: INV-057 = inv-57 = INV057 = INV57"""
+    if not r: return ''
+    r = str(r).upper().replace(' ','').replace('-','')
+    r = re.sub(r'^(INV)0+(\d+)$', r'\g<1>\2', r)
+    return r
+
+GITHUB_RAW = 'https://raw.githubusercontent.com/hadi907/ftm8-monitor/main/farm_data.json'
+XLSX_PATH  = os.environ.get('XLSX_PATH', 'Farm_Account.xlsx')
+EMAIL_FROM = os.environ.get('EMAIL_FROM', '')
+EMAIL_PASS = os.environ.get('EMAIL_PASS', '')
+EMAIL_TO   = os.environ.get('EMAIL_TO', 'hadi@ftm8.com')
+GH_TOKEN   = os.environ.get('GH_TOKEN', '')
+TODAY      = datetime.date.today().isoformat()
+CURRENT_MONTH = TODAY[:7]  # 'YYYY-MM' — تقرير المقارنة يقتصر على الشهر الحالي فقط
+AR_MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+MONTH_LABEL = f"{AR_MONTH_NAMES[int(CURRENT_MONTH[5:7])-1]} {CURRENT_MONTH[:4]}"
+
+def load_app():
+    """يجلب farm_data.json مع إعادة محاولة تلقائية (حتى 3 مرات) لو صار
+    انقطاع/تأخر مؤقت بالشبكة أو رد غير صالح (مثل 404 مؤقت من CDN GitHub).
+    يرجّع None فقط لو فشلت كل المحاولات — حتى لا يُحسب هذا كـ"صفر مبيعات
+    حقيقي" ويُنتج فارقاً وهمياً بالتقرير.
+    ── المستودع خاص (private)، فلازم تمرير توكن مصادقة وإلا raw.githubusercontent.com
+    يرجّع 404 دائماً حتى لو الملف موجود فعلاً ──"""
+    headers = {'Authorization': f'token {GH_TOKEN}'} if GH_TOKEN else {}
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            res = requests.get(GITHUB_RAW, headers=headers, timeout=20)
+            res.raise_for_status()
+            data = res.json()
+            # ── إصلاح: يدعم المفاتيحين uppercase (SALES) و lowercase (ps3_sales) ──
+            sales = data.get('SALES', data.get('ps3_sales', []))
+            print(f"✅ farm_data.json — {len(sales)} مبيعة")
+            return sales
+        except Exception as e:
+            last_err = e
+            print(f"⚠️ محاولة {attempt}/3 لجلب farm_data.json فشلت: {e}")
+            if attempt < 3:
+                time.sleep(5 * attempt)
+    print(f"❌ فشل جلب farm_data.json بعد 3 محاولات: {last_err} — سيتم إيقاف التقرير لتفادي نتائج غير دقيقة")
+    return None
+
+def load_xlsx():
+    rows = []
+    try:
+        df = pd.read_excel(XLSX_PATH, sheet_name='كشف الحساب', header=None, skiprows=3)
+        skipped_date = []
+        skipped_zero = 0
+        for _, row in df.iterrows():
+            date_v   = row[0]
+            ref      = str(row[1] if pd.notna(row[1]) else '').strip()
+            desc     = str(row[2] if pd.notna(row[2]) else '').strip()
+            credit_v = row[4]
+
+            if not ref or ref in ['0','nan','None']:
+                continue
+
+            date_str = parse_date(date_v)
+            if not date_str:
+                skipped_date.append(f"ref={ref}, raw={date_v!r}")
+                continue
+
+            try:
+                c = float(credit_v) if pd.notna(credit_v) and str(credit_v).strip() not in ['—','-',''] else 0.0
+            except:
+                c = 0.0
+
+            if c <= 0:
+                skipped_zero += 1
+                continue
+
+            rows.append({
+                'date':     date_str,
+                'ref':      ref,
+                'ref_norm': norm_ref(ref),
+                'desc':     desc,
+                'credit':   round(c, 3)
+            })
+
+        total = sum(r['credit'] for r in rows)
+        print(f"✅ XLSX (كشف الحساب) — {len(rows)} سطر، إجمالي={total:.3f} دك")
+        if skipped_date:
+            print(f"  ⚠️ تجاهلت {len(skipped_date)} صف بسبب تاريخ غير صالح:")
+            for s in skipped_date: print(f"    - {s}")
+        if skipped_zero:
+            print(f"  ℹ️ تجاهلت {skipped_zero} صف credit=0 (مدين أو فارغ)")
+    except Exception as e:
+        print(f"❌ خطأ XLSX: {e}")
+        import traceback; traceback.print_exc()
+    return rows
+
+def compare(app_sales, xlsx_rows):
+    app_total   = round(sum(s.get('total', 0) for s in app_sales), 3)
+    xlsx_credit = round(sum(r['credit'] for r in xlsx_rows), 3)
+
+    # ── نطاق المزامنة: JSONBin يحتفظ بآخر 50 فاتورة فقط، فأي سطر XLSX أقدم
+    #    من أقدم فاتورة موجودة فعلياً في التطبيق (السحابة) لا يُعتبر "ناقصاً"،
+    #    لأنه ببساطة خارج نطاق ما يُرفع للمقارنة (موجود بالكامل في المتصفح محلياً) ──
+    app_dates = [s.get('date') for s in app_sales if s.get('date')]
+    min_app_date = min(app_dates) if app_dates else None
+
+    xlsx_by_ref = {}
+    for r in xlsx_rows:
+        xlsx_by_ref.setdefault(r['ref_norm'], []).append(r)
+
+    app_refs = set()
+    for s in app_sales:
+        ref = norm_ref(s.get('invNum') or '')
+        if ref: app_refs.add(ref)
+
+    diffs = []
+    out_of_range = []
+    seen  = set()
+
+    for s in app_sales:
+        ref  = norm_ref(s.get('invNum') or '')
+        amt  = round(s.get('total', 0), 3)
+        prod = s.get('product', '')
+        date = s.get('date', '')
+        if amt <= 0 or not ref: continue
+        matches = [r for r in xlsx_by_ref.get(ref, []) if r['credit'] > 0]
+        key = f"{ref}|{prod}"
+        if key in seen: continue
+        seen.add(key)
+        if not matches:
+            diffs.append({'type':'في التطبيق فقط','ref':ref,'desc':prod,'date':date,'app_val':amt,'xlsx_val':0,'diff':amt})
+        else:
+            xlsx_amt = round(sum(m['credit'] for m in matches), 3)
+            if abs(xlsx_amt - amt) > 0.005:
+                diffs.append({'type':'فارق في القيمة','ref':ref,'desc':prod,'date':date,'app_val':amt,'xlsx_val':xlsx_amt,'diff':round(amt-xlsx_amt,3)})
+
+    for ref_norm, rws in xlsx_by_ref.items():
+        if ref_norm in app_refs: continue
+        for r in rws:
+            key = f"{ref_norm}|xlsx"
+            if key in seen: continue
+            seen.add(key)
+            item = {'type':'في XLSX فقط','ref':r['ref'],'desc':r['desc'],'date':r['date'],'app_val':0,'xlsx_val':r['credit'],'diff':-r['credit']}
+            # فاتورة بتاريخ أقدم من (أو يساوي) أقدم فاتورة مزامنة = خارج نطاق JSONBin (50 فقط)
+            # نستخدم "<=" وليس "<" لأن أكثر من فاتورة قد تقع في نفس يوم حدّ القطع (تأكّد فعلياً بفحص المتصفح)
+            if min_app_date and r['date'] and r['date'] <= min_app_date:
+                out_of_range.append(item)
+            else:
+                diffs.append(item)
+
+    # الفارق الإجمالي يُحسب فقط على النطاق المشترك (نفس فترة آخر 50 فاتورة)
+    # حتى لا يظهر فارق وهمي بسبب الفواتير القديمة خارج نطاق المزامنة
+    out_of_range_total_tmp = round(sum(-i['diff'] for i in out_of_range), 3)
+    xlsx_credit_in_range = round(xlsx_credit - out_of_range_total_tmp, 3)
+
+    return {
+        'app_total':   app_total,
+        'xlsx_credit': xlsx_credit,
+        'xlsx_credit_in_range': xlsx_credit_in_range,
+        'diff_total':  round(app_total - xlsx_credit_in_range, 3),
+        'diffs':       sorted(diffs, key=lambda x: x['date'], reverse=True),
+        'out_of_range': sorted(out_of_range, key=lambda x: x['date'], reverse=True),
+        'out_of_range_total': round(sum(-i['diff'] for i in out_of_range), 3),
+        'min_app_date': min_app_date,
+        'app_count':   len(app_sales),
+        'xlsx_count':  len(xlsx_rows)
+    }
+
+def build_html(r):
+    dc     = '#c62828' if abs(r['diff_total']) > 0.01 else '#1b5e20'
+    icon   = '⚠️' if r['diffs'] else '✅'
+    status = f"{len(r['diffs'])} فارق بحاجة مراجعة" if r['diffs'] else "كل البيانات متطابقة"
+    rows_html = ''
+    if r['diffs']:
+        for d in r['diffs']:
+            tc   = {'في التطبيق فقط':'#e65100','في XLSX فقط':'#1565c0','فارق في القيمة':'#6a1b9a'}.get(d['type'],'#555')
+            sign = '+' if d['diff'] > 0 else ''
+            rows_html += (
+                f'<tr>'
+                f'<td style="padding:8px 12px;border-bottom:1px solid #eee">{d["date"]}</td>'
+                f'<td style="padding:8px 12px;color:#1565c0;font-weight:700;border-bottom:1px solid #eee">{d["ref"]}</td>'
+                f'<td style="padding:8px 12px;border-bottom:1px solid #eee">{d["desc"][:35]}</td>'
+                f'<td style="padding:8px 12px;text-align:center;border-bottom:1px solid #eee">'
+                f'<span style="background:{tc}22;color:{tc};padding:2px 8px;border-radius:4px;font-size:12px;font-weight:700">{d["type"]}</span></td>'
+                f'<td style="padding:8px 12px;text-align:center;direction:ltr;border-bottom:1px solid #eee">{d["app_val"]:.3f}</td>'
+                f'<td style="padding:8px 12px;text-align:center;direction:ltr;border-bottom:1px solid #eee">{d["xlsx_val"]:.3f}</td>'
+                f'<td style="padding:8px 12px;text-align:center;direction:ltr;font-weight:900;color:{dc};border-bottom:1px solid #eee">{sign}{d["diff"]:.3f}</td>'
+                f'</tr>'
+            )
+    else:
+        rows_html = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#1b5e20;font-size:16px">✅ لا توجد فوارق</td></tr>'
+
+    note_html = ''
+    if r['out_of_range']:
+        note_html = (
+            '<div class="note" style="background:#e3f2fd;border-right:4px solid #1565c0;'
+            'padding:10px 16px;border-radius:6px;font-size:12px;color:#1565c0;margin-top:12px">'
+            '<b>ملاحظة:</b> ' + str(len(r['out_of_range'])) + ' فاتورة قديمة (قبل ' + str(r['min_app_date']) +
+            ') بقيمة ' + f"{r['out_of_range_total']:.3f}" +
+            ' دك موجودة في XLSX وفي التطبيق محلياً، لكنها خارج نطاق آخر 50 فاتورة المرفوعة لـ JSONBin (ضمن الشهر الحالي) — لا تُعتبر فارقاً.'
+            '</div>'
+        )
+
+    template = """<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Tajawal,Arial;direction:rtl;background:#f5f5f5;padding:20px}.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid #e0e0e0}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.kpi{background:#f8fffe;border-radius:8px;padding:14px;text-align:center;border:1px solid #e0e0e0}.kpi-lbl{font-size:12px;color:#666;margin-bottom:4px}.kpi-val{font-size:20px;font-weight:900;direction:ltr}table{width:100%;border-collapse:collapse;font-size:13px}th{background:#1b5e20;color:#fff;padding:10px 12px;text-align:right}tr:nth-child(even){background:#f9f9f9}</style></head>
+<body><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1b5e20;padding-bottom:12px;margin-bottom:16px">
+<div><h1 style="font-size:18px;color:#1b5e20;font-weight:900">🌿 مزرعة هادي اسحاق</h1><p style="color:#555;font-size:13px">تقرير المقارنة — __MONTHLABEL__ — __TODAY__</p></div>
+<div style="background:__BGCOL__;padding:10px 20px;border-radius:8px;text-align:center"><div style="font-size:22px">__ICON__</div><div style="font-size:12px;font-weight:700;color:__DC__">__STATUS__</div></div></div>
+<div class="kpis">
+<div class="kpi"><div class="kpi-lbl">مبيعات التطبيق (الشهر الحالي)</div><div class="kpi-val" style="color:#1b5e20">__APPTOTAL__ دك</div><div style="font-size:11px;color:#999">__APPCOUNT__ سجل</div></div>
+<div class="kpi"><div class="kpi-lbl">مبيعات XLSX (الشهر الحالي)</div><div class="kpi-val" style="color:#1565c0">__XLSXRANGE__ دك</div><div style="font-size:11px;color:#999">من __MINDATE__</div></div>
+<div class="kpi"><div class="kpi-lbl">الفارق</div><div class="kpi-val" style="color:__DC__">__DIFFTOTAL__ دك</div></div>
+<div class="kpi"><div class="kpi-lbl">الفوارق الحقيقية</div><div class="kpi-val" style="color:__DC__">__DIFFCOUNT__</div></div></div>
+__NOTE__
+</div>
+<div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:12px">📋 تفاصيل الفوارق الحقيقية</h2>
+<table><thead><tr><th>التاريخ</th><th>الفاتورة</th><th>الوصف</th><th style="text-align:center">النوع</th><th style="text-align:center">التطبيق</th><th style="text-align:center">XLSX</th><th style="text-align:center">الفارق</th></tr></thead>
+<tbody>__ROWS__</tbody></table></div>
+<p style="text-align:center;color:#999;font-size:11px;margin-top:12px">GitHub Actions — __TODAY__</p>
+</body></html>"""
+
+    html = (template
+        .replace('__TODAY__', TODAY)
+        .replace('__MONTHLABEL__', MONTH_LABEL)
+        .replace('__BGCOL__', '#fff3e0' if r['diffs'] else '#e8f5e9')
+        .replace('__ICON__', icon)
+        .replace('__DC__', dc)
+        .replace('__STATUS__', status)
+        .replace('__APPTOTAL__', f"{r['app_total']:.3f}")
+        .replace('__APPCOUNT__', str(r['app_count']))
+        .replace('__XLSXRANGE__', f"{r['xlsx_credit_in_range']:.3f}")
+        .replace('__MINDATE__', str(r['min_app_date'] or '—'))
+        .replace('__DIFFTOTAL__', f"{r['diff_total']:+.3f}")
+        .replace('__DIFFCOUNT__', str(len(r['diffs'])))
+        .replace('__NOTE__', note_html)
+        .replace('__ROWS__', rows_html)
+    )
+    return html
+
+def send_email(html_body, diff_count):
+    subject = f"{'⚠️' if diff_count else '✅'} مزرعة هادي اسحاق - مقارنة {MONTH_LABEL} — {TODAY}"
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From']    = EMAIL_FROM
+    msg['To']      = EMAIL_TO
+    msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+    print(f"📧 SMTP: smtp.gmail.com:587 → {EMAIL_TO}")
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as srv:
+            srv.ehlo(); srv.starttls(); srv.ehlo()
+            srv.login(EMAIL_FROM, EMAIL_PASS)
+            srv.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
+        print(f"✅ تم إرسال التقرير")
+        return True
+    except Exception as e:
+        print(f"❌ فشل Gmail: {e}")
+        return False
+
+if __name__ == '__main__':
+    print(f"🌿 farm_compare.py — {TODAY} {datetime.datetime.now().strftime('%H:%M')}")
+    print(f"📬 من: {EMAIL_FROM} → إلى: {EMAIL_TO}")
+    app_sales = load_app()
+    if app_sales is None:
+        print("❌ توقف التقرير: تعذّر جلب بيانات التطبيق (farm_data.json) بعد عدة محاولات — لن يُرسل تقرير بأرقام غير دقيقة")
+        exit(1)
+    xlsx_rows = load_xlsx()
+    if not app_sales and not xlsx_rows:
+        print("❌ لا توجد بيانات"); exit(1)
+
+    # ── تقييد المقارنة على الشهر الحالي فقط (بطلب هادي) ──
+    app_all_count  = len(app_sales)
+    xlsx_all_count = len(xlsx_rows)
+    app_sales = [s for s in app_sales if (s.get('date') or '')[:7] == CURRENT_MONTH]
+    xlsx_rows = [r for r in xlsx_rows if (r.get('date') or '')[:7] == CURRENT_MONTH]
+    print(f"📅 تصفية للشهر الحالي ({MONTH_LABEL}): تطبيق {len(app_sales)}/{app_all_count} | XLSX {len(xlsx_rows)}/{xlsx_all_count}")
+    result = compare(app_sales, xlsx_rows)
+    print(f"📊 تطبيق={result['app_total']:.3f} | XLSX (بالنطاق)={result['xlsx_credit_in_range']:.3f} | فارق={result['diff_total']:+.3f} | فوارق حقيقية={len(result['diffs'])} | خارج النطاق (غير محسوبة كفارق)={len(result['out_of_range'])}")
+    # ── الإرسال فقط عند حدوث تغيير بنتيجة المقارنة (فوارق أو تطابق) — بطلب هادي 2026-10-03 ──
+    sig = json.dumps({
+        'month': CURRENT_MONTH,
+        'app_total': result['app_total'], 'app_count': result['app_count'],
+        'xlsx_total': result['xlsx_credit_in_range'], 'xlsx_count': result['xlsx_count'],
+        'diffs': [(d['ref'], d['desc'], d['type'], d['diff']) for d in result['diffs']],
+    }, ensure_ascii=False, sort_keys=True)
+    SIG_FILE = os.environ.get('SIG_FILE', '.compare_state/last_sent.txt')
+    try:
+        last = open(SIG_FILE, encoding='utf-8').read()
+    except Exception:
+        last = ''
+    if last == sig:
+        print("ℹ️ لا تغيير منذ آخر إيميل — لن يُرسل إيميل")
+        exit(0)
+    html = build_html(result)
+    if send_email(html, len(result['diffs'])):
+        os.makedirs(os.path.dirname(SIG_FILE) or '.', exist_ok=True)
+        open(SIG_FILE, 'w', encoding='utf-8').write(sig)

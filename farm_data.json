@@ -3674,6 +3674,24 @@
       "notes": "",
       "cashId": "mvv2jj1ucbp",
       "maClass": "نقدا"
+    },
+    {
+      "id": "mvwodl4dudd",
+      "date": "2026-10-31",
+      "type": "أخرى",
+      "desc": "نباتات 16 + 10 صيانه ماكينه الرش",
+      "amount": 26,
+      "paid": 26,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "اكتوبر 2026",
+      "notes": "",
+      "cashId": "mvwodl4dwg3"
     }
   ],
   "DEBTS": [
@@ -3960,5 +3978,5 @@
   ],
   "CUST": [],
   "v": 4,
-  "ts": "2026-10-30T15:47:53.407Z"
+  "ts": "2026-10-31T18:16:44.413Z"
 }

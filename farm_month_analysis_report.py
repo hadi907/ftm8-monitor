@@ -208,16 +208,24 @@ kpi_remaining_total = cash_bal + wamd_bal  # "إجمالي المتبقي حال
 # ══ المبيعات المعلقة (لم تُستلم) — نفس قسم "تفاصيل المبيعات المعلقة" بالتطبيق — أُضيف 2026-10-30 ══
 pending = {}
 for s_ in sales:
-    if not in_scope(s_.get("date", "")) or s_.get("payment", "") != "معلق":
+    _d = s_.get("date", "") or ""
+    # ↩️ 2026-11-07: المعلق من الأشهر السابقة يُرحَّل للشهر المختار حتى يُستلم
+    if not _d or s_.get("payment", "") != "معلق" or (sel_month and _d[:7] > sel_month):
         continue
     key = s_.get("invNum") or s_.get("id")
     p_ = pending.setdefault(key, {"inv": s_.get("invNum") or "—", "date": s_.get("date", ""),
                                   "client": (s_.get("client") or s_.get("client2") or "").strip() or "—",
                                   "items": [], "total": 0.0})
+    if _d < p_["date"]:
+        p_["date"] = _d
     p_["items"].append(f'{s_.get("product","") or "—"} × {s_.get("qty", 1)}')
     p_["total"] += float(s_.get("total", 0) or 0)
 pending_rows = sorted(pending.values(), key=lambda x: (x["date"], x["inv"]))
 pending_total = sum(x["total"] for x in pending_rows)
+for x in pending_rows:
+    x["carried"] = bool(sel_month and x["date"][:7] < sel_month)
+    x["tag"] = '<div style="font-size:8pt;color:#e65100;font-weight:700">↩️ مُرحّل</div>' if x["carried"] else ''
+pending_period = (f"حتى نهاية {month_label(sel_month)} — يشمل المرحّل من الأشهر السابقة" if sel_month else "كل الفترات")
 
 # ══ تصنيف المصاريف (نفس منطق buildMaClassRows / renderMaClassSummary بالتطبيق) ══
 class_rows = [e for e in exps if e.get("date") and in_scope(e.get("date", ""))]
@@ -321,7 +329,7 @@ tbody td{{padding:6px 8px;border:1px solid #ddd;vertical-align:top}}
 if pending_rows:
     html += (f'<div style="margin:0 20px 16px;border:2px solid #e65100;border-radius:10px;overflow:hidden">'
              f'<div style="background:linear-gradient(135deg,#e65100,#f57c00);color:#fff;padding:10px 14px;font-weight:800;font-size:10pt">'
-             f'⏳ تفاصيل المبيعات المعلقة (لم تُستلم) — {period_str}</div>'
+             f'⏳ تفاصيل المبيعات المعلقة (لم تُستلم) — {pending_period}</div>'
              '<div style="overflow-x:auto"><table><thead><tr style="background:#fff3e0;color:#bf360c">'
              '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">#</th>'
              '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">رقم الفاتورة</th>'
@@ -330,7 +338,7 @@ if pending_rows:
              '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">الأصناف</th>'
              '<th style="background:#fff3e0;color:#bf360c;border:1px solid #ffcc80">المبلغ (د.ك)</th></tr></thead><tbody>')
     for i, x in enumerate(pending_rows, 1):
-        html += (f'<tr><td>{i}</td><td style="font-weight:700">{x["inv"]}</td><td>{x["date"]}</td>'
+        html += (f'<tr><td>{i}</td><td style="font-weight:700">{x["inv"]}</td><td>{x["date"]}{x["tag"]}</td>'
                  f'<td style="font-weight:700">{x["client"]}</td><td>{"، ".join(x["items"])}</td>'
                  f'<td style="direction:ltr;text-align:center;font-weight:900;color:#e65100">{fmt(x["total"])}</td></tr>')
     html += (f'<tr style="background:#e65100;color:#fff;font-weight:900"><td colspan="5" style="border:1px solid #bf360c">'

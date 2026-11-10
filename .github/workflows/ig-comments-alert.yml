@@ -1,7 +1,7 @@
 name: ig-comments-alert
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "7 */2 * * *"
   workflow_dispatch:
 concurrency:
   group: ig-comments-alert
@@ -16,7 +16,7 @@ jobs:
       - name: Check new Instagram comments
         env:
           IG_TOKEN: ${{ secrets.IG_TOKEN }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TOKEN: ${{ secrets.FARM_TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python3 ig_comments_alert.py
       - name: Save state (only seen_ig_comments.json)

@@ -1,0 +1,27 @@
+name: ig-comments-alert
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+concurrency:
+  group: ig-comments-alert
+  cancel-in-progress: false
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check new Instagram comments
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 ig_comments_alert.py
+      - name: Save state (only seen_ig_comments.json)
+        run: |
+          git config user.name "actions-user"
+          git config user.email "actions@users.noreply.github.com"
+          git add seen_ig_comments.json
+          git diff --cached --quiet || (git commit -m "ig-alert: update seen comments" && git pull --rebase -q && git push)

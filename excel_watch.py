@@ -51,6 +51,42 @@ def download():
                 return True
         except Exception as ex:
             print("error:", ex)
+
+    # الطريقة الثانية: نفس الطريقة التي يستخدمها موقع OneDrive لفتح الرابط بدون تسجيل دخول
+    try:
+        t = requests.post(
+            "https://api-badgerp.svc.ms/v1.0/token",
+            json={"appId": "5cbed6ac-a083-4e14-b191-b4ba07653de2"},
+            timeout=30,
+        )
+        print("badger token ->", t.status_code)
+        token = t.json()["token"]
+        h = {"Authorization": f"Badger {token}", "Prefer": "autoredeem"}
+        m = requests.get(f"https://api.onedrive.com/v1.0/shares/u!{enc}/driveitem",
+                         headers=h, timeout=60)
+        print("badger item ->", m.status_code)
+        dl = m.json().get("@content.downloadUrl")
+        if not dl:
+            item = m.json()
+            drive = item.get("parentReference", {}).get("driveId")
+            if drive and item.get("id"):
+                c = requests.get(
+                    f"https://api.onedrive.com/v1.0/drives/{drive}/items/{item['id']}/content",
+                    headers=h, timeout=60, allow_redirects=True)
+                print("badger content ->", c.status_code, len(c.content))
+                if c.ok and c.content[:2] == b"PK":
+                    with open("watched.xlsx", "wb") as f:
+                        f.write(c.content)
+                    return True
+            return False
+        r = requests.get(dl, timeout=60)
+        print("badger download ->", r.status_code, len(r.content))
+        if r.ok and r.content[:2] == b"PK":
+            with open("watched.xlsx", "wb") as f:
+                f.write(r.content)
+            return True
+    except Exception as ex:
+        print("badger error:", ex)
     return False
 
 

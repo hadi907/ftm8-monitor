@@ -156,16 +156,30 @@ def main():
         for coord in sorted(set(o) | set(n), key=lambda k: (int("".join(ch for ch in k if ch.isdigit())), k)):
             if coord == TOTAL_CELL:
                 continue
-            if o.get(coord) != n.get(coord):
-                lines.append(f"• {header_for(n or o, coord)} ({coord}): "
-                             f"{fmt(o.get(coord))} ← {fmt(n.get(coord))}")
+            ov, nv = o.get(coord), n.get(coord)
+            if ov != nv:
+                row = "".join(ch for ch in coord if ch.isdigit())
+                label = f"• {header_for(n or o, coord)} – صف {row}: "
+                if ov in (None, ""):
+                    lines.append(label + f"أُضيف {fmt(nv)}")
+                elif nv in (None, ""):
+                    lines.append(label + f"حُذف {fmt(ov)}")
+                else:
+                    lines.append(label + f"كان {fmt(ov)}، أصبح {fmt(nv)}")
 
     if lines:
         first = next(iter(new.values()), {})
+        t_old = old.get(next(iter(old)), {}).get(TOTAL_CELL)
+        t_new = first.get(TOTAL_CELL)
+        diff = ""
+        if isinstance(t_old, (int, float)) and isinstance(t_new, (int, float)) and t_new != t_old:
+            d = t_new - t_old
+            diff = f" ({'+' if d > 0 else '-'}{fmt(abs(d))})"
         extra = f"\n… و{len(lines) - MAX_LINES} تغيير آخر" if len(lines) > MAX_LINES else ""
         send("📝 تغييرات جديدة في ملف عرض السعر\n\n"
              + "\n".join(lines[:MAX_LINES]) + extra
-             + f"\n\n💰 الإجمالي: {fmt(old.get(next(iter(old)), {}).get(TOTAL_CELL))} ← {fmt(first.get(TOTAL_CELL))}"
+             + f"\n\n💰 الإجمالي قبل: {fmt(t_old)}"
+             + f"\n💰 الإجمالي بعد: {fmt(t_new)}{diff}"
              + f"\n🕒 {now}")
         with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump(new, f, ensure_ascii=False)

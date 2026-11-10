@@ -1,0 +1,41 @@
+name: 📝 مراقبة ملف عرض السعر (OneDrive)
+
+on:
+  schedule:
+    # كل ساعتين
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install
+        run: pip install requests openpyxl
+
+      - name: 💾 Restore last snapshot
+        uses: actions/cache/restore@v4
+        with:
+          path: .excel_watch_state
+          key: excel-watch-${{ github.run_id }}
+          restore-keys: excel-watch-
+
+      - name: 🔍 Check for changes
+        env:
+          TELEGRAM_TOKEN:   ${{ secrets.FARM_TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python excel_watch.py
+
+      - name: 💾 Save snapshot
+        if: always() && hashFiles('.excel_watch_state/**') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .excel_watch_state
+          key: excel-watch-${{ github.run_id }}

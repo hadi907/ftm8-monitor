@@ -5176,6 +5176,24 @@
       "payment": "نقدا",
       "cashId": "mwmiqke4zw0",
       "img": ""
+    },
+    {
+      "id": "mwmir9gt5lr",
+      "invNum": "INV-246",
+      "date": "2026-11-18",
+      "client": "نقدا",
+      "client2": "",
+      "invItemId": "",
+      "product": "متنوع",
+      "category": "",
+      "qty": 1,
+      "price": 28,
+      "discount": 0,
+      "total": 28,
+      "location": "محل",
+      "payment": "نقدا",
+      "cashId": "mwmir9gt7tt",
+      "img": ""
     }
   ],
   "EXP": [
@@ -12629,6 +12647,19 @@
       "month": "نوفمبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mwmir9gt7tt",
+      "date": "2026-11-18",
+      "type": "وارد",
+      "amount": 28,
+      "paid": 28,
+      "remaining": 0,
+      "payment": "نقدا",
+      "ref": "INV-246",
+      "month": "نوفمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -12942,5 +12973,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-11-18T19:32:55.556Z"
+  "date": "2026-11-18T19:33:28.085Z"
 }

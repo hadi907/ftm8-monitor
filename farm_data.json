@@ -5536,6 +5536,24 @@
       "payment": "نقدا",
       "cashId": "mwv52jslx0s",
       "img": ""
+    },
+    {
+      "id": "mwv5c8pb9p3",
+      "invNum": "INV-266",
+      "date": "2026-11-23",
+      "client": "نقدا",
+      "client2": "",
+      "invItemId": "",
+      "product": "متنوع",
+      "category": "",
+      "qty": 1,
+      "price": 95,
+      "discount": 0,
+      "total": 95,
+      "location": "محل",
+      "payment": "نقدا",
+      "cashId": "mwv5c8pby2e",
+      "img": ""
     }
   ],
   "EXP": [
@@ -7991,6 +8009,44 @@
       "cashId": "mwqu6hi9qn9",
       "img": "",
       "maClass": "نقدا"
+    },
+    {
+      "id": "mwv58oov4r1",
+      "date": "2026-11-22",
+      "type": "أخرى",
+      "desc": "فيتامين حديد",
+      "amount": 5.8,
+      "paid": 5.8,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "ومض",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "نوفمبر 2026",
+      "notes": "",
+      "cashId": "mwv58oowhdu",
+      "img": ""
+    },
+    {
+      "id": "mwv59qr6zpj",
+      "date": "2026-11-21",
+      "type": "أخرى",
+      "desc": "اخري",
+      "amount": 8,
+      "paid": 8,
+      "remaining": 0,
+      "status": "مدفوع",
+      "source": "نقدا",
+      "paidBy": "",
+      "payment": "نقد",
+      "vendor": "",
+      "invRef": "",
+      "month": "نوفمبر 2026",
+      "notes": "",
+      "cashId": "mwv59qr6rae",
+      "img": ""
     }
   ],
   "CASH": [
@@ -13315,6 +13371,45 @@
       "month": "نوفمبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - نقدا",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mwv58oowhdu",
+      "date": "2026-11-22",
+      "type": "صادر",
+      "amount": 5.8,
+      "paid": 5.8,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "—",
+      "month": "نوفمبر 2026",
+      "notes": "مصروف: أخرى - فيتامين حديد",
+      "autoFrom": "expense"
+    },
+    {
+      "id": "mwv59qr6rae",
+      "date": "2026-11-21",
+      "type": "صادر",
+      "amount": 8,
+      "paid": 8,
+      "remaining": 0,
+      "payment": "نقد",
+      "ref": "—",
+      "month": "نوفمبر 2026",
+      "notes": "مصروف: أخرى - اخري",
+      "autoFrom": "expense"
+    },
+    {
+      "id": "mwv5c8pby2e",
+      "date": "2026-11-23",
+      "type": "وارد",
+      "amount": 95,
+      "paid": 95,
+      "remaining": 0,
+      "payment": "نقدا",
+      "ref": "INV-266",
+      "month": "نوفمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - نقدا",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -13628,5 +13723,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-11-24T20:20:15.754Z"
+  "date": "2026-11-24T20:27:47.812Z"
 }

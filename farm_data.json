@@ -5662,6 +5662,24 @@
       "payment": "ومض",
       "cashId": "mwxe9t90q5i",
       "img": ""
+    },
+    {
+      "id": "mwxeagv5438",
+      "invNum": "INV-273",
+      "date": "2026-11-26",
+      "client": "ومض",
+      "client2": "",
+      "invItemId": "",
+      "product": "متنوع",
+      "category": "",
+      "qty": 1,
+      "price": 12,
+      "discount": 0,
+      "total": 12,
+      "location": "محل",
+      "payment": "ومض",
+      "cashId": "mwxeagv56jy",
+      "img": ""
     }
   ],
   "EXP": [
@@ -13664,6 +13682,19 @@
       "month": "نوفمبر ٢٠٢٦",
       "notes": "مبيعة: متنوع - ومض",
       "autoFrom": "sale"
+    },
+    {
+      "id": "mwxeagv56jy",
+      "date": "2026-11-26",
+      "type": "وارد",
+      "amount": 12,
+      "paid": 12,
+      "remaining": 0,
+      "payment": "ومض",
+      "ref": "INV-273",
+      "month": "نوفمبر ٢٠٢٦",
+      "notes": "مبيعة: متنوع - ومض",
+      "autoFrom": "sale"
     }
   ],
   "CUST": [],
@@ -13977,5 +14008,5 @@
     "ftm8Sync": true,
     "cloudBinId": "https://api.jsonbin.io/v3/b/6a0c5f4b6877513b27993aed"
   },
-  "date": "2026-11-26T10:13:23.363Z"
+  "date": "2026-11-26T10:13:53.977Z"
 }
